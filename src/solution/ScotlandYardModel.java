@@ -73,11 +73,9 @@ public class ScotlandYardModel extends ScotlandYard {
 
     @Override
     protected void play(MoveTicket move) {
-		System.out.println("ticketmove");
 		mPlayerMap.get(move.colour).setCurrentLocation(move.target);
 
 		if(move.colour == MR_X_COLOUR){
-			System.out.println("incrementing "+mCurrentRound);
 			mCurrentRound++;
 		}
 		notifySpectators(move);
@@ -87,7 +85,6 @@ public class ScotlandYardModel extends ScotlandYard {
     protected void play(MoveDouble move) {
 		notifySpectators(move);
 
-		System.out.println("doublemove");
 		for(Move innerMove : move.moves) {
 			play(innerMove);
 		}
@@ -97,7 +94,6 @@ public class ScotlandYardModel extends ScotlandYard {
     protected void play(MovePass move) {
 		notifySpectators(move);
 		//we do nothing right now
-		System.out.println("passmove");
     }
 
 	private void notifySpectators(final Move move) {
