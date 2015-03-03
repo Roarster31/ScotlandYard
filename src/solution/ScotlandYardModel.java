@@ -16,6 +16,7 @@ import scotlandyard.Ticket;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -205,7 +206,8 @@ public class ScotlandYardModel extends ScotlandYard {
 
     @Override
     public Set<Colour> getWinningPlayers() {
-        return null;
+		Set<Colour> winningPlayers = new HashSet<Colour>();
+        return winningPlayers;
     }
 
     @Override
@@ -237,7 +239,7 @@ public class ScotlandYardModel extends ScotlandYard {
 
     @Override
     public boolean isGameOver() {
-        return false;
+        return isReady() && (mPlayerMap.size() <= 1 || validMoves(MR_X_COLOUR).size() == 0);
     }
 
     @Override
