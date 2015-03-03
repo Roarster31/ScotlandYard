@@ -102,13 +102,44 @@ public class ScotlandYardModel extends ScotlandYard {
 		List<Move> validMoves = new ArrayList<Move>();
 
 
-		for(Edge<Integer, Route> edge : edges){
-			if(edge.source() == playerPos){
-				validMoves.add(new MoveTicket(player, edge.target(), Ticket.fromRoute(edge.data())));
-			}else if(edge.target() == playerPos){
-				validMoves.add(new MoveTicket(player, edge.source(), Ticket.fromRoute(edge.data())));
+		for(Edge<Integer, Route> primaryEdge : edges){
+
+			Integer primaryNode = null;
+			if(primaryEdge.source() == playerPos){
+				primaryNode = primaryEdge.target();
+			}else if(primaryEdge.target() == playerPos){
+				primaryNode = primaryEdge.source();
 			}
+
+			final MoveTicket firstMove = new MoveTicket(player, primaryNode, Ticket.fromRoute(primaryEdge.data()));
+			validMoves.add(firstMove);
+
+
+			//if we're dealing with Mr X, he has double move cards
+			if(player == MR_X_COLOUR){
+
+
+				List<Edge<Integer, Route>> secondaryEdges = mGraph.getConnectedEdges(new Node<Integer>(primaryNode));
+
+				for(Edge<Integer, Route> secondaryEdge : secondaryEdges) {
+
+					Integer secondaryNode = null;
+					if (secondaryEdge.source() == primaryNode) {
+						secondaryNode = secondaryEdge.target();
+					} else if (secondaryEdge.target() == primaryNode) {
+						secondaryNode = secondaryEdge.source();
+					}
+
+					final MoveTicket secondMove = new MoveTicket(player, secondaryNode, Ticket.fromRoute(primaryEdge.data()));
+
+					validMoves.add(new MoveDouble(player, firstMove, secondMove));
+				}
+
+
+			}
+
 		}
+
 
 
 		return validMoves;
