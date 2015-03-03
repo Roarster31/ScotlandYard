@@ -45,6 +45,7 @@ public class ScotlandYardModel extends ScotlandYard {
 	private final List<Boolean> mRounds;
 	private final ExtendedGraph mGraph;
 	private final TreeMap<Colour, PlayerHolder> mPlayerMap;
+	private final List<Spectator> mSpectators;
 	private final int mNumberOfDetectives;
 	private Colour mCurrentPlayerColour = MR_X_COLOUR;
 	private int mCurrentRound = 0;
@@ -55,6 +56,7 @@ public class ScotlandYardModel extends ScotlandYard {
 		mNumberOfDetectives = numberOfDetectives;
 
 		mPlayerMap = new TreeMap<Colour, PlayerHolder>();
+		mSpectators = new ArrayList<Spectator>();
 
     }
 
@@ -78,10 +80,13 @@ public class ScotlandYardModel extends ScotlandYard {
 			System.out.println("incrementing "+mCurrentRound);
 			mCurrentRound++;
 		}
-    }
+		notifySpectators(move);
+	}
 
-    @Override
+	@Override
     protected void play(MoveDouble move) {
+		notifySpectators(move);
+
 		System.out.println("doublemove");
 		for(Move innerMove : move.moves) {
 			play(innerMove);
@@ -90,9 +95,16 @@ public class ScotlandYardModel extends ScotlandYard {
 
     @Override
     protected void play(MovePass move) {
+		notifySpectators(move);
 		//we do nothing right now
 		System.out.println("passmove");
     }
+
+	private void notifySpectators(final Move move) {
+		for(Spectator spectator : mSpectators){
+			spectator.notify(move);
+		}
+	}
 
     @Override
     protected List<Move> validMoves(Colour player) {
@@ -147,7 +159,7 @@ public class ScotlandYardModel extends ScotlandYard {
 
     @Override
     public void spectate(Spectator spectator) {
-
+		mSpectators.add(spectator);
     }
 
     @Override
