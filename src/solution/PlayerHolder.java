@@ -63,6 +63,19 @@ public class PlayerHolder {
 		return tickets;
 	}
 
+	public boolean hasEnoughTickets(PlayerHolder playerHolder, Ticket ticket){
+		return playerHolder.getTickets().get(ticket) > 0;
+	}
+
+	public boolean hasEnoughTickets(PlayerHolder playerHolder, Ticket ticket1, Ticket ticket2){
+		if(ticket1 == ticket2){
+			return playerHolder.getTickets().get(ticket1) > 1;
+		}else{
+			return playerHolder.getTickets().get(ticket1) > 0 && playerHolder.getTickets().get(ticket2) > 0;
+		}
+
+	}
+
 	@Override
 	public boolean equals(final Object o) {
 		if (this == o)

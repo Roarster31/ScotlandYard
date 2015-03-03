@@ -104,7 +104,8 @@ public class ScotlandYardModel extends ScotlandYard {
 
     @Override
     protected List<Move> validMoves(Colour player) {
-		int playerPos = mPlayerMap.get(player).getRealPosition();
+		final PlayerHolder playerHolder = mPlayerMap.get(player);
+		int playerPos = playerHolder.getRealPosition();
         List<Edge<Integer, Route>> edges = mGraph.getConnectedEdges(new Node<Integer>(playerPos));
 
 		List<Move> validMoves = new ArrayList<Move>();
@@ -121,8 +122,9 @@ public class ScotlandYardModel extends ScotlandYard {
 
 			MoveTicket firstMove = null;
 
-			if(!detectiveOnNode(primaryNode)) {
-				firstMove = new MoveTicket(player, primaryNode, Ticket.fromRoute(primaryEdge.data()));
+			final Ticket firstTicket = Ticket.fromRoute(primaryEdge.data());
+			if(!detectiveOnNode(primaryNode) && playerHolder.hasEnoughTickets(playerHolder, firstTicket)) {
+				firstMove = new MoveTicket(player, primaryNode, firstTicket);
 				validMoves.add(firstMove);
 			}else{
 				continue;
@@ -144,8 +146,9 @@ public class ScotlandYardModel extends ScotlandYard {
 						secondaryNode = secondaryEdge.source();
 					}
 
-					if(!detectiveOnNode(secondaryNode)) {
-						final MoveTicket secondMove = new MoveTicket(player, secondaryNode, Ticket.fromRoute(primaryEdge.data()));
+					final Ticket secondTicket = Ticket.fromRoute(primaryEdge.data());
+					if(!detectiveOnNode(secondaryNode) && playerHolder.hasEnoughTickets(playerHolder, firstTicket, secondTicket)) {
+						final MoveTicket secondMove = new MoveTicket(player, secondaryNode, secondTicket);
 
 						validMoves.add(new MoveDouble(player, firstMove, secondMove));
 					}else{
@@ -176,6 +179,10 @@ public class ScotlandYardModel extends ScotlandYard {
 		}
 		return false;
 	}
+
+
+
+
 
     @Override
     public void spectate(Spectator spectator) {
