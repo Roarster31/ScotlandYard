@@ -18,20 +18,6 @@ public class ExtendedGraph extends Graph<Integer, Route> {
 		this.edges.addAll(graph.getEdges());
 	}
 
-	public List<Node> getNeighbours(Node targetNode){
-		List<Node> neighbours = new ArrayList<Node>();
-		if(nodes.contains(targetNode)){
-
-			for(Edge edge: edges){
-				if(edge.source() == targetNode.data()){
-					neighbours.add(new Node(edge.source()));
-				}else if(edge.target() == targetNode.data()){
-					neighbours.add(new Node(edge.target()));
-				}
-			}
-		}
-		return neighbours;
-	}
 
 	public List<Edge<Integer, Route>> getConnectedEdges(Node targetNode){
 		List<Edge<Integer, Route>> edges = new ArrayList<Edge<Integer, Route>>();

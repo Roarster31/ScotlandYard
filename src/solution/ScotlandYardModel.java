@@ -17,35 +17,28 @@ import scotlandyard.Ticket;
 import java.io.IOException;
 import java.util.*;
 
-/**
- * alright, alright, alright
- * ...
- * this, is confusing, but I think I understand
- * ...
- * it looks like the equivalent to a primary key for players is their colour
- * so we'll use that, maybe in a list
- */
 public class ScotlandYardModel extends ScotlandYard {
 
 	private static final Colour MR_X_COLOUR = Colour.Black;
 
-	private ArrayList<Colour> colourList = new ArrayList<Colour>();
-
 	private final List<Boolean> mRounds;
 	private final ExtendedGraph mGraph;
-	private final TreeMap<Colour, PlayerHolder> mPlayerMap;
+	private final Map<Colour, PlayerHolder> mPlayerMap;
 	private final List<Spectator> mSpectators;
+	private final ArrayList<Colour> colourList;
 	private final int mNumberOfDetectives;
+
 	private Colour mCurrentPlayerColour = MR_X_COLOUR;
 	private int mCurrentRound = 0;
+
 	public ScotlandYardModel(int numberOfDetectives, List<Boolean> rounds, String graphFileName) throws IOException {
         super(numberOfDetectives, rounds, graphFileName);
 		mRounds = rounds;
 		mGraph = new ExtendedGraph(new ScotlandYardGraphReader().readGraph(graphFileName));
 		mNumberOfDetectives = numberOfDetectives;
-
-		mPlayerMap = new TreeMap<Colour, PlayerHolder>();
+		mPlayerMap = new HashMap<Colour, PlayerHolder>();
 		mSpectators = new ArrayList<Spectator>();
+		colourList = new ArrayList<Colour>();
 
     }
 
@@ -71,7 +64,7 @@ public class ScotlandYardModel extends ScotlandYard {
 		if(move.colour == MR_X_COLOUR){
 			mCurrentRound++;
 		} else {
-			// Add the ticket to MrX stash
+			// Add the ticket to MrX's stash if it wasn't Mr X who played
 			Map<Ticket, Integer> mrXTickets = mPlayerMap.get(MR_X_COLOUR).getTickets();
 			mrXTickets.put(move.ticket, mrXTickets.get(move.ticket) + 1);
 		}
@@ -113,92 +106,80 @@ public class ScotlandYardModel extends ScotlandYard {
 		List<Move> validMoves = new ArrayList<Move>();
 
 
-		for(Edge<Integer, Route> primaryEdge : edges){
+		for(Edge<Integer, Route> firstEdge : edges){
 
-			Integer primaryNode = null;
-			if(primaryEdge.source() == playerPos){
-				primaryNode = primaryEdge.target();
-			}else if(primaryEdge.target() == playerPos){
-				primaryNode = primaryEdge.source();
+			Integer firstNodePos = null;
+			if(firstEdge.source() == playerPos){
+				firstNodePos = firstEdge.target();
+			}else if(firstEdge.target() == playerPos){
+				firstNodePos = firstEdge.source();
 			}
 
-			MoveTicket firstMove = null;
+			MoveTicket firstMove;
 
-			final Ticket firstTicket = Ticket.fromRoute(primaryEdge.data());
-			if(!detectiveOnNode(primaryNode) && playerHolder.hasEnoughTickets(firstTicket)) {
-				firstMove = new MoveTicket(player, primaryNode, firstTicket);
+			final Ticket firstTicket = Ticket.fromRoute(firstEdge.data());
+			if(!detectiveOnNode(firstNodePos) && playerHolder.hasEnoughTickets(firstTicket)) {
+				firstMove = new MoveTicket(player, firstNodePos, firstTicket);
 				validMoves.add(firstMove);
 			}else{
 				continue;
 			}
 
 
-			//if we're dealing with Mr X, he has double move cards
-			if(player == MR_X_COLOUR && playerHolder.hasEnoughTickets(Ticket.DoubleMove)){
+			//if we're dealing with Mr X
+			if(player == MR_X_COLOUR){
 
-				MoveTicket firstSecretMove = new MoveTicket(player, primaryNode, Ticket.SecretMove);
+				//then he has the possibility to use a secret move
+				MoveTicket firstSecretMove = new MoveTicket(player, firstNodePos, Ticket.SecretMove);
 				if(playerHolder.hasEnoughTickets(Ticket.SecretMove)) {
 					validMoves.add(firstSecretMove);
 				}
 
-				List<Edge<Integer, Route>> secondaryEdges = mGraph.getConnectedEdges(new Node<Integer>(primaryNode));
+				//if he has double moves then we need to add those too
+				if(playerHolder.hasEnoughTickets(Ticket.DoubleMove)) {
 
-				for(Edge<Integer, Route> secondaryEdge : secondaryEdges) {
+					List<Edge<Integer, Route>> secondaryEdges = mGraph.getConnectedEdges(new Node<Integer>(firstNodePos));
 
+					for (Edge<Integer, Route> secondaryEdge : secondaryEdges) {
 
-					Integer secondaryNode = null;
-					if (secondaryEdge.source() == primaryNode) {
-						secondaryNode = secondaryEdge.target();
-					} else if (secondaryEdge.target() == primaryNode) {
-						secondaryNode = secondaryEdge.source();
+						Integer secondaryNode = null;
+						if (secondaryEdge.source().equals(firstNodePos)) {
+							secondaryNode = secondaryEdge.target();
+						} else if (secondaryEdge.target().equals(firstNodePos)) {
+							secondaryNode = secondaryEdge.source();
+						}
+
+						final Ticket secondTicket = Ticket.fromRoute(secondaryEdge.data());
+						final MoveTicket secondMove = new MoveTicket(player, secondaryNode, secondTicket);
+						MoveTicket secondSecretMove = new MoveTicket(player, secondaryNode, Ticket.SecretMove);
+
+						if (firstMove.target == 2 && secondMove.target == 5) {
+							player.name();
+						}
+
+						//so long as there isn't a detective on the chosen node
+						if (!detectiveOnNode(secondaryNode)) {
+
+							//and so long as Mr X has enough tickets
+							if (playerHolder.hasEnoughTickets(playerHolder, firstTicket, secondTicket)) {
+								validMoves.add(new MoveDouble(player, firstMove, secondMove));
+							}
+
+							if (playerHolder.hasEnoughTickets(playerHolder, firstTicket, Ticket.SecretMove)) {
+								validMoves.add(new MoveDouble(player, firstMove, secondSecretMove));
+							}
+
+							if (playerHolder.hasEnoughTickets(playerHolder, Ticket.SecretMove, secondTicket)) {
+								validMoves.add(new MoveDouble(player, firstSecretMove, secondMove));
+							}
+
+							if (playerHolder.hasEnoughTickets(playerHolder, Ticket.SecretMove, Ticket.SecretMove)) {
+								validMoves.add(new MoveDouble(player, firstSecretMove, secondSecretMove));
+							}
+						}
 					}
-
-
-
-
-					final Ticket secondTicket = Ticket.fromRoute(secondaryEdge.data());
-					final MoveTicket secondMove = new MoveTicket(player, secondaryNode, secondTicket);
-					MoveTicket secondSecretMove = new MoveTicket(player, secondaryNode, Ticket.SecretMove);
-
-
-					if(firstMove.target == 2 && secondMove.target == 5){
-						player.name();
-					}
-
-
-
-					if(!detectiveOnNode(secondaryNode)) {
-
-						if(playerHolder.hasEnoughTickets(playerHolder, firstTicket, secondTicket)) {
-							validMoves.add(new MoveDouble(player, firstMove, secondMove));
-						}
-
-						if(playerHolder.hasEnoughTickets(playerHolder, firstTicket, Ticket.SecretMove)) {
-							validMoves.add(new MoveDouble(player, firstMove, secondSecretMove));
-						}
-
-						if(playerHolder.hasEnoughTickets(playerHolder, Ticket.SecretMove, secondTicket)) {
-							validMoves.add(new MoveDouble(player, firstSecretMove, secondMove));
-						}
-
-						if(playerHolder.hasEnoughTickets(playerHolder, Ticket.SecretMove, Ticket.SecretMove)) {
-							validMoves.add(new MoveDouble(player, firstSecretMove, secondSecretMove));
-						}
-
-					}else{
-						continue;
-					}
-
-
-
-
-
-
 				}
-
-
 			}
-
 		}
 
 		// If no possible moves, then return a pass
@@ -208,11 +189,7 @@ public class ScotlandYardModel extends ScotlandYard {
 
 		return validMoves;
     }
-	/**
-	 * returns whether or not there is a detective on the node or not
-	 * @param node
-	 * @return
-	 */
+
 	private boolean detectiveOnNode(Integer node){
 		for(Colour colour : mPlayerMap.keySet()){
 			PlayerHolder playerHolder = mPlayerMap.get(colour);
@@ -222,10 +199,6 @@ public class ScotlandYardModel extends ScotlandYard {
 		}
 		return false;
 	}
-
-
-
-
 
     @Override
     public void spectate(Spectator spectator) {
@@ -237,7 +210,6 @@ public class ScotlandYardModel extends ScotlandYard {
 		mPlayerMap.put(colour, new PlayerHolder(player, colour, location, tickets));
 		// Add the current player to the colour list
 		colourList.add(colour);
-		//not sure what to return - not in javadocs
         return false;
     }
 
@@ -255,12 +227,8 @@ public class ScotlandYardModel extends ScotlandYard {
 			if (isMrXWinner()) {
 				winningPlayers.add(MR_X_COLOUR);
 			} else {
-				for (Colour currentColour : mPlayerMap.keySet()) {
-					if (currentColour != MR_X_COLOUR) {
-						winningPlayers.add(currentColour);
-					}
-				}
-
+				winningPlayers.addAll(mPlayerMap.keySet());
+				winningPlayers.remove(MR_X_COLOUR);
 			}
 		}
         return winningPlayers;
@@ -274,10 +242,6 @@ public class ScotlandYardModel extends ScotlandYard {
 		if(playerHolder != null) {
 			if (colour != MR_X_COLOUR || mRounds.get(mCurrentRound)){
 				playerHolder.updateVisiblePosition();
-			}
-
-			if(colour == MR_X_COLOUR){
-				System.out.println();
 			}
 			return playerHolder.getVisiblePosition();
 		}else{
@@ -295,34 +259,37 @@ public class ScotlandYardModel extends ScotlandYard {
 			return -1;
 		}
     }
-	private boolean isAllDetectivesStuck(){
+
+	private boolean areAllDetectivesStuck(){
 		for(Colour currentColour : mPlayerMap.keySet()){
 
 			if(currentColour != MR_X_COLOUR) {
-				List<Move> moves = validMoves(currentColour);
-				if (cannotMove(moves)) {
-					continue;
-				} else {
+				if (canMove(currentColour)) {
 					return false;
 				}
 			}
-
 		}
 		return true;
 	}
 
-	private boolean cannotMove(List<Move> moves) {
-		return moves.size() == 0 || (moves.size() == 1 && moves.get(0) instanceof MovePass);
+	private boolean canMove(Colour colour) {
+		List<Move> moves = validMoves(colour);
+		return moves.size() > 0 && !(moves.get(0) instanceof MovePass);
 	}
 
 	@Override
     public boolean isGameOver() {
-        return isReady() && (mPlayerMap.size() <= 1 || (mCurrentRound >= (mRounds.size()-1) && mCurrentPlayerColour == MR_X_COLOUR) || cannotMove(validMoves(MR_X_COLOUR)) || isAllDetectivesStuck());
+        return isReady() && (areAllTurnsCompleted() || !canMove(MR_X_COLOUR) || areAllDetectivesStuck());
     }
 
-	private boolean isMrXWinner(){
-		return mCurrentRound >= mRounds.size() || isAllDetectivesStuck();
+	private boolean areAllTurnsCompleted() {
+		return mCurrentRound >= (mRounds.size()-1)  && mCurrentPlayerColour == MR_X_COLOUR;
 	}
+
+	private boolean isMrXWinner(){
+		return areAllTurnsCompleted() || areAllDetectivesStuck();
+	}
+
     @Override
     public boolean isReady() {
         return mPlayerMap.size() == mNumberOfDetectives + 1;
@@ -335,7 +302,6 @@ public class ScotlandYardModel extends ScotlandYard {
 
     @Override
     public int getRound() {
-		//ok, so if a round is true, then MrX has to show his location at this point
 	return mCurrentRound;
     }
 
