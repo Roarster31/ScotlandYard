@@ -15,12 +15,7 @@ import scotlandyard.Spectator;
 import scotlandyard.Ticket;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * alright, alright, alright
@@ -34,14 +29,7 @@ public class ScotlandYardModel extends ScotlandYard {
 
 	private static final Colour MR_X_COLOUR = Colour.Black;
 
-	private static final ArrayList<Colour> COLOUR_LIST = new ArrayList<Colour>() {{
-		add(Colour.Black);
-		add(Colour.Blue);
-		add(Colour.Red);
-		add(Colour.Green);
-		add(Colour.White);
-		add(Colour.Yellow);
-	}};
+	private ArrayList<Colour> colourList = new ArrayList<Colour>();
 
 	private final List<Boolean> mRounds;
 	private final ExtendedGraph mGraph;
@@ -68,16 +56,28 @@ public class ScotlandYardModel extends ScotlandYard {
 
     @Override
     protected void nextPlayer() {
-		final int pos = COLOUR_LIST.indexOf(mCurrentPlayerColour);
-		mCurrentPlayerColour = (pos+1) < COLOUR_LIST.size() ? COLOUR_LIST.get(pos+1) : COLOUR_LIST.get(0);
+		final int pos = colourList.indexOf(mCurrentPlayerColour);
+		mCurrentPlayerColour = (pos+1) < mPlayerMap.size() ? colourList.get(pos+1) : colourList.get(0);
     }
 
     @Override
     protected void play(MoveTicket move) {
 		mPlayerMap.get(move.colour).setCurrentLocation(move.target);
 
+		// Decrease the ticket that has been used by the player
+		Map<Ticket, Integer> playerTickets = mPlayerMap.get(move.colour).getTickets();
+		playerTickets.put(move.ticket, playerTickets.get(move.ticket) - 1);
+
 		if(move.colour == MR_X_COLOUR){
 			mCurrentRound++;
+		} else {
+			// Add the ticket to MrX stash
+			Map<Ticket, Integer> mrXTickets = mPlayerMap.get(MR_X_COLOUR).getTickets();
+			mrXTickets.put(move.ticket, mrXTickets.get(move.ticket) + 1);
+		}
+
+		if (move.colour == MR_X_COLOUR && !mRounds.get(mCurrentRound)){
+			move = new MoveTicket(MR_X_COLOUR, getPlayerLocation(MR_X_COLOUR), move.ticket);
 		}
 		notifySpectators(move);
 	}
@@ -106,6 +106,7 @@ public class ScotlandYardModel extends ScotlandYard {
     @Override
     protected List<Move> validMoves(Colour player) {
 		final PlayerHolder playerHolder = mPlayerMap.get(player);
+
 		int playerPos = playerHolder.getRealPosition();
         List<Edge<Integer, Route>> edges = mGraph.getConnectedEdges(new Node<Integer>(playerPos));
 
@@ -124,7 +125,7 @@ public class ScotlandYardModel extends ScotlandYard {
 			MoveTicket firstMove = null;
 
 			final Ticket firstTicket = Ticket.fromRoute(primaryEdge.data());
-			if(!detectiveOnNode(primaryNode) && playerHolder.hasEnoughTickets(playerHolder, firstTicket)) {
+			if(!detectiveOnNode(primaryNode) && playerHolder.hasEnoughTickets(firstTicket)) {
 				firstMove = new MoveTicket(player, primaryNode, firstTicket);
 				validMoves.add(firstMove);
 			}else{
@@ -133,12 +134,17 @@ public class ScotlandYardModel extends ScotlandYard {
 
 
 			//if we're dealing with Mr X, he has double move cards
-			if(player == MR_X_COLOUR){
+			if(player == MR_X_COLOUR && playerHolder.hasEnoughTickets(Ticket.DoubleMove)){
 
+				MoveTicket firstSecretMove = new MoveTicket(player, primaryNode, Ticket.SecretMove);
+				if(playerHolder.hasEnoughTickets(Ticket.SecretMove)) {
+					validMoves.add(firstSecretMove);
+				}
 
 				List<Edge<Integer, Route>> secondaryEdges = mGraph.getConnectedEdges(new Node<Integer>(primaryNode));
 
 				for(Edge<Integer, Route> secondaryEdge : secondaryEdges) {
+
 
 					Integer secondaryNode = null;
 					if (secondaryEdge.source() == primaryNode) {
@@ -147,14 +153,47 @@ public class ScotlandYardModel extends ScotlandYard {
 						secondaryNode = secondaryEdge.source();
 					}
 
-					final Ticket secondTicket = Ticket.fromRoute(primaryEdge.data());
-					if(!detectiveOnNode(secondaryNode) && playerHolder.hasEnoughTickets(playerHolder, firstTicket, secondTicket)) {
-						final MoveTicket secondMove = new MoveTicket(player, secondaryNode, secondTicket);
 
-						validMoves.add(new MoveDouble(player, firstMove, secondMove));
+
+
+					final Ticket secondTicket = Ticket.fromRoute(secondaryEdge.data());
+					final MoveTicket secondMove = new MoveTicket(player, secondaryNode, secondTicket);
+					MoveTicket secondSecretMove = new MoveTicket(player, secondaryNode, Ticket.SecretMove);
+
+
+					if(firstMove.target == 2 && secondMove.target == 5){
+						player.name();
+					}
+
+
+
+					if(!detectiveOnNode(secondaryNode)) {
+
+						if(playerHolder.hasEnoughTickets(playerHolder, firstTicket, secondTicket)) {
+							validMoves.add(new MoveDouble(player, firstMove, secondMove));
+						}
+
+						if(playerHolder.hasEnoughTickets(playerHolder, firstTicket, Ticket.SecretMove)) {
+							validMoves.add(new MoveDouble(player, firstMove, secondSecretMove));
+						}
+
+						if(playerHolder.hasEnoughTickets(playerHolder, Ticket.SecretMove, secondTicket)) {
+							validMoves.add(new MoveDouble(player, firstSecretMove, secondMove));
+						}
+
+						if(playerHolder.hasEnoughTickets(playerHolder, Ticket.SecretMove, Ticket.SecretMove)) {
+							validMoves.add(new MoveDouble(player, firstSecretMove, secondSecretMove));
+						}
+
 					}else{
 						continue;
 					}
+
+
+
+
+
+
 				}
 
 
@@ -162,7 +201,10 @@ public class ScotlandYardModel extends ScotlandYard {
 
 		}
 
-
+		// If no possible moves, then return a pass
+		if(validMoves.size() == 0 && player != MR_X_COLOUR){
+			validMoves.add(new MovePass(player));
+		}
 
 		return validMoves;
     }
@@ -193,6 +235,8 @@ public class ScotlandYardModel extends ScotlandYard {
     @Override
     public boolean join(Player player, Colour colour, int location, Map<Ticket, Integer> tickets) {
 		mPlayerMap.put(colour, new PlayerHolder(player, colour, location, tickets));
+		// Add the current player to the colour list
+		colourList.add(colour);
 		//not sure what to return - not in javadocs
         return false;
     }
@@ -207,6 +251,18 @@ public class ScotlandYardModel extends ScotlandYard {
     @Override
     public Set<Colour> getWinningPlayers() {
 		Set<Colour> winningPlayers = new HashSet<Colour>();
+		if(isGameOver()) {
+			if (isMrXWinner()) {
+				winningPlayers.add(MR_X_COLOUR);
+			} else {
+				for (Colour currentColour : mPlayerMap.keySet()) {
+					if (currentColour != MR_X_COLOUR) {
+						winningPlayers.add(currentColour);
+					}
+				}
+
+			}
+		}
         return winningPlayers;
     }
 
@@ -220,6 +276,9 @@ public class ScotlandYardModel extends ScotlandYard {
 				playerHolder.updateVisiblePosition();
 			}
 
+			if(colour == MR_X_COLOUR){
+				System.out.println();
+			}
 			return playerHolder.getVisiblePosition();
 		}else{
 			return -1;
@@ -236,12 +295,34 @@ public class ScotlandYardModel extends ScotlandYard {
 			return -1;
 		}
     }
+	private boolean isAllDetectivesStuck(){
+		for(Colour currentColour : mPlayerMap.keySet()){
 
-    @Override
+			if(currentColour != MR_X_COLOUR) {
+				List<Move> moves = validMoves(currentColour);
+				if (cannotMove(moves)) {
+					continue;
+				} else {
+					return false;
+				}
+			}
+
+		}
+		return true;
+	}
+
+	private boolean cannotMove(List<Move> moves) {
+		return moves.size() == 0 || (moves.size() == 1 && moves.get(0) instanceof MovePass);
+	}
+
+	@Override
     public boolean isGameOver() {
-        return isReady() && (mPlayerMap.size() <= 1 || validMoves(MR_X_COLOUR).size() == 0);
+        return isReady() && (mPlayerMap.size() <= 1 || (mCurrentRound >= (mRounds.size()-1) && mCurrentPlayerColour == MR_X_COLOUR) || cannotMove(validMoves(MR_X_COLOUR)) || isAllDetectivesStuck());
     }
 
+	private boolean isMrXWinner(){
+		return mCurrentRound >= mRounds.size() || isAllDetectivesStuck();
+	}
     @Override
     public boolean isReady() {
         return mPlayerMap.size() == mNumberOfDetectives + 1;

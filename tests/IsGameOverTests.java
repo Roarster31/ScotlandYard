@@ -68,19 +68,19 @@ public class IsGameOverTests {
         ScotlandYard game = TestHelper.getGame(1, rounds, "test_resources/small_map.txt");
         TestHelper.addMrxToGame(game, 4);
         TestHelper.addDetectiveToGame(game, Colour.Blue, 1);
-
+//0
         game.turn();
         assertFalse("Game should not be over after first move", game.isGameOver());
 
         game.turn();
         assertFalse("Game should not be over after second move", game.isGameOver());
-
+//1
         game.turn();
         assertFalse("Game should not be over after third move", game.isGameOver());
 
         game.turn();
         assertTrue("Game should be over after forth move", game.isGameOver());
-
+//2
     }
 
 

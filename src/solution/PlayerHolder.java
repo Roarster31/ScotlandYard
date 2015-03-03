@@ -63,8 +63,8 @@ public class PlayerHolder {
 		return tickets;
 	}
 
-	public boolean hasEnoughTickets(PlayerHolder playerHolder, Ticket ticket){
-		return playerHolder.getTickets().get(ticket) > 0;
+	public boolean hasEnoughTickets(Ticket ticket){
+		return tickets.get(ticket) > 0;
 	}
 
 	public boolean hasEnoughTickets(PlayerHolder playerHolder, Ticket ticket1, Ticket ticket2){

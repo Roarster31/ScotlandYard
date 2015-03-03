@@ -23,8 +23,7 @@ public class MrXValidMovesTests extends ValidMovesTests {
 
 
         for(Move move : expected) {
-            assertTrue("Mr X Valid tickets should contain " + move,
-                    moves.contains(move));
+            assertTrue("Mr X Valid tickets should contain " + move, moves.contains(move));
         }
     }
 
