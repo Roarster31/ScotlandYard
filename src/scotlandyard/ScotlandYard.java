@@ -28,7 +28,7 @@ public abstract class ScotlandYard implements ScotlandYardView {
    * playing that move, and then passing priority to the next player.
    */
   final public void turn() {
-	  Move chosenMove = getPlayerMove(getCurrentPlayer());
+    Move chosenMove = getPlayerMove(getCurrentPlayer());
     play(chosenMove);
     nextPlayer();
   }

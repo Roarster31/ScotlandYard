@@ -47,6 +47,7 @@ public class InitialisationTests {
         Colour[] expectedColours = { Colour.Black, Colour.Blue };
         List<Colour> actualColours = game.getPlayers();
 
+
         assertArrayEquals("The list of colours from getPlayers() should match the players added",
                 expectedColours, actualColours.toArray());
     }
