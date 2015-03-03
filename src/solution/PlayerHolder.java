@@ -25,11 +25,14 @@ public class PlayerHolder {
 		this.currentLocation = currentLocation;
 		this.tickets = tickets;
 
-		//Mr X's first position shouldn't be viewable but tests fail otherwise
+		this.currentLocation = currentLocation;
 
-//		if(Colour.Black == colour){
-		this.currentVisibleLocation = currentLocation;
-//		}
+		// Only update the players visible position if they are not Mr X
+		if(Colour.Black == colour) {
+			this.currentVisibleLocation = 0;
+		} else {
+			this.currentVisibleLocation = currentLocation;
+		}
 	}
 
 	public int getVisiblePosition(){
