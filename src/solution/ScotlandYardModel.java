@@ -119,8 +119,14 @@ public class ScotlandYardModel extends ScotlandYard {
 				primaryNode = primaryEdge.source();
 			}
 
-			final MoveTicket firstMove = new MoveTicket(player, primaryNode, Ticket.fromRoute(primaryEdge.data()));
-			validMoves.add(firstMove);
+			MoveTicket firstMove = null;
+
+			if(!detectiveOnNode(primaryNode)) {
+				firstMove = new MoveTicket(player, primaryNode, Ticket.fromRoute(primaryEdge.data()));
+				validMoves.add(firstMove);
+			}else{
+				continue;
+			}
 
 
 			//if we're dealing with Mr X, he has double move cards
@@ -138,9 +144,13 @@ public class ScotlandYardModel extends ScotlandYard {
 						secondaryNode = secondaryEdge.source();
 					}
 
-					final MoveTicket secondMove = new MoveTicket(player, secondaryNode, Ticket.fromRoute(primaryEdge.data()));
+					if(!detectiveOnNode(secondaryNode)) {
+						final MoveTicket secondMove = new MoveTicket(player, secondaryNode, Ticket.fromRoute(primaryEdge.data()));
 
-					validMoves.add(new MoveDouble(player, firstMove, secondMove));
+						validMoves.add(new MoveDouble(player, firstMove, secondMove));
+					}else{
+						continue;
+					}
 				}
 
 
@@ -152,6 +162,20 @@ public class ScotlandYardModel extends ScotlandYard {
 
 		return validMoves;
     }
+	/**
+	 * returns whether or not there is a detective on the node or not
+	 * @param node
+	 * @return
+	 */
+	private boolean detectiveOnNode(Integer node){
+		for(Colour colour : mPlayerMap.keySet()){
+			PlayerHolder playerHolder = mPlayerMap.get(colour);
+			if(playerHolder.getColour() != MR_X_COLOUR && playerHolder.getVisiblePosition() == node){
+				return true;
+			}
+		}
+		return false;
+	}
 
     @Override
     public void spectate(Spectator spectator) {
