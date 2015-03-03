@@ -31,13 +31,22 @@ import java.util.TreeMap;
  */
 public class ScotlandYardModel extends ScotlandYard {
 
-	private static final Colour MrXColour = Colour.Black;
+	private static final Colour MR_X_COLOUR = Colour.Black;
+
+	private static final ArrayList<Colour> COLOUR_LIST = new ArrayList<Colour>() {{
+		add(Colour.Black);
+		add(Colour.Blue);
+		add(Colour.Red);
+		add(Colour.Green);
+		add(Colour.White);
+		add(Colour.Yellow);
+	}};
 
 	private final List<Boolean> mRounds;
 	private final ExtendedGraph mGraph;
 	private final TreeMap<Colour, PlayerHolder> mPlayerMap;
 	private final int mNumberOfDetectives;
-	private Colour mCurrentPlayerColour = MrXColour;
+	private Colour mCurrentPlayerColour = MR_X_COLOUR;
 	private int mCurrentRound = 0;
 	public ScotlandYardModel(int numberOfDetectives, List<Boolean> rounds, String graphFileName) throws IOException {
         super(numberOfDetectives, rounds, graphFileName);
@@ -56,7 +65,8 @@ public class ScotlandYardModel extends ScotlandYard {
 
     @Override
     protected void nextPlayer() {
-		mCurrentPlayerColour = mPlayerMap.get(ColourHelper.nextColour(mCurrentPlayerColour)).getColour();
+		final int pos = COLOUR_LIST.indexOf(mCurrentPlayerColour);
+		mCurrentPlayerColour = (pos+1) < COLOUR_LIST.size() ? COLOUR_LIST.get(pos+1) : COLOUR_LIST.get(0);
     }
 
     @Override
@@ -64,7 +74,7 @@ public class ScotlandYardModel extends ScotlandYard {
 		System.out.println("ticketmove");
 		mPlayerMap.get(move.colour).setCurrentLocation(move.target);
 
-		if(move.colour == MrXColour){
+		if(move.colour == MR_X_COLOUR){
 			System.out.println("incrementing "+mCurrentRound);
 			mCurrentRound++;
 		}
@@ -134,7 +144,7 @@ public class ScotlandYardModel extends ScotlandYard {
 		PlayerHolder playerHolder = mPlayerMap.get(colour);
 
 		if(playerHolder != null) {
-			if (colour != MrXColour || mRounds.get(mCurrentRound)){
+			if (colour != MR_X_COLOUR || mRounds.get(mCurrentRound)){
 				playerHolder.updateVisiblePosition();
 			}
 
