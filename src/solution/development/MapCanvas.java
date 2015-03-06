@@ -25,6 +25,7 @@ public class MapCanvas extends JPanel implements MouseListener, MouseMotionListe
 	private PathNode selectedNode;
 	private CanvasInterface mInterface;
 	private boolean mConnectingNodes;
+	public int curHighId = 0;
 	public PathNode getDraggingNode() {
 		return draggingNode;
 	}
@@ -123,7 +124,8 @@ public class MapCanvas extends JPanel implements MouseListener, MouseMotionListe
 	public void resetActions() {
 		mConnectingNodes = false;
 
-		draggingNode = selectedNode = null;
+		draggingNode = null;
+		selectedNode = null;
 		repaint();
 	}
 
@@ -181,7 +183,7 @@ public class MapCanvas extends JPanel implements MouseListener, MouseMotionListe
 
 			GeneralPath polyLine = edge.getPath();
 			if(stroke.createStrokedShape(polyLine).contains(mouseX, mouseY)){
-				PathNode waypoint = new PathNode(mNodeList.size()+1, x,y, WAYPOINT_SIZE);
+				PathNode waypoint = new PathNode(curHighId++, x,y, WAYPOINT_SIZE);
 				mNodeList.add(waypoint);
 				mEdgeList.add(edge.split(waypoint));
 
@@ -230,7 +232,7 @@ public class MapCanvas extends JPanel implements MouseListener, MouseMotionListe
 	}
 
 	private void addNode(int x, int y){
-		final PathNode node = new PathNode(mNodeList.size() + 1, x, y, CIRC_SIZE);
+		final PathNode node = new PathNode(curHighId++, x, y, CIRC_SIZE);
 		mNodeList.add(node);
 		selectedNode = node;
 
@@ -302,6 +304,7 @@ public class MapCanvas extends JPanel implements MouseListener, MouseMotionListe
 	public void setData(final MapData mapData) {
 		mNodeList = mapData.getPathNodeList();
 		mEdgeList = mapData.getPathEdgeList();
+		curHighId = mapData.getHighId();
 		resetActions();
 	}
 	public void deleteNode(PathNode node){

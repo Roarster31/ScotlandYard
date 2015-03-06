@@ -8,8 +8,10 @@ import java.util.ArrayList;
 public class MapData {
 	private ArrayList<PathNode> mPathNodeList;
 	private ArrayList<PathEdge> mPathEdgeList;
+	private int mHighId;
 
-	public MapData(ArrayList<PathNode> nodeList, ArrayList<PathEdge> edgeList){
+	public MapData(int highId, ArrayList<PathNode> nodeList, ArrayList<PathEdge> edgeList){
+		this.mHighId = highId;
 		this.mPathNodeList = nodeList;
 		this.mPathEdgeList = edgeList;
 	}
@@ -25,5 +27,11 @@ public class MapData {
 	}
 	public void setPathEdgeList(final ArrayList<PathEdge> pathEdgeList) {
 		this.mPathEdgeList = pathEdgeList;
+	}
+	public int getHighId() {
+		return mHighId;
+	}
+	public void setHighId(final int highId) {
+		mHighId = highId;
 	}
 }

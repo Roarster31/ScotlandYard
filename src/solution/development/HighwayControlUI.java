@@ -52,7 +52,7 @@ public class HighwayControlUI extends JFrame implements MapCanvas.CanvasInterfac
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					File file = fileChooser.getSelectedFile();
 					try {
-						mDataParser.saveData(new MapData(mCanvas.mNodeList, mCanvas.mEdgeList), file);
+						mDataParser.saveData(new MapData(mCanvas.curHighId, mCanvas.mNodeList, mCanvas.mEdgeList), file);
 					} catch (FileNotFoundException e1) {
 						e1.printStackTrace();
 					} catch (UnsupportedEncodingException e1) {
@@ -100,7 +100,7 @@ public class HighwayControlUI extends JFrame implements MapCanvas.CanvasInterfac
 		add(mImagePanel);
 		add(toolbarPanel);
 
-		setSize(image.getIconWidth() + 200, image.getIconHeight());
+		setSize(image.getIconWidth() + 200, image.getIconHeight()+100);
 
 		createMenu();
 
