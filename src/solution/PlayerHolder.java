@@ -12,7 +12,7 @@ import java.util.Map;
  * Created by rory on 03/03/15.
  */
 public class PlayerHolder {
-
+	private String name;
 	private Player player;
 	private Colour colour;
 	private int currentLocation;
@@ -34,6 +34,13 @@ public class PlayerHolder {
 			this.currentVisibleLocation = currentLocation;
 		}
 	}
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getName(){
+		return name;
+	}
 
 	public int getVisiblePosition(){
 		return currentVisibleLocation;
@@ -51,6 +58,7 @@ public class PlayerHolder {
 		return player.notify(currentLocation, possibleMoves);
 	}
 
+	public Player getPlayer(){ return player;}
 	public void setCurrentLocation(final int currentLocation) {
 		this.currentLocation = currentLocation;
 	}

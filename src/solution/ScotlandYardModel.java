@@ -97,7 +97,7 @@ public class ScotlandYardModel extends ScotlandYard {
 	}
 
     @Override
-    protected List<Move> validMoves(Colour player) {
+    public  List<Move> validMoves(Colour player) {
 		final PlayerHolder playerHolder = mPlayerMap.get(player);
 
 		int playerPos = playerHolder.getRealPosition();
@@ -248,7 +248,19 @@ public class ScotlandYardModel extends ScotlandYard {
 			return -1;
 		}
     }
+	// Get Map of Player Holders
+	public Map<Colour, PlayerHolder> getPlayerHolders(){
+		return mPlayerMap;
+	}
+	public void setPlayerName(Colour key, String name){
+		PlayerHolder oldPlayer = mPlayerMap.get(key);
+		PlayerHolder newPlayer = new PlayerHolder(oldPlayer.getPlayer(), key, oldPlayer.getRealPosition(), oldPlayer.getTickets());
+		newPlayer.setName(name);
+		// Replace
+		mPlayerMap.remove(key);
+		mPlayerMap.put(key, newPlayer);
 
+	}
     @Override
     public int getPlayerTickets(Colour colour, Ticket ticket) {
 		PlayerHolder playerHolder = mPlayerMap.get(colour);

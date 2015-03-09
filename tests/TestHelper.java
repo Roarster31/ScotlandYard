@@ -29,6 +29,7 @@ public class TestHelper
         public MoveTicket chosenMove;
         public Move notify(int location, List<Move> moves) {
             for(Move move : moves) {
+                
                 if(move instanceof MoveTicket) {
                     chosenMove = (MoveTicket) move;
                     return move;
