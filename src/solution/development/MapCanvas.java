@@ -14,7 +14,7 @@ import java.util.ArrayList;
  */
 public class MapCanvas extends JPanel implements MouseListener, MouseMotionListener {
 	private static final double WAYPOINT_SIZE = 4;
-	private static double CIRC_SIZE = 10;
+	public static double CIRC_SIZE = 10;
 	private final BasicStroke stroke;
 	ArrayList<PathNode> mNodeList;
 	ArrayList<PathEdge> mEdgeList;

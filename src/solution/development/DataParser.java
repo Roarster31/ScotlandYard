@@ -25,6 +25,16 @@ public class DataParser {
 
 	}
 
+    public void saveCompatibleFile(MapData mapData, File file) throws FileNotFoundException, UnsupportedEncodingException {
+
+        Gson gson = new Gson();
+
+        PrintWriter writer = new PrintWriter(file, "UTF-8");
+        writer.write(gson.toJson(mapData));
+        writer.close();
+
+    }
+
 	public MapData loadData(File file) throws IOException {
 
 
