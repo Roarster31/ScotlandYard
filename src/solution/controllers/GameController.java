@@ -139,6 +139,7 @@ public class GameController implements MainFrame.MainFrameListener, Player, Grap
         }
         System.out.println("mSelectedNode = " + mSelectedNode);
         model.turn();
+        mMainFrame.updateGameUI();
         notifyUpdateListeners();
     }
 

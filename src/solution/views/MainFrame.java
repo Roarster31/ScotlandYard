@@ -21,7 +21,9 @@ public class MainFrame extends JFrame implements DataUpdateListener {
         add(mGameLayout);
         pack();
     }
-
+    public void updateGameUI(){
+        mGameLayout = new GameLayout();
+    }
     public GameLayout getGameLayout(){
         return mGameLayout;
     }

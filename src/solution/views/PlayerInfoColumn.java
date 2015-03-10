@@ -6,6 +6,7 @@ import solution.controllers.GameController;
 import solution.helpers.ColourHelper;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.Map;
 
 /**
@@ -26,7 +27,7 @@ public class PlayerInfoColumn extends JPanel {
         JLabel colour = new JLabel(" hello ");
         colour.setBackground(ColourHelper.toColor(currentPlayer));
         colour.setOpaque(true);
-        colour.setSize(200,40);
+        //colour.setMinimumSize(new Dimension(300,200));
 
         vertView.add(colour);
 
@@ -106,11 +107,11 @@ public class PlayerInfoColumn extends JPanel {
         this.gameController = gameController;
         // Check to see whether the passed player equals the current player
         if(gameController.getCurrentPlayer() == currentPlayer) {
-            setupExtendedCols(currentPlayer);
+            //setupExtendedCols(currentPlayer);
         } else {
-            setupCols(currentPlayer);
+            //setupCols(currentPlayer);
         }
-
+        setupCols(currentPlayer);
     }
 
     public void setMrX(boolean isMrX) {
