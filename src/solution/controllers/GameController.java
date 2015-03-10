@@ -1,8 +1,6 @@
 package solution.controllers;
 
-import scotlandyard.Move;
-import scotlandyard.MoveTicket;
-import scotlandyard.Player;
+import scotlandyard.*;
 import solution.ModelUpdateListener;
 import solution.ScotlandYardModel;
 import solution.helpers.ColourHelper;
@@ -49,7 +47,8 @@ public class GameController implements MainFrame.MainFrameListener, Player, Grap
 
             for (int i = 0; i < playerCount; i++) {
                 //todo do proper location
-                model.join(this, ColourHelper.getColour(i), new Random().nextInt(190), SetupHelper.getTickets(false));
+                final Colour colour = ColourHelper.getColour(i);
+                model.join(this, colour, new Random().nextInt(190), SetupHelper.getTickets(colour.equals(Colour.Black)));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -81,6 +80,16 @@ public class GameController implements MainFrame.MainFrameListener, Player, Grap
                 if(moveTicket.target == mSelectedNode){
                     return move;
                 }
+            }else if(move instanceof MoveDouble){
+                MoveDouble doubleMove = (MoveDouble) move;
+                Move finalMove = doubleMove.moves.get(doubleMove.moves.size()-1);
+                if(finalMove instanceof MoveTicket){
+                    MoveTicket moveTicket = (MoveTicket) finalMove;
+                    if(moveTicket.target == mSelectedNode){
+                        return move;
+                    }
+                }
+
             }
         }
         return null;
@@ -97,11 +106,23 @@ public class GameController implements MainFrame.MainFrameListener, Player, Grap
                     nodeFound = true;
                     break;
                 }
+            }else if(move instanceof MoveDouble){
+                MoveDouble doubleMove = (MoveDouble) move;
+                Move finalMove = doubleMove.moves.get(doubleMove.moves.size()-1);
+                if(finalMove instanceof MoveTicket){
+                    MoveTicket ticket = (MoveTicket) finalMove;
+                    if(ticket.target == nodeId){
+                        nodeFound = true;
+                        break;
+                    }
+                }
+
             }
         }
         if(!nodeFound){
             return;
         }
+        System.out.println("mSelectedNode = " + mSelectedNode);
         model.turn();
         notifyUpdateListeners();
     }

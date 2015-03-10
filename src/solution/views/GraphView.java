@@ -2,6 +2,7 @@ package solution.views;
 
 import scotlandyard.Colour;
 import scotlandyard.Move;
+import scotlandyard.MoveDouble;
 import scotlandyard.MoveTicket;
 import solution.Models.CoordinateData;
 import solution.Models.GraphData;
@@ -68,16 +69,24 @@ public class GraphView extends JPanel {
         this.mListener = mListener;
     }
 
-    public void setAvailablePositions(java.util.List<Move> availablePositions) {
+    public void setAvailablePositions(java.util.List<Move> availableMoves) {
         this.availablePositions.clear();
-        if(availablePositions != null) {
-            for (Move move : availablePositions) {
+        if(availableMoves != null) {
+            for (Move move : availableMoves) {
                 if (move instanceof MoveTicket) {
                     MoveTicket ticket = (MoveTicket) move;
                     this.availablePositions.add(ticket.target);
+                }else if(move instanceof MoveDouble){
+                    MoveDouble doubleMove = (MoveDouble) move;
+                    Move finalMove = doubleMove.moves.get(doubleMove.moves.size()-1);
+                    if(finalMove instanceof MoveTicket){
+                        MoveTicket ticket = (MoveTicket) finalMove;
+                        this.availablePositions.add(ticket.target);
+                    }
                 }
             }
         }
+        repaint();
     }
 
     private void setupGraphImage(final String graphImageMapPath) {
@@ -86,6 +95,7 @@ public class GraphView extends JPanel {
             mGraphImage = ImageIO.read(new File(resource.toURI()));
             mImageSize = new Dimension(mGraphImage.getWidth(), mGraphImage.getHeight());
             setSize(mImageSize);
+            setMinimumSize(mImageSize);
             setPreferredSize(mImageSize);
         } catch (IOException ex) {
             //todo handle exception...

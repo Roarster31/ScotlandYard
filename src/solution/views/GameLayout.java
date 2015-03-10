@@ -18,6 +18,7 @@ public class GameLayout extends JPanel implements ModelUpdateListener{
 
     private final JLabel statusLabel;
     private final GraphView graphView;
+    private final CurrentPlayerIndicator playerIndicator;
 
     public GameLayout () {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -25,7 +26,11 @@ public class GameLayout extends JPanel implements ModelUpdateListener{
         graphView = new GraphView("map.jpg", new GraphData("pos.txt", GraphData.DataFormat.STANDARD));
         add(graphView);
 
+        playerIndicator = new CurrentPlayerIndicator();
+
+
         statusLabel = new JLabel("");
+        add(playerIndicator);
         add(statusLabel);
 
     }
@@ -33,6 +38,8 @@ public class GameLayout extends JPanel implements ModelUpdateListener{
     @Override
     public void onWaitingOnPlayer(ScotlandYardModel model) {
 
+        playerIndicator.setColours(model.getPlayers());
+        playerIndicator.setSelectedColour(model.getCurrentPlayer());
         if(!model.isGameOver()) {
             for (Colour colour : model.getPlayers()) {
                 graphView.setPlayerPosition(colour, model.getPlayerLocation(colour));
@@ -45,7 +52,7 @@ public class GameLayout extends JPanel implements ModelUpdateListener{
                 winningPlayers.add(ColourHelper.toString(winningColour));
             }
             graphView.setAvailablePositions(null);
-            statusLabel.setText(("Gameover! "+ StringUtils.join(winningPlayers,", ")+" won!"));
+            statusLabel.setText(("Gameover! " + StringUtils.join(winningPlayers,", ")+" won!"));
         }
     }
 
