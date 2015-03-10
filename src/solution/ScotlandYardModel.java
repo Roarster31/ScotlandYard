@@ -263,7 +263,15 @@ public class ScotlandYardModel extends ScotlandYard {
 			return -1;
 		}
     }
-
+	public Map<Ticket, Integer> getAllPlayerTickets(Colour colour){
+		PlayerHolder playerHolder = mPlayerMap.get(colour);
+		if(playerHolder != null) {
+			return playerHolder.getTickets();
+		}else{
+			System.out.printf("Could not find player");
+			return null;
+		}
+	}
 	private boolean areAllDetectivesStuck(){
 		for(Colour currentColour : mPlayerMap.keySet()){
 

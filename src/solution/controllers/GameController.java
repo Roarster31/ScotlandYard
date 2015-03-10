@@ -12,6 +12,7 @@ import solution.views.MainFrame;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -32,8 +33,8 @@ public class GameController implements MainFrame.MainFrameListener, Player, Grap
         mMainFrame.setMainFrameListener(this);
         addModelUpdateListener(mMainFrame.getGameLayout());
         mMainFrame.getGameLayout().setGameListener(this);
-    }
 
+    }
     public void addModelUpdateListener(ModelUpdateListener listener){
         listeners.add(listener);
     }
@@ -42,6 +43,7 @@ public class GameController implements MainFrame.MainFrameListener, Player, Grap
     public void onPlayersAdded(final int count) {
         setupModel(count);
         mMainFrame.showGameUI();
+        mMainFrame.setGameController(this);
     }
 
     private void setupModel(final int playerCount) {
@@ -66,7 +68,15 @@ public class GameController implements MainFrame.MainFrameListener, Player, Grap
             listener.onWaitingOnPlayer(model, mrXHistoryTracker.getMoveHistory());
         }
     }
-
+    public Colour getCurrentPlayer(){
+        return model.getCurrentPlayer();
+    }
+    public Map<Ticket, Integer> getPlayerTickets(Colour currentPlayer){
+        return model.getAllPlayerTickets(currentPlayer);
+    }
+    public List<Colour> getPlayers(){
+        return model.getPlayers();
+    }
     public static List<Boolean> getRounds() {
         List<Boolean> rounds = new ArrayList<Boolean>();
         rounds.add(false);

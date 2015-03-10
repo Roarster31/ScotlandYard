@@ -2,6 +2,7 @@ package solution.views;
 
 import solution.Constants;
 import solution.DataUpdateListener;
+import solution.controllers.GameController;
 
 import javax.swing.*;
 
@@ -30,11 +31,11 @@ public class MainFrame extends JFrame implements DataUpdateListener {
         public void onPlayersAdded(final int count);
     }
 
-    public MainFrame () {
-
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    public MainFrame() {
 
         mGameLayout = new GameLayout();
+
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         playerCountLayout = new PlayerCountLayout(Constants.MIN_PLAYERS, Constants.MAX_PLAYERS);
         playerCountLayout.setListener(new PlayerCountLayout.PlayerCountListener() {
@@ -49,7 +50,9 @@ public class MainFrame extends JFrame implements DataUpdateListener {
 
         setVisible(true);
     }
-
+    public void setGameController(GameController gc){
+        mGameLayout.setGameController(gc);
+    }
     public void setMainFrameListener(final MainFrameListener mainFrameListener){
         this.mainFrameListener = mainFrameListener;
     }

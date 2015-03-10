@@ -6,6 +6,7 @@ import scotlandyard.MoveTicket;
 import solution.ModelUpdateListener;
 import solution.Models.GraphData;
 import solution.ScotlandYardModel;
+import solution.controllers.GameController;
 import solution.helpers.ColourHelper;
 
 import javax.swing.*;
@@ -20,6 +21,7 @@ public class GameLayout extends JPanel implements ModelUpdateListener{
     private final JLabel statusLabel;
     private final GraphView graphView;
     private final CurrentPlayerIndicator playerIndicator;
+    private final PlayerInfoBar playerInfoBar;
 
     public GameLayout () {
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
@@ -36,13 +38,19 @@ public class GameLayout extends JPanel implements ModelUpdateListener{
 
         playerIndicator = new CurrentPlayerIndicator();
 
+        playerInfoBar = new PlayerInfoBar();
 
         statusLabel = new JLabel("");
 
         subLayout.add(graphView);
+<<<<<<< HEAD
 //        scrollPane.add(scrollPane);
+=======
+
+        subLayout.add(playerInfoBar);
+>>>>>>> Added Player Bar
         add(subLayout);
-        add(playerIndicator);
+        add(scrollPane);
         add(statusLabel);
 
     }
@@ -70,5 +78,10 @@ public class GameLayout extends JPanel implements ModelUpdateListener{
 
     public void setGameListener(GraphView.GraphViewListener listener) {
         graphView.setListener(listener);
+
+    }
+
+    public void setGameController(GameController gc) {
+        playerInfoBar.setGameControllerListener(gc);
     }
 }

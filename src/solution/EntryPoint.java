@@ -17,6 +17,7 @@ public class EntryPoint {
         //and then add a reference of it to the controller
         GameController gameController = new GameController(mainFrame);
 
+
         //now we're good to go!
 
 
