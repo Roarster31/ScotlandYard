@@ -1,6 +1,7 @@
 package solution.controllers;
 
 import scotlandyard.*;
+import solution.Constants;
 import solution.ModelUpdateListener;
 import solution.ScotlandYardModel;
 import solution.helpers.ColourHelper;
@@ -22,10 +23,12 @@ public class GameController implements MainFrame.MainFrameListener, Player, Grap
     private ScotlandYardModel model;
     private List<ModelUpdateListener> listeners;
     private int mSelectedNode;
+    private MrXHistoryTracker mrXHistoryTracker;
 
     public GameController(MainFrame mainFrame){
         mMainFrame = mainFrame;
         listeners = new ArrayList<ModelUpdateListener>();
+        mrXHistoryTracker = new MrXHistoryTracker();
         mMainFrame.setMainFrameListener(this);
         addModelUpdateListener(mMainFrame.getGameLayout());
         mMainFrame.getGameLayout().setGameListener(this);
@@ -45,6 +48,8 @@ public class GameController implements MainFrame.MainFrameListener, Player, Grap
         try {
             model = new ScotlandYardModel(playerCount-1, getRounds(), "graph.txt");
 
+            model.spectate(mrXHistoryTracker);
+
             for (int i = 0; i < playerCount; i++) {
                 //todo do proper location
                 final Colour colour = ColourHelper.getColour(i);
@@ -58,7 +63,7 @@ public class GameController implements MainFrame.MainFrameListener, Player, Grap
 
     private void notifyUpdateListeners() {
         for(ModelUpdateListener listener : listeners){
-            listener.onWaitingOnPlayer(model);
+            listener.onWaitingOnPlayer(model, mrXHistoryTracker.getMoveHistory());
         }
     }
 
@@ -125,5 +130,31 @@ public class GameController implements MainFrame.MainFrameListener, Player, Grap
         System.out.println("mSelectedNode = " + mSelectedNode);
         model.turn();
         notifyUpdateListeners();
+    }
+
+    class MrXHistoryTracker implements Spectator {
+
+        List<MoveTicket> moveHistory;
+
+        public MrXHistoryTracker () {
+            moveHistory = new ArrayList<MoveTicket>();
+        }
+
+        @Override
+        public void notify(Move move) {
+            if(move.colour == Constants.MR_X_COLOUR){
+                if(move instanceof MoveTicket){
+                    moveHistory.add((MoveTicket) move);
+                }else if(move instanceof MoveDouble){
+                    for(Move subMove : ((MoveDouble) move).moves){
+                        notify(subMove);
+                    }
+                }
+            }
+        }
+
+        public List<MoveTicket> getMoveHistory() {
+            return moveHistory;
+        }
     }
 }

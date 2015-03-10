@@ -9,7 +9,6 @@ import java.util.*;
 
 public class ScotlandYardModel extends ScotlandYard {
 
-	private static final Colour MR_X_COLOUR = Colour.Black;
 
 	private final List<Boolean> mRounds;
 	private final ExtendedGraph mGraph;
@@ -18,7 +17,7 @@ public class ScotlandYardModel extends ScotlandYard {
 	private final ArrayList<Colour> colourList;
 	private final int mNumberOfDetectives;
 
-	private Colour mCurrentPlayerColour = MR_X_COLOUR;
+	private Colour mCurrentPlayerColour = Constants.MR_X_COLOUR;
 	private int mCurrentRound = 0;
 
 	public ScotlandYardModel(int numberOfDetectives, List<Boolean> rounds, String graphFileName) throws IOException {
@@ -54,16 +53,16 @@ public class ScotlandYardModel extends ScotlandYard {
 		Map<Ticket, Integer> playerTickets = mPlayerMap.get(move.colour).getTickets();
 		playerTickets.put(move.ticket, playerTickets.get(move.ticket) - 1);
 
-		if(move.colour == MR_X_COLOUR){
+		if(move.colour == Constants.MR_X_COLOUR){
 			mCurrentRound++;
 		} else {
 			// Add the ticket to MrX's stash if it wasn't Mr X who played
-			Map<Ticket, Integer> mrXTickets = mPlayerMap.get(MR_X_COLOUR).getTickets();
+			Map<Ticket, Integer> mrXTickets = mPlayerMap.get(Constants.MR_X_COLOUR).getTickets();
 			mrXTickets.put(move.ticket, mrXTickets.get(move.ticket) + 1);
 		}
 
-		if (move.colour == MR_X_COLOUR && !mRounds.get(mCurrentRound)){
-			move = new MoveTicket(MR_X_COLOUR, getPlayerLocation(MR_X_COLOUR), move.ticket);
+		if (move.colour == Constants.MR_X_COLOUR && !mRounds.get(mCurrentRound)){
+			move = new MoveTicket(Constants.MR_X_COLOUR, getPlayerLocation(Constants.MR_X_COLOUR), move.ticket);
 		}
 		notifySpectators(move);
 	}
@@ -120,7 +119,7 @@ public class ScotlandYardModel extends ScotlandYard {
 
 
 			//if we're dealing with Mr X
-			if(player == MR_X_COLOUR){
+			if(player == Constants.MR_X_COLOUR){
 
 				//then he has the possibility to use a secret move
 				MoveTicket firstSecretMove = new MoveTicket(player, firstNodePos, Ticket.SecretMove);
@@ -176,7 +175,7 @@ public class ScotlandYardModel extends ScotlandYard {
 		}
 
 		// If no possible moves, then return a pass
-		if(validMoves.size() == 0 && player != MR_X_COLOUR){
+		if(validMoves.size() == 0 && player != Constants.MR_X_COLOUR){
 			validMoves.add(new MovePass(player));
 		}
 
@@ -186,7 +185,7 @@ public class ScotlandYardModel extends ScotlandYard {
 	private boolean detectiveOnNode(Integer node){
 		for(Colour colour : mPlayerMap.keySet()){
 			PlayerHolder playerHolder = mPlayerMap.get(colour);
-			if(playerHolder.getColour() != MR_X_COLOUR && playerHolder.getVisiblePosition() == node){
+			if(playerHolder.getColour() != Constants.MR_X_COLOUR && playerHolder.getVisiblePosition() == node){
 				return true;
 			}
 		}
@@ -218,10 +217,10 @@ public class ScotlandYardModel extends ScotlandYard {
 		Set<Colour> winningPlayers = new HashSet<Colour>();
 		if(isGameOver()) {
 			if (isMrXWinner()) {
-				winningPlayers.add(MR_X_COLOUR);
+				winningPlayers.add(Constants.MR_X_COLOUR);
 			} else {
 				winningPlayers.addAll(mPlayerMap.keySet());
-				winningPlayers.remove(MR_X_COLOUR);
+				winningPlayers.remove(Constants.MR_X_COLOUR);
 			}
 		}
         return winningPlayers;
@@ -233,7 +232,7 @@ public class ScotlandYardModel extends ScotlandYard {
 		PlayerHolder playerHolder = mPlayerMap.get(colour);
 
 		if(playerHolder != null) {
-			if (colour != MR_X_COLOUR || mRounds.get(mCurrentRound)){
+			if (colour != Constants.MR_X_COLOUR || mRounds.get(mCurrentRound)){
 				playerHolder.updateVisiblePosition();
 			}
 			return playerHolder.getVisiblePosition();
@@ -268,7 +267,7 @@ public class ScotlandYardModel extends ScotlandYard {
 	private boolean areAllDetectivesStuck(){
 		for(Colour currentColour : mPlayerMap.keySet()){
 
-			if(currentColour != MR_X_COLOUR) {
+			if(currentColour != Constants.MR_X_COLOUR) {
 				if (canMove(currentColour)) {
 					return false;
 				}
@@ -284,14 +283,14 @@ public class ScotlandYardModel extends ScotlandYard {
 
 	@Override
     public boolean isGameOver() {
-        return isReady() && (areAllTurnsCompleted() || !canMove(MR_X_COLOUR) || areAllDetectivesStuck() || isDetectiveOnMrX());
+        return isReady() && (areAllTurnsCompleted() || !canMove(Constants.MR_X_COLOUR) || areAllDetectivesStuck() || isDetectiveOnMrX());
     }
 
     private boolean isDetectiveOnMrX() {
-        int mrXPos = mPlayerMap.get(MR_X_COLOUR).getRealPosition();
+        int mrXPos = mPlayerMap.get(Constants.MR_X_COLOUR).getRealPosition();
         for(Colour currentColour : mPlayerMap.keySet()){
 
-            if(currentColour != MR_X_COLOUR) {
+            if(currentColour != Constants.MR_X_COLOUR) {
                 if(getPlayerLocation(currentColour) == mrXPos){
                     return true;
                 }
@@ -301,7 +300,7 @@ public class ScotlandYardModel extends ScotlandYard {
     }
 
     private boolean areAllTurnsCompleted() {
-		return mCurrentRound >= (mRounds.size()-1)  && mCurrentPlayerColour == MR_X_COLOUR;
+		return mCurrentRound >= (mRounds.size()-1)  && mCurrentPlayerColour == Constants.MR_X_COLOUR;
 	}
 
 	private boolean isMrXWinner(){

@@ -2,6 +2,7 @@ package solution.views;
 
 import com.sun.deploy.util.StringUtils;
 import scotlandyard.Colour;
+import scotlandyard.MoveTicket;
 import solution.ModelUpdateListener;
 import solution.Models.GraphData;
 import solution.ScotlandYardModel;
@@ -21,22 +22,33 @@ public class GameLayout extends JPanel implements ModelUpdateListener{
     private final CurrentPlayerIndicator playerIndicator;
 
     public GameLayout () {
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+
+        JPanel subLayout = new JPanel();
+        subLayout.setLayout(new BoxLayout(subLayout, BoxLayout.Y_AXIS));
+
+
+        JPanel mrXHistoryPanel = new JPanel();
+        mrXHistoryPanel.setLayout(new BoxLayout(mrXHistoryPanel, BoxLayout.Y_AXIS));
+        JScrollPane scrollPane = new JScrollPane(mrXHistoryPanel);
 
         graphView = new GraphView("map.jpg", new GraphData("pos.txt", GraphData.DataFormat.STANDARD));
-        add(graphView);
 
         playerIndicator = new CurrentPlayerIndicator();
 
 
         statusLabel = new JLabel("");
+
+        subLayout.add(graphView);
+        scrollPane.add(scrollPane);
+        add(subLayout);
         add(playerIndicator);
         add(statusLabel);
 
     }
 
     @Override
-    public void onWaitingOnPlayer(ScotlandYardModel model) {
+    public void onWaitingOnPlayer(ScotlandYardModel model, List<MoveTicket> mrXMoves) {
 
         playerIndicator.setColours(model.getPlayers());
         playerIndicator.setSelectedColour(model.getCurrentPlayer());
