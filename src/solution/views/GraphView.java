@@ -1,7 +1,11 @@
 package solution.views;
 
+import scotlandyard.Colour;
+import scotlandyard.Move;
+import scotlandyard.MoveTicket;
 import solution.Models.CoordinateData;
 import solution.Models.GraphData;
+import solution.helpers.ColourHelper;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -15,7 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * This class deals with drawing the underlying Graph and anything on top of
@@ -30,7 +34,17 @@ public class GraphView extends JPanel {
     private GraphViewListener mListener;
     private int mCurrentHoverNode;
     private ArrayList<Integer> availablePositions;
+    private Map<Integer, Colour> mPlayerLocations;
 
+    public void setPlayerPosition(Colour colour, int playerLocation) {
+        for(Map.Entry<Integer, Colour> entry : mPlayerLocations.entrySet()){
+            if(entry.getValue().equals(colour)){
+                mPlayerLocations.remove(entry.getKey());
+                break;
+            }
+        }
+        mPlayerLocations.put(playerLocation, colour);
+    }
 
 
     public interface GraphViewListener {
@@ -43,6 +57,7 @@ public class GraphView extends JPanel {
         }
         mNodes = graphData.getNodes();
         availablePositions = new ArrayList<Integer>();
+        mPlayerLocations = new HashMap<Integer, Colour>();
         mDrawColour = Color.gray;
         addMouseListener(new GraphMouseListener());
         addMouseMotionListener(new GraphMouseListener());
@@ -53,8 +68,16 @@ public class GraphView extends JPanel {
         this.mListener = mListener;
     }
 
-    public void setAvailablePositions(ArrayList<Integer> availablePositions) {
-        this.availablePositions = availablePositions;
+    public void setAvailablePositions(java.util.List<Move> availablePositions) {
+        this.availablePositions.clear();
+        if(availablePositions != null) {
+            for (Move move : availablePositions) {
+                if (move instanceof MoveTicket) {
+                    MoveTicket ticket = (MoveTicket) move;
+                    this.availablePositions.add(ticket.target);
+                }
+            }
+        }
     }
 
     private void setupGraphImage(final String graphImageMapPath) {
@@ -87,8 +110,12 @@ public class GraphView extends JPanel {
 
             int radius = isHovered && isAvailable ? (int) (CIRC_RADIUS * 1.5f) : CIRC_RADIUS;
 
-            if(isAvailable){
-                g2d.setColor(Color.RED);
+            if(mPlayerLocations.containsKey(coordinateData.getId())){
+                g2d.setColor(ColourHelper.toColor(mPlayerLocations.get(coordinateData.getId())));
+                g2d.fillOval(coordinateData.getX()-radius/2, coordinateData.getY()-radius/2, radius, radius);
+                g2d.setColor(mDrawColour);
+            }else if(isAvailable){
+                g2d.setColor(Color.MAGENTA);
                 g2d.fillOval(coordinateData.getX()-radius/2, coordinateData.getY()-radius/2, radius, radius);
                 g2d.setColor(mDrawColour);
             }else{
@@ -106,8 +133,8 @@ public class GraphView extends JPanel {
                 for (CoordinateData coordinateData : mNodes) {
                     if (new Rectangle2D.Double(coordinateData.getX() - CIRC_RADIUS, coordinateData.getY() - CIRC_RADIUS, 2 * CIRC_RADIUS, 2 * CIRC_RADIUS).contains(e.getX(), e.getY())) {
                         mListener.onNodeClicked(coordinateData.getId());
+                        return;
                     }
-                    return;
                 }
             }
         }

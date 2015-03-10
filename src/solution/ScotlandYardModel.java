@@ -284,15 +284,28 @@ public class ScotlandYardModel extends ScotlandYard {
 
 	@Override
     public boolean isGameOver() {
-        return isReady() && (areAllTurnsCompleted() || !canMove(MR_X_COLOUR) || areAllDetectivesStuck());
+        return isReady() && (areAllTurnsCompleted() || !canMove(MR_X_COLOUR) || areAllDetectivesStuck() || isDetectiveOnMrX());
     }
 
-	private boolean areAllTurnsCompleted() {
+    private boolean isDetectiveOnMrX() {
+        int mrXPos = mPlayerMap.get(MR_X_COLOUR).getRealPosition();
+        for(Colour currentColour : mPlayerMap.keySet()){
+
+            if(currentColour != MR_X_COLOUR) {
+                if(getPlayerLocation(currentColour) == mrXPos){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean areAllTurnsCompleted() {
 		return mCurrentRound >= (mRounds.size()-1)  && mCurrentPlayerColour == MR_X_COLOUR;
 	}
 
 	private boolean isMrXWinner(){
-		return areAllTurnsCompleted() || areAllDetectivesStuck();
+		return (areAllTurnsCompleted() || areAllDetectivesStuck()) && !isDetectiveOnMrX();
 	}
 
     @Override

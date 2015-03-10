@@ -1,69 +1,49 @@
 package solution.views;
 
+import solution.Constants;
+import solution.DataUpdateListener;
+
 import javax.swing.*;
-import java.awt.*;
-import java.util.List;
 
 /**
  * Created by rory on 09/03/15.
  */
-public class MainFrame extends JFrame {
+public class MainFrame extends JFrame implements DataUpdateListener {
 
-    private final PlayerManagementLayout mManagementFrame;
+    private final PlayerCountLayout playerCountLayout;
+    //    private final PlayerManagementLayout mManagementFrame;
     MainFrameListener mainFrameListener;
     private GameLayout mGameLayout;
 
     public void showGameUI() {
-        remove(mManagementFrame);
-        mGameLayout = new GameLayout();
+        remove(playerCountLayout);
         add(mGameLayout);
         pack();
     }
 
+    public GameLayout getGameLayout(){
+        return mGameLayout;
+    }
+
+
     public interface MainFrameListener {
-        public void onPlayersAdded(List<String> names);
+        public void onPlayersAdded(final int count);
     }
 
     public MainFrame () {
-        //here we can add our layouts
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-//        GraphView graphView = new GraphView("map.jpg", new GraphData("pos.txt", GraphData.DataFormat.STANDARD));
-//
-//        graphView.setMainFrameListener(new GraphView.GraphViewListener() {
-//            @Override
-//            public void onNodeClicked(int nodeId) {
-//                System.out.println("clicked on node with id "+nodeId);
-//            }
-//        });
-//
-//        ArrayList<Integer> availablePositions = new ArrayList<Integer>();
-//
-//        availablePositions.add(127);
-//        availablePositions.add(115);
-//        availablePositions.add(126);
-//        availablePositions.add(133);
-//        availablePositions.add(134);
-//        availablePositions.add(116);
-//
-//        graphView.setAvailablePositions(availablePositions);
-//
-//        getContentPane().add(graphView, BorderLayout.CENTER);
+        mGameLayout = new GameLayout();
 
-        mManagementFrame = new PlayerManagementLayout(new PlayerManagementLayout.PlayerManagementListener() {
+        playerCountLayout = new PlayerCountLayout(Constants.MIN_PLAYERS, Constants.MAX_PLAYERS);
+        playerCountLayout.setListener(new PlayerCountLayout.PlayerCountListener() {
             @Override
-            public void onPlayersChanged() {
-                pack();
-            }
-
-            @Override
-            public void onAllPlayersAdded(List<String> nameList) {
-                mainFrameListener.onPlayersAdded(nameList);
+            public void onPlayerCountDecided(int count) {
+                mainFrameListener.onPlayersAdded(count);
             }
         });
-
-        getContentPane().add(mManagementFrame, BorderLayout.CENTER);
+        getContentPane().add(playerCountLayout);
 
         pack();
 

@@ -45,7 +45,7 @@ public class SpectatorTests {
 
     @Test
     public void testSpectatorIsNotifiedOfADetectiveMove() throws Exception {
-        ScotlandYard game = TestHelper.getGame(1, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(1, "small_map.txt");
         TestHelper.addMrxToGame(game, 3);
 
         TestPlayer player = new TestPlayer();
@@ -63,7 +63,7 @@ public class SpectatorTests {
 
     @Test
     public void testSpectatorIsNotifiedOfADetectiveMove2() throws Exception {
-        ScotlandYard game = TestHelper.getGame(1, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(1, "small_map.txt");
         TestHelper.addMrxToGame(game, 3);
 
         TestPlayer player = new TestPlayer();
@@ -82,7 +82,7 @@ public class SpectatorTests {
 
     @Test
     public void testSpectatorIsNotifiedOfAMrXMove() throws Exception {
-        ScotlandYard game = TestHelper.getGame(1, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(1, "small_map.txt");
         TestHelper.addMrxToGame(game, 3);
 
         TestPlayer player = new TestPlayer();
@@ -101,7 +101,7 @@ public class SpectatorTests {
     @Test
     public void testSpectatorIsGivenMrXsLastKnowLocationIfHeIsHidden() throws Exception {
         List<Boolean> rounds = Arrays.asList(false, false, false);
-        ScotlandYard game = TestHelper.getGame(1, rounds, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(1, rounds, "small_map.txt");
 
         List<Move> movesToUse = new ArrayList<Move>();
         movesToUse.add(new MoveTicket(Colour.Black, 2, Ticket.Bus));
@@ -134,7 +134,7 @@ public class SpectatorTests {
     @Test
     public void testSpectatorIsGivenCorrectLocationWhenMrXIsVisible() throws Exception {
         List<Boolean> rounds = Arrays.asList(false, true, true);
-        ScotlandYard game = TestHelper.getGame(1, rounds, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(1, rounds, "small_map.txt");
 
         List<Move> movesToUse = new ArrayList<Move>();
         movesToUse.add(new MoveTicket(Colour.Black, 2, Ticket.Bus));

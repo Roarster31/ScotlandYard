@@ -17,7 +17,7 @@ public class IsGameOverTests {
 
     @Test
     public void testIsGameOverShouldBeFalseIfIsRunningIsFalse() throws Exception {
-        ScotlandYard game = TestHelper.getGame(1, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(1, "small_map.txt");
         TestHelper.addMrxToGame(game, 4);
 
         assertFalse("If the game is not ready it should also not be over", game.isGameOver());
@@ -26,7 +26,7 @@ public class IsGameOverTests {
 
     @Test
     public void testIsGameOverShouldBeFalseIfNotGameOver() throws Exception {
-        ScotlandYard game = TestHelper.getGame(1, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(1, "small_map.txt");
         TestHelper.addMrxToGame(game, 4);
         TestHelper.addDetectiveToGame(game, Colour.Blue, 1);
         game.turn();
@@ -40,7 +40,7 @@ public class IsGameOverTests {
     // mr X win conditions
     @Test
     public void testIsGameOverWhenDetectivesAreAllStuck() throws Exception {
-        ScotlandYard game = TestHelper.getGame(2, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(2, "small_map.txt");
         TestHelper.addMrxToGame(game, 4);
 
 
@@ -65,7 +65,7 @@ public class IsGameOverTests {
     public void testIsGameOverWhenNumberOfRoundsHasBeenPlayedAndDetectivesHavePlayed() throws Exception {
         List<Boolean> rounds = Arrays.asList(true, true, true);
 
-        ScotlandYard game = TestHelper.getGame(1, rounds, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(1, rounds, "small_map.txt");
         TestHelper.addMrxToGame(game, 4);
         TestHelper.addDetectiveToGame(game, Colour.Blue, 1);
 
@@ -89,7 +89,7 @@ public class IsGameOverTests {
     public void testIsGameOverIfMrXIsCaught() throws Exception {
         List<Boolean> rounds = Arrays.asList(true, true);
 
-        ScotlandYard game = TestHelper.getGame(1, rounds, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(1, rounds, "small_map.txt");
         TestPlayer mrX = new TestPlayer();
         TestPlayer detective = new TestPlayer();
 
@@ -111,7 +111,7 @@ public class IsGameOverTests {
     public void testIsGameOverIfMrXHasNowhereToMove() throws Exception {
         List<Boolean> rounds = Arrays.asList(true, true);
 
-        ScotlandYard game = TestHelper.getGame(3, rounds, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(3, rounds, "small_map.txt");
 
         TestHelper.addMrxToGame(game, 5);
         TestHelper.addDetectiveToGame(game, Colour.Blue, 6);

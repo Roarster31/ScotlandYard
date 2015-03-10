@@ -23,9 +23,9 @@ public class ExtendedGraph extends Graph<Integer, Route> {
 		List<Edge<Integer, Route>> edges = new ArrayList<Edge<Integer, Route>>();
 
 			for(Edge<Integer, Route> edge: this.edges){
-				if(edge.source() == targetNode.data()){
+				if(edge.source().equals(targetNode.data())){
 					edges.add(edge);
-				}else if(edge.target() == targetNode.data()){
+				}else if(edge.target().equals(targetNode.data())){
 					edges.add(edge);
 				}
 			}

@@ -12,6 +12,7 @@ import java.util.List;
 /**
  * Created by rory on 10/03/15.
  */
+@Deprecated
 public class PlayerManagementLayout extends JPanel implements PlayerManagementView.PlayerManagementViewListener {
 
     private static final int REQUIRED_PLAYER_COUNT = 2;

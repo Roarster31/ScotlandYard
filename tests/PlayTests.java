@@ -1,9 +1,13 @@
-import org.junit.Before;
 import org.junit.Test;
 import scotlandyard.*;
-import java.util.*;
 
-import static org.junit.Assert.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class PlayTests {
 
@@ -11,7 +15,7 @@ public class PlayTests {
     @Test
     public void testInterpretOnlyCurrentPlayerMayMove() throws Exception {
         List<Boolean> rounds = Arrays.asList(true, true, true, true);
-        ScotlandYard game = TestHelper.getGame(2, rounds, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(2, rounds, "small_map.txt");
         TestHelper.addMrxToGame(game, 2);
         TestHelper.addDetectiveToGame(game, Colour.Blue, 4);
         TestHelper.addDetectiveToGame(game, Colour.Yellow, 1);
@@ -71,7 +75,7 @@ public class PlayTests {
     // Move Pass play
     @Test
     public void testInterpretPassShouldNotChangePlayerLocation() throws Exception {
-        ScotlandYard game = TestHelper.getGame(1, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(1, "small_map.txt");
         TestHelper.addMrxToGame(game, 2);
 
         TestPassTicketPlayer testPlayer = new TestPassTicketPlayer();
@@ -90,7 +94,7 @@ public class PlayTests {
 
     @Test
     public void testInterpretPassShouldNotChangePlayerTickets() throws Exception {
-        ScotlandYard game = TestHelper.getGame(1, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(1, "small_map.txt");
         TestHelper.addMrxToGame(game, 2);
         TestPassTicketPlayer testPlayer = new TestPassTicketPlayer();
         TestHelper.addDetectiveToGame(game, testPlayer, Colour.Blue, 7);
@@ -114,7 +118,7 @@ public class PlayTests {
 
     @Test
     public void testInterpretPassShouldMoveTheCurrentPlayerOnByOne() throws Exception {
-        ScotlandYard game = TestHelper.getGame(1, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(1, "small_map.txt");
         TestHelper.addMrxToGame(game, 2);
 
         TestPassTicketPlayer testPlayer = new TestPassTicketPlayer();
@@ -147,7 +151,7 @@ public class PlayTests {
     // Move Ticket Interpret
     @Test
     public void testDetectiveTicketsGivenToMrX() throws Exception {
-        ScotlandYard game = TestHelper.getGame(1, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(1, "small_map.txt");
         TestHelper.addMrxToGame(game, 2);
 
         TestMoveTicketPlayer testPlayer = new TestMoveTicketPlayer();
@@ -171,7 +175,7 @@ public class PlayTests {
 
     @Test
     public void testPlayerMovesToTheDesiredLocation() throws Exception {
-        ScotlandYard game = TestHelper.getGame(1, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(1, "small_map.txt");
         TestHelper.addMrxToGame(game, 2);
 
         TestMoveTicketPlayer testPlayer = new TestMoveTicketPlayer();
@@ -189,7 +193,7 @@ public class PlayTests {
 
     @Test
     public void testPlayerTicketsDecrementedAfterMove() throws Exception {
-        ScotlandYard game = TestHelper.getGame(1, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(1, "small_map.txt");
         TestHelper.addMrxToGame(game, 2);
 
         TestMoveTicketPlayer testPlayer = new TestMoveTicketPlayer();
@@ -227,7 +231,7 @@ public class PlayTests {
     // Move Double Interpret
     @Test
     public void testDoubleMoveWork() throws Exception {
-        ScotlandYard game = TestHelper.getGame(1, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(1, "small_map.txt");
         DoubleMoveTicketPlayer testPlayer = new DoubleMoveTicketPlayer();
         TestHelper.addMrxToGame(game, testPlayer, 2);
         TestHelper.addDetectiveToGame(game, Colour.Blue, 5);
@@ -241,7 +245,7 @@ public class PlayTests {
     }
 
     public void testDoubleMoveUsesTheCorrectTickets() throws Exception {
-        ScotlandYard game = TestHelper.getGame(1, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(1, "small_map.txt");
         DoubleMoveTicketPlayer testPlayer = new DoubleMoveTicketPlayer();
         TestHelper.addMrxToGame(game, testPlayer, 2);
         TestHelper.addDetectiveToGame(game, Colour.Blue, 5);

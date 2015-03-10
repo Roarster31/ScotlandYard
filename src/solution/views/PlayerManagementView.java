@@ -12,6 +12,7 @@ import java.awt.event.KeyEvent;
 /**
  * Created by rory on 10/03/15.
  */
+@Deprecated
 public class PlayerManagementView extends JPanel {
 
     private final JTextField mNameTextField;

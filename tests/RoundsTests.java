@@ -58,7 +58,7 @@ public class RoundsTests {
     @Test
     public void testAfterMrXMakesADoubleMoveTheRoundsShouldHaveIncrementedTwice() throws Exception {
         int numDetectives = 1;
-        ScotlandYard game = TestHelper.getGame(numDetectives, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(numDetectives, "small_map.txt");
         TestHelper.addMrxToGame(game, TestHelper.getDoubleMovePlayer(), 5);
         TestHelper.addDetectiveToGame(game, Colour.Blue, 15);
         int roundOne = game.getRound();
@@ -73,7 +73,7 @@ public class RoundsTests {
     @Test
     public void testAfterFirstMoveOfADoubleMoveRoundsShouldIncrementByOne() throws Exception {
         int numDetectives = 1;
-        ScotlandYard game = TestHelper.getGame(numDetectives, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(numDetectives, "small_map.txt");
         TestHelper.addMrxToGame(game, TestHelper.getDoubleMovePlayer(), 5);
         TestHelper.addDetectiveToGame(game, Colour.Blue, 15);
 
@@ -94,7 +94,7 @@ public class RoundsTests {
     public void testTheVisibilityOfTheRoundsShouldCorrespondToTheInputRounds() throws Exception {
         int numDetectives = 1;
         List<Boolean> rounds = Arrays.asList(true, false, true, false, true);
-        ScotlandYard game = TestHelper.getGame(numDetectives, rounds, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(numDetectives, rounds, "small_map.txt");
         TestHelper.addMrxToGame(game, TestHelper.getDoubleMovePlayer(), 5);
         TestHelper.addDetectiveToGame(game, Colour.Blue, 15);
 

@@ -22,7 +22,7 @@ public class PlayerNotifyTests {
 
     @Test
     public void testThecurrentPlayerIsNotifiedOnTheirTurn() throws Exception {
-        ScotlandYard game = TestHelper.getGame(1, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(1, "small_map.txt");
         TestHelper.addMrxToGame(game, 2);
 
         PlayerTest player = new PlayerTest();
@@ -38,7 +38,7 @@ public class PlayerNotifyTests {
 
     @Test
     public void testThePlayerIsNotifiedWithTheCorrectLocation() throws Exception {
-        ScotlandYard game = TestHelper.getGame(1, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(1, "small_map.txt");
         TestHelper.addMrxToGame(game, 2);
 
         PlayerTest player = new PlayerTest();
@@ -54,7 +54,7 @@ public class PlayerNotifyTests {
 
     @Test
     public void testMrXIsNotifiedWithCorrectLocation() throws Exception {
-        ScotlandYard game = TestHelper.getGame(1, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(1, "small_map.txt");
 
         TestHelper.TestPlayer player = new TestHelper.TestPlayer();
         int mxLocation = 2;
@@ -71,7 +71,7 @@ public class PlayerNotifyTests {
     @Test
     public void testMrXLocationNotifyIsCorrectEvenWhenHidden() throws Exception {
         List<Boolean> rounds =Arrays.asList(false, false);
-        ScotlandYard game = TestHelper.getGame(1, rounds, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(1, rounds, "small_map.txt");
 
         TestHelper.TestPlayer player = new TestHelper.TestPlayer();
         int mxLocation = 2;

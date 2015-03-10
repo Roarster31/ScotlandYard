@@ -1,9 +1,7 @@
-import org.junit.Test;
-import scotlandyard.*;
-import java.util.*;
+import scotlandyard.ScotlandYard;
 
-
-import static org.junit.Assert.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ValidMovesTests {
 
@@ -18,7 +16,7 @@ public class ValidMovesTests {
         rounds.add(true);
         rounds.add(true);
 
-        return TestHelper.getGame(numDetectives, rounds, "test_resources/small_map.txt");
+        return TestHelper.getGame(numDetectives, rounds, "small_map.txt");
     }
 
 

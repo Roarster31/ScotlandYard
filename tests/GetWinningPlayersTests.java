@@ -1,8 +1,9 @@
 import org.junit.Test;
-import scotlandyard.*;
-import java.util.*;
+import scotlandyard.Colour;
+import scotlandyard.ScotlandYard;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 
 
@@ -19,7 +20,7 @@ public class GetWinningPlayersTests {
 
     @Test
     public void testIfGameIsOverNonEmptyListIsReturned() throws Exception {
-        ScotlandYard game = TestHelper.getGame(1, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(1, "small_map.txt");
         TestHelper.addMrxToGame(game, 1);
         TestHelper.addDetectiveToGame(game, Colour.Blue, 7);
 
@@ -29,7 +30,7 @@ public class GetWinningPlayersTests {
 
     @Test
     public void testIfMrXWonHisColourShouldBeReturned() throws Exception {
-        ScotlandYard game = TestHelper.getGame(1, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(1, "small_map.txt");
         TestHelper.addMrxToGame(game, 1);
         TestHelper.addDetectiveToGame(game, Colour.Blue, 7);
 
@@ -39,7 +40,7 @@ public class GetWinningPlayersTests {
 
     @Test
     public void testIfMrXWonOnlyHisColourShouldBeReturned() throws Exception {
-        ScotlandYard game = TestHelper.getGame(1, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(1, "small_map.txt");
         TestHelper.addMrxToGame(game, 1);
         TestHelper.addDetectiveToGame(game, Colour.Blue, 7);
 
@@ -49,7 +50,7 @@ public class GetWinningPlayersTests {
 
     @Test
     public void testIfDetectivesWonAllTheirColoursAreReturned() throws Exception {
-        ScotlandYard game = TestHelper.getGame(3, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(3, "small_map.txt");
         TestHelper.addMrxToGame(game, 5);
         TestHelper.addDetectiveToGame(game, Colour.Blue, 2);
         TestHelper.addDetectiveToGame(game, Colour.Red, 4);
@@ -67,7 +68,7 @@ public class GetWinningPlayersTests {
 
     @Test
     public void testIfDetectivesWonMrXColourIsNotReturned() throws Exception {
-        ScotlandYard game = TestHelper.getGame(3, "test_resources/small_map.txt");
+        ScotlandYard game = TestHelper.getGame(3, "small_map.txt");
         TestHelper.addMrxToGame(game, 5);
         TestHelper.addDetectiveToGame(game, Colour.Blue, 2);
         TestHelper.addDetectiveToGame(game, Colour.Red, 4);

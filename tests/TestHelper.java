@@ -106,7 +106,7 @@ public class TestHelper
 
     public static ScotlandYard getGame(int numDetectives, List<Boolean> rounds)
     {
-        return getGame(numDetectives, rounds, "resources/graph.txt");
+        return getGame(numDetectives, rounds, "graph.txt");
     }
 
     public static ScotlandYard getGame(int numDetectives, String mapFilename)
@@ -133,7 +133,7 @@ public class TestHelper
 
 
     public static ScotlandYard getGame(int numDetectives) {
-        return getGame(numDetectives, TestHelper.getRounds(), "resources/graph.txt");
+        return getGame(numDetectives, TestHelper.getRounds(), "graph.txt");
     }
 
 
@@ -151,7 +151,7 @@ public class TestHelper
 
     public static ScotlandYard subscribedGame(int numDetectives)
     {
-        return subscribedGame(numDetectives, "resources/graph.txt");
+        return subscribedGame(numDetectives, "graph.txt");
     }
 
     public static class TestPlayer implements Player {
