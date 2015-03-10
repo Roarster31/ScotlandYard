@@ -43,12 +43,7 @@ public class GameLayout extends JPanel implements ModelUpdateListener{
         statusLabel = new JLabel("");
 
         subLayout.add(graphView);
-<<<<<<< HEAD
-//        scrollPane.add(scrollPane);
-=======
-
         subLayout.add(playerInfoBar);
->>>>>>> Added Player Bar
         add(subLayout);
         add(scrollPane);
         add(statusLabel);
