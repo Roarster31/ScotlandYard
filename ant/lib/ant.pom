@@ -99,8 +99,8 @@
           <excludes>
             <exclude>org/apache/tools/ant/filters/util/JavaClassHelper*</exclude>
             <exclude>org/apache/tools/ant/types/resolver/**</exclude>
-            <exclude>org/apache/tools/ant/listener/Log4jListener*</exclude>
-            <exclude>org/apache/tools/ant/listener/CommonsLoggingListener*</exclude>
+            <exclude>org/apache/tools/ant/mainFrameListener/Log4jListener*</exclude>
+            <exclude>org/apache/tools/ant/mainFrameListener/CommonsLoggingListener*</exclude>
             <exclude>org/apache/tools/ant/util/regexp/JakartaRegexp*</exclude>
             <exclude>org/apache/tools/ant/util/regexp/JakartaOro*</exclude>
             <exclude>org/apache/tools/ant/taskdefs/email/MimeMailer*</exclude>
@@ -127,8 +127,8 @@
             <exclude>org/apache/tools/ant/filters/util/JavaClassHelper*</exclude>
             <exclude>org/apache/tools/ant/types/resolver/**</exclude>
             <exclude>org/apache/tools/ant/util/Script*</exclude>
-            <exclude>org/apache/tools/ant/listener/Log4jListener*</exclude>
-            <exclude>org/apache/tools/ant/listener/CommonsLoggingListener*</exclude>
+            <exclude>org/apache/tools/ant/mainFrameListener/Log4jListener*</exclude>
+            <exclude>org/apache/tools/ant/mainFrameListener/CommonsLoggingListener*</exclude>
             <exclude>org/apache/tools/ant/util/regexp/JakartaRegexp*</exclude>
             <exclude>org/apache/tools/ant/util/regexp/JakartaOro*</exclude>
             <exclude>org/apache/tools/ant/util/regexp/Jdk14Regexp*</exclude>

@@ -55,7 +55,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
           <includes>
-            <include>org/apache/tools/ant/listener/Log4jListener*</include>
+            <include>org/apache/tools/ant/mainFrameListener/Log4jListener*</include>
           </includes>
         </configuration>
       </plugin>

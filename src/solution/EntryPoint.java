@@ -1,5 +1,6 @@
 package solution;
 
+import solution.controllers.GameController;
 import solution.views.MainFrame;
 
 /**
@@ -10,7 +11,11 @@ public class EntryPoint {
 
 	public static void main(String[] args) {
 
-		new MainFrame();
+		MainFrame mainFrame = new MainFrame();
+
+        GameController gameController = new GameController(mainFrame);
+
+
 
 	}
 

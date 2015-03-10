@@ -35,7 +35,7 @@
   <artifactId>ant-swing</artifactId>
   <version>1.9.4</version>
   <name>Apache Ant + Swing</name>
-  <description>a listener and a splash task based on Swing</description>
+  <description>a mainFrameListener and a splash task based on Swing</description>
   <dependencies>
     <dependency>
       <groupId>org.apache.ant</groupId>

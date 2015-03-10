@@ -34,7 +34,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
   <artifactId>ant-jmf</artifactId>
   <version>1.9.4</version>
   <name>Apache Ant + JMF</name>
-  <description>contains the sound task and a soundplayer listener
+  <description>contains the sound task and a soundplayer mainFrameListener
     download the dependency from http://java.sun.com/products/java-media/jmf/</description>
   <dependencies>
     <dependency>

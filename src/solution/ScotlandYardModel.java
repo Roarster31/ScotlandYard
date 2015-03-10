@@ -1,20 +1,10 @@
 package solution;
 
-import scotlandyard.Colour;
-import scotlandyard.Edge;
-import scotlandyard.Move;
-import scotlandyard.MoveDouble;
-import scotlandyard.MovePass;
-import scotlandyard.MoveTicket;
-import scotlandyard.Node;
-import scotlandyard.Player;
-import scotlandyard.Route;
-import scotlandyard.ScotlandYard;
-import scotlandyard.ScotlandYardGraphReader;
-import scotlandyard.Spectator;
-import scotlandyard.Ticket;
+import scotlandyard.*;
 
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.util.*;
 
 public class ScotlandYardModel extends ScotlandYard {
@@ -34,7 +24,10 @@ public class ScotlandYardModel extends ScotlandYard {
 	public ScotlandYardModel(int numberOfDetectives, List<Boolean> rounds, String graphFileName) throws IOException {
         super(numberOfDetectives, rounds, graphFileName);
 		mRounds = rounds;
-		mGraph = new ExtendedGraph(new ScotlandYardGraphReader().readGraph(graphFileName));
+        final URL resource = getClass().getClassLoader().getResource(graphFileName);
+        final String filename = URLDecoder.decode(resource.getFile());
+        System.out.println("filename = " + filename);
+        mGraph = new ExtendedGraph(new ScotlandYardGraphReader().readGraph(filename));
 		mNumberOfDetectives = numberOfDetectives;
 		mPlayerMap = new HashMap<Colour, PlayerHolder>();
 		mSpectators = new ArrayList<Spectator>();
