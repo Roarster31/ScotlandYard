@@ -1,9 +1,6 @@
 package solution.views;
 
-import scotlandyard.Colour;
-import scotlandyard.Move;
-import scotlandyard.MoveDouble;
-import scotlandyard.MoveTicket;
+import scotlandyard.*;
 import solution.Models.CoordinateData;
 import solution.Models.GraphData;
 import solution.helpers.ColourHelper;
@@ -20,13 +17,16 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class deals with drawing the underlying Graph and anything on top of
  * it.
  */
-public class GraphView extends JPanel {
+public class GraphView extends JPanel implements GraphNodePopup.PopupInterface {
     private static final int CIRC_RADIUS = 20;
     private final ArrayList<CoordinateData> mNodes;
     private final Color mDrawColour;
@@ -34,8 +34,14 @@ public class GraphView extends JPanel {
     private Dimension mImageSize;
     private GraphViewListener mListener;
     private int mCurrentHoverNode;
-    private ArrayList<Integer> availablePositions;
+    private int mDoubleMoveNode;
     private Map<Integer, Colour> mPlayerLocations;
+    private List<Move> mAvailableMoves;
+    private List<Move> mDoubleAvailableMoves;
+    private List<Integer> mAvailablePositions;
+    private List<Integer> mDoubleAvailablePositions;
+    private int mCurrentClickNode;
+    private GraphNodePopup graphPopup;
 
     public void setPlayerPosition(Colour colour, int playerLocation) {
         for(Map.Entry<Integer, Colour> entry : mPlayerLocations.entrySet()){
@@ -47,17 +53,20 @@ public class GraphView extends JPanel {
         mPlayerLocations.put(playerLocation, colour);
     }
 
-
     public interface GraphViewListener {
+
+
         public void onNodeClicked(int nodeId);
     }
-
     public GraphView(final String graphImageMapPath, final GraphData graphData) {
         if (graphImageMapPath == null || graphData == null) {
             System.err.println("Do not pass null variables!");
         }
         mNodes = graphData.getNodes();
-        availablePositions = new ArrayList<Integer>();
+        mAvailableMoves = new ArrayList<Move>();
+        mAvailablePositions = new ArrayList<Integer>();
+        mDoubleAvailablePositions = new ArrayList<Integer>();
+        mDoubleAvailableMoves = new ArrayList<Move>();
         mPlayerLocations = new HashMap<Integer, Colour>();
         mDrawColour = Color.gray;
         addMouseListener(new GraphMouseListener());
@@ -69,25 +78,23 @@ public class GraphView extends JPanel {
         this.mListener = mListener;
     }
 
-    public void setAvailablePositions(java.util.List<Move> availableMoves) {
-        this.availablePositions.clear();
-        if(availableMoves != null) {
-            for (Move move : availableMoves) {
-                if (move instanceof MoveTicket) {
-                    MoveTicket ticket = (MoveTicket) move;
-                    this.availablePositions.add(ticket.target);
-                }else if(move instanceof MoveDouble){
-                    MoveDouble doubleMove = (MoveDouble) move;
-                    Move finalMove = doubleMove.moves.get(doubleMove.moves.size()-1);
-                    if(finalMove instanceof MoveTicket){
-                        MoveTicket ticket = (MoveTicket) finalMove;
-                        this.availablePositions.add(ticket.target);
-                    }
-                }
-            }
+    public void setAvailableMoves(java.util.List<Move> availableMoves) {
+        mAvailableMoves.clear();
+        mAvailablePositions.clear();
+        mAvailableMoves.addAll(availableMoves);
+        for(Move move : mAvailableMoves){
+            mAvailablePositions.add(getMovePosition(move));
         }
         repaint();
     }
+
+    private int getMovePosition(final Move move){
+        if(move instanceof MoveTicket){
+            return ((MoveTicket)move).target;
+        }else {
+            return -1;
+        }
+    };
 
     private void setupGraphImage(final String graphImageMapPath) {
         try {
@@ -116,8 +123,7 @@ public class GraphView extends JPanel {
 
         for(CoordinateData coordinateData : mNodes){
             final boolean isHovered = coordinateData.getId() == mCurrentHoverNode;
-            final boolean isAvailable = availablePositions.contains(coordinateData.getId());
-
+            final boolean isAvailable = mAvailablePositions.contains(coordinateData.getId());
             int radius = isHovered && isAvailable ? (int) (CIRC_RADIUS * 1.5f) : CIRC_RADIUS;
 
             if(mPlayerLocations.containsKey(coordinateData.getId())){
@@ -132,35 +138,76 @@ public class GraphView extends JPanel {
                 g2d.fillOval(coordinateData.getX()-radius/2, coordinateData.getY()-radius/2, radius, radius);
             }
 
+            if(mCurrentClickNode == coordinateData.getId()){
+                ArrayList<Ticket> tickets = new ArrayList<Ticket>();
+                for(Move move : mAvailableMoves){
+                    if(move instanceof MoveTicket){
+                        MoveTicket ticket = (MoveTicket) move;
+                        if(ticket.target == mCurrentClickNode){
+                            tickets.add(ticket.ticket);
+                        }
+                    }
+                }
+                if(graphPopup == null || graphPopup.getNodeId() != coordinateData.getId()) {
+                    graphPopup = new GraphNodePopup(coordinateData.getId(), tickets, this);
+                    graphPopup.create(coordinateData.getX(), coordinateData.getY(), mImageSize);
+                }
+            }
+
         }
 
+        if(graphPopup != null){
+            graphPopup.draw(g2d);
+        }
+
+    }
+
+    @Override
+    public void onMoveSelected(Ticket ticket, int nodeId) {
+//        mDoubleMoveNode = nodeId;
+        mListener.onNodeClicked(nodeId);
+        mCurrentClickNode = -1;
+        graphPopup = null;
+        repaint();
     }
 
     class GraphMouseListener extends MouseAdapter implements MouseMotionListener {
         @Override
         public void mouseClicked(MouseEvent e) {
-            if(mListener != null) {
+            if(graphPopup != null && graphPopup.onClick(e.getX(), e.getY())){
+                repaint();
+            } else {
                 for (CoordinateData coordinateData : mNodes) {
-                    if (new Rectangle2D.Double(coordinateData.getX() - CIRC_RADIUS, coordinateData.getY() - CIRC_RADIUS, 2 * CIRC_RADIUS, 2 * CIRC_RADIUS).contains(e.getX(), e.getY())) {
-                        mListener.onNodeClicked(coordinateData.getId());
+                    if (mAvailablePositions.contains(coordinateData.getId()) && new Rectangle2D.Double(coordinateData.getX() - CIRC_RADIUS, coordinateData.getY() - CIRC_RADIUS, 2 * CIRC_RADIUS, 2 * CIRC_RADIUS).contains(e.getX(), e.getY())) {
+                        mCurrentClickNode = coordinateData.getId();
+                        repaint();
                         return;
                     }
                 }
+                mCurrentClickNode = -1;
+                graphPopup = null;
+                repaint();
             }
         }
 
         @Override
         public void mouseMoved(MouseEvent e) {
-            for (CoordinateData coordinateData : mNodes) {
-                if (new Rectangle2D.Double(coordinateData.getX() - CIRC_RADIUS, coordinateData.getY() - CIRC_RADIUS, 2 * CIRC_RADIUS, 2 * CIRC_RADIUS).contains(e.getX(), e.getY())) {
-                    mCurrentHoverNode = coordinateData.getId();
-                    repaint();
-                    return;
+            if(graphPopup != null && graphPopup.onMouseMoved(e.getX(), e.getY())){
+              repaint();
+            } else {
+                for (CoordinateData coordinateData : mNodes) {
+                    if (new Rectangle2D.Double(coordinateData.getX() - CIRC_RADIUS, coordinateData.getY() - CIRC_RADIUS, 2 * CIRC_RADIUS, 2 * CIRC_RADIUS).contains(e.getX(), e.getY())) {
+                        mCurrentHoverNode = coordinateData.getId();
+                        repaint();
+                        return;
+                    }
                 }
-            }
-            if(mCurrentHoverNode != -1){
-                mCurrentHoverNode = -1;
-                repaint();
+                if (mCurrentHoverNode != -1) {
+                    mCurrentHoverNode = -1;
+                    mCurrentClickNode = -1;
+                    graphPopup = null;
+                    repaint();
+                }
             }
         }
 

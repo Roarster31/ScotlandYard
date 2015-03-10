@@ -40,7 +40,7 @@ public class GameLayout extends JPanel implements ModelUpdateListener{
         statusLabel = new JLabel("");
 
         subLayout.add(graphView);
-        scrollPane.add(scrollPane);
+//        scrollPane.add(scrollPane);
         add(subLayout);
         add(playerIndicator);
         add(statusLabel);
@@ -56,14 +56,14 @@ public class GameLayout extends JPanel implements ModelUpdateListener{
             for (Colour colour : model.getPlayers()) {
                 graphView.setPlayerPosition(colour, model.getPlayerLocation(colour));
             }
-            graphView.setAvailablePositions(model.validMoves(model.getCurrentPlayer()));
+            graphView.setAvailableMoves(model.validMoves(model.getCurrentPlayer()));
             statusLabel.setText("It is " + ColourHelper.toString(model.getCurrentPlayer()) + "'s turn");
         }else{
             List<String> winningPlayers = new ArrayList<String>();
             for(Colour winningColour : model.getWinningPlayers()){
                 winningPlayers.add(ColourHelper.toString(winningColour));
             }
-            graphView.setAvailablePositions(null);
+            graphView.setAvailableMoves(null);
             statusLabel.setText(("Gameover! " + StringUtils.join(winningPlayers,", ")+" won!"));
         }
     }
