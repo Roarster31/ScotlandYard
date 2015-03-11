@@ -73,9 +73,11 @@ public class GameController implements GameControllerInterface {
     public void notifyAllPlayersAdded(int count) {
         setupModel(count);
 
-        for(GameUIInterface gameInterface : listeners) {
-            gameInterface.showGameInterface();
-        }
+        //parts of the ui rely on the model being created so this has to
+        //come after setupModel
+        listeners.get(0).showGameInterface();
+
+        notifyModelUpdated();
     }
 
     @Override

@@ -10,7 +10,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by rory on 09/03/15.
@@ -22,13 +23,13 @@ public class GraphData {
     private static final String TXT = "txt";
     private static final String JSON = "json";
 
-    private final ArrayList<CoordinateData> mNodes;
+    private final Map<Integer,Integer[]> mPositionMap;
 
     public GraphData(final String dataFilePath, final DataFormat dataFormat){
 
         final String extension = dataFilePath.substring(dataFilePath.lastIndexOf(".")+1, dataFilePath.length());
 
-        mNodes = new ArrayList<CoordinateData>();
+        mPositionMap = new HashMap<Integer, Integer[]>();
 
         if(dataFormat == DataFormat.STANDARD){
             parseStandardTextFile(dataFilePath);
@@ -49,8 +50,7 @@ public class GraphData {
                 if(pieces.length < 3) {
                     System.err.println("bad line: "+line);
                 }else{
-                    mNodes.add(new CoordinateData(Integer.parseInt(pieces[0]), Integer.parseInt(pieces[1]), Integer.parseInt(pieces[2])));
-
+                    mPositionMap.put(Integer.parseInt(pieces[0]), new Integer[]{Integer.parseInt(pieces[1]), Integer.parseInt(pieces[2])});
                 }
             }
         } catch (IOException e) {
@@ -78,12 +78,12 @@ public class GraphData {
         MapData mapData = gson.fromJson(input, MapData.class);
 
         for(PathNode pathNode : mapData.getPathNodeList()){
-            mNodes.add(new CoordinateData(pathNode.getId(), pathNode.getX(), pathNode.getY()));
+            mPositionMap.put(pathNode.getId(), new Integer[]{pathNode.getX(),pathNode.getY()});
         }
 
     }
 
-    public ArrayList<CoordinateData> getNodes() {
-        return mNodes;
+    public Map<Integer, Integer[]> getPositionMap() {
+        return mPositionMap;
     }
 }

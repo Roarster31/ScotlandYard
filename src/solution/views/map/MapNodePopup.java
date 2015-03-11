@@ -1,5 +1,7 @@
-package solution.views;
+package solution.views.map;
 
+import scotlandyard.Move;
+import scotlandyard.MoveTicket;
 import scotlandyard.Ticket;
 
 import java.awt.*;
@@ -9,17 +11,17 @@ import java.util.ArrayList;
 /**
  * Created by rory on 10/03/15.
  */
-public class GraphNodePopup {
+public class MapNodePopup {
 
     private static final int BUTTON_SIZE = 50;
     private static final int TRIANGLE_SIZE = 10;
     private static final int BUTTON_PADDING = 10;
     private static final int BUTTON_CORNER_RADIUS = 15;
-    private final int nodeId;
+    private final MapPosition mapPosition;
     private final PopupInterface mInterface;
 
     public interface PopupInterface {
-        public void onMoveSelected(final Ticket ticket, final int nodeId);
+        public void onMoveSelected(final Move move, final int nodeId);
     }
 
     ArrayList<Ticket> fullTicketList = new ArrayList<Ticket>() {{
@@ -36,13 +38,14 @@ public class GraphNodePopup {
     private Polygon mTrianglePolygon;
     private Rectangle2D mHoveredTicketRect;
 
-    public GraphNodePopup(int id, ArrayList<Ticket> tickets, PopupInterface popupInterface){
-        nodeId = id;
-        ticketList = tickets;
+    public MapNodePopup(MapPosition mapPosition, final Dimension canvasSize, PopupInterface popupInterface){
+        this.mapPosition = mapPosition;
+        ticketList = mapPosition.getTickets();
         mInterface = popupInterface;
+        create(mapPosition.getX(), mapPosition.getY(), canvasSize);
     }
 
-    public void create(final int x, final int y, final Dimension canvasSize){
+    private void create(final int x, final int y, final Dimension canvasSize){
 
 
         Rectangle2D rect = getStandardRect();
@@ -162,7 +165,13 @@ public class GraphNodePopup {
             for (int i = 0; i < mTicketRectList.size(); i++) {
                 Rectangle2D rect = mTicketRectList.get(i);
                 if (rect.contains(x, y)) {
-                    mInterface.onMoveSelected(fullTicketList.get(i), nodeId);
+                    for(Move move : mapPosition.getMoves()){
+                        MoveTicket moveTicket = (MoveTicket) move;
+                        if(moveTicket.target == mapPosition.getId()){
+                            mInterface.onMoveSelected(move, mapPosition.getId());
+                            return true;
+                        }
+                    }
                     break;
                 }
             }
@@ -187,7 +196,4 @@ public class GraphNodePopup {
         }
     }
 
-    public int getNodeId() {
-        return nodeId;
-    }
 }

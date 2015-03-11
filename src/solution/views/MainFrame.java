@@ -12,13 +12,15 @@ import javax.swing.*;
 public class MainFrame extends JFrame {
 
     private final PlayerCountLayout playerCountLayout;
+    private final GameControllerInterface mControllerInterface;
     private GameLayout mGameLayout;
 
 
     public MainFrame(final GameControllerInterface controllerInterface) {
 
+        mControllerInterface = controllerInterface;
         controllerInterface.addUpdateListener(new GameAdapter());
-        mGameLayout = new GameLayout(controllerInterface);
+
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -39,6 +41,8 @@ public class MainFrame extends JFrame {
     class GameAdapter extends GameUIAdapter {
         @Override
         public void showGameInterface() {
+            mGameLayout = new GameLayout(mControllerInterface);
+
             remove(playerCountLayout);
             add(mGameLayout);
             pack();

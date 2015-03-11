@@ -7,6 +7,7 @@ import solution.ScotlandYardModel;
 import solution.helpers.ColourHelper;
 import solution.interfaces.GameControllerInterface;
 import solution.interfaces.adapters.GameUIAdapter;
+import solution.views.map.MapView;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import java.util.List;
 public class GameLayout extends JPanel {
 
     private final JLabel statusLabel;
-    private final GraphView graphView;
+    private final MapView mapView;
     private final CurrentPlayerIndicator playerIndicator;
     private final PlayerInfoBar playerInfoBar;
 
@@ -34,7 +35,7 @@ public class GameLayout extends JPanel {
         mrXHistoryPanel.setLayout(new BoxLayout(mrXHistoryPanel, BoxLayout.Y_AXIS));
         JScrollPane scrollPane = new JScrollPane(mrXHistoryPanel);
 
-        graphView = new GraphView(controllerInterface, "map.jpg", new GraphData("pos.txt", GraphData.DataFormat.STANDARD));
+        mapView = new MapView(controllerInterface, "map.jpg", new GraphData("pos.txt", GraphData.DataFormat.STANDARD));
 
         playerIndicator = new CurrentPlayerIndicator();
 
@@ -42,7 +43,7 @@ public class GameLayout extends JPanel {
 
         statusLabel = new JLabel("");
 
-        subLayout.add(graphView);
+        subLayout.add(mapView);
         subLayout.add(playerInfoBar);
         add(subLayout);
         add(scrollPane);
@@ -56,17 +57,12 @@ public class GameLayout extends JPanel {
             playerIndicator.setColours(model.getPlayers());
             playerIndicator.setSelectedColour(model.getCurrentPlayer());
             if(!model.isGameOver()) {
-                for (Colour colour : model.getPlayers()) {
-                    graphView.setPlayerPosition(colour, model.getPlayerLocation(colour));
-                }
-                graphView.setAvailableMoves(model.validMoves(model.getCurrentPlayer()));
                 statusLabel.setText("It is " + ColourHelper.toString(model.getCurrentPlayer()) + "'s turn");
             }else{
                 List<String> winningPlayers = new ArrayList<String>();
                 for(Colour winningColour : model.getWinningPlayers()){
                     winningPlayers.add(ColourHelper.toString(winningColour));
                 }
-                graphView.setAvailableMoves(null);
                 statusLabel.setText(("Gameover! " + StringUtils.join(winningPlayers, ", ")+" won!"));
             }
         }
