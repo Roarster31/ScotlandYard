@@ -2,12 +2,11 @@ package solution.controllers;
 
 import scotlandyard.*;
 import solution.Constants;
-import solution.ModelUpdateListener;
 import solution.ScotlandYardModel;
 import solution.helpers.ColourHelper;
 import solution.helpers.SetupHelper;
-import solution.views.GraphView;
-import solution.views.MainFrame;
+import solution.interfaces.GameControllerInterface;
+import solution.interfaces.GameUIInterface;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,32 +17,21 @@ import java.util.Random;
 /**
  * Created by rory on 10/03/15.
  */
-public class GameController implements MainFrame.MainFrameListener, Player, GraphView.GraphViewListener{
+public class GameController implements GameControllerInterface {
 
-    private final MainFrame mMainFrame;
     private ScotlandYardModel model;
-    private List<ModelUpdateListener> listeners;
+    private List<GameUIInterface> listeners;
     private int mSelectedNode;
     private MrXHistoryTracker mrXHistoryTracker;
+    private UIPlayer uiPlayer;
 
-    public GameController(MainFrame mainFrame){
-        mMainFrame = mainFrame;
-        listeners = new ArrayList<ModelUpdateListener>();
+    public GameController(){
+        listeners = new ArrayList<GameUIInterface>();
         mrXHistoryTracker = new MrXHistoryTracker();
-        mMainFrame.setMainFrameListener(this);
-        addModelUpdateListener(mMainFrame.getGameLayout());
-        mMainFrame.getGameLayout().setGameListener(this);
-
+        uiPlayer = new UIPlayer();
     }
-    public void addModelUpdateListener(ModelUpdateListener listener){
+    public void addUpdateListener(GameUIInterface listener){
         listeners.add(listener);
-    }
-
-    @Override
-    public void onPlayersAdded(final int count) {
-        setupModel(count);
-        mMainFrame.showGameUI();
-        mMainFrame.setGameController(this);
     }
 
     private void setupModel(final int playerCount) {
@@ -55,25 +43,48 @@ public class GameController implements MainFrame.MainFrameListener, Player, Grap
             for (int i = 0; i < playerCount; i++) {
                 //todo do proper location
                 final Colour colour = ColourHelper.getColour(i);
-                model.join(this, colour, new Random().nextInt(190), SetupHelper.getTickets(colour.equals(Colour.Black)));
+                model.join(uiPlayer, colour, new Random().nextInt(190), SetupHelper.getTickets(colour.equals(Colour.Black)));
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        notifyUpdateListeners();
+        notifyModelUpdated();
     }
 
-    private void notifyUpdateListeners() {
-        for(ModelUpdateListener listener : listeners){
-            listener.onWaitingOnPlayer(model, mrXHistoryTracker.getMoveHistory());
+    private void notifyModelUpdated() {
+        for(GameUIInterface gameInterface : listeners) {
+            gameInterface.onGameModelUpdated(model);
         }
     }
+
     public Colour getCurrentPlayer(){
         return model.getCurrentPlayer();
     }
     public Map<Ticket, Integer> getPlayerTickets(Colour currentPlayer){
         return model.getAllPlayerTickets(currentPlayer);
     }
+
+    @Override
+    public List<Colour> getPlayerList() {
+        return model.getPlayers();
+    }
+
+    @Override
+    public void notifyAllPlayersAdded(int count) {
+        setupModel(count);
+
+        for(GameUIInterface gameInterface : listeners) {
+            gameInterface.showGameInterface();
+        }
+    }
+
+    @Override
+    public void notifyMoveSelected(Move move) {
+        uiPlayer.setPendingMove(move);
+        model.turn();
+        notifyModelUpdated();
+    }
+
     public List<Colour> getPlayers(){
         return model.getPlayers();
     }
@@ -87,61 +98,7 @@ public class GameController implements MainFrame.MainFrameListener, Player, Grap
         return rounds;
     }
 
-    @Override
-    public Move notify(int location, List<Move> list) {
-        for(Move move : list){
-            if(move instanceof MoveTicket){
-                MoveTicket moveTicket = (MoveTicket) move;
-                if(moveTicket.target == mSelectedNode){
-                    return move;
-                }
-            }else if(move instanceof MoveDouble){
-                MoveDouble doubleMove = (MoveDouble) move;
-                Move finalMove = doubleMove.moves.get(doubleMove.moves.size()-1);
-                if(finalMove instanceof MoveTicket){
-                    MoveTicket moveTicket = (MoveTicket) finalMove;
-                    if(moveTicket.target == mSelectedNode){
-                        return move;
-                    }
-                }
 
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public void onNodeClicked(int nodeId) {
-        mSelectedNode = nodeId;
-        boolean nodeFound = false;
-        for(Move move : model.validMoves(model.getCurrentPlayer())){
-            if(move instanceof MoveTicket){
-                MoveTicket ticket = (MoveTicket) move;
-                if(ticket.target == nodeId){
-                    nodeFound = true;
-                    break;
-                }
-            }else if(move instanceof MoveDouble){
-                MoveDouble doubleMove = (MoveDouble) move;
-                Move finalMove = doubleMove.moves.get(doubleMove.moves.size()-1);
-                if(finalMove instanceof MoveTicket){
-                    MoveTicket ticket = (MoveTicket) finalMove;
-                    if(ticket.target == nodeId){
-                        nodeFound = true;
-                        break;
-                    }
-                }
-
-            }
-        }
-        if(!nodeFound){
-            return;
-        }
-        System.out.println("mSelectedNode = " + mSelectedNode);
-        model.turn();
-        mMainFrame.updateGameUI();
-        notifyUpdateListeners();
-    }
 
     class MrXHistoryTracker implements Spectator {
 
@@ -168,4 +125,5 @@ public class GameController implements MainFrame.MainFrameListener, Player, Grap
             return moveHistory;
         }
     }
+
 }

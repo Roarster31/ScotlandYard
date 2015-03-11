@@ -1,41 +1,24 @@
 package solution.views;
 
 import solution.Constants;
-import solution.DataUpdateListener;
-import solution.controllers.GameController;
+import solution.interfaces.GameControllerInterface;
+import solution.interfaces.adapters.GameUIAdapter;
 
 import javax.swing.*;
 
 /**
  * Created by rory on 09/03/15.
  */
-public class MainFrame extends JFrame implements DataUpdateListener {
+public class MainFrame extends JFrame {
 
     private final PlayerCountLayout playerCountLayout;
-    //    private final PlayerManagementLayout mManagementFrame;
-    MainFrameListener mainFrameListener;
     private GameLayout mGameLayout;
 
-    public void showGameUI() {
-        remove(playerCountLayout);
-        add(mGameLayout);
-        pack();
-    }
-    public void updateGameUI(){
-        mGameLayout = new GameLayout();
-    }
-    public GameLayout getGameLayout(){
-        return mGameLayout;
-    }
 
+    public MainFrame(final GameControllerInterface controllerInterface) {
 
-    public interface MainFrameListener {
-        public void onPlayersAdded(final int count);
-    }
-
-    public MainFrame() {
-
-        mGameLayout = new GameLayout();
+        controllerInterface.addUpdateListener(new GameAdapter());
+        mGameLayout = new GameLayout(controllerInterface);
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -43,7 +26,7 @@ public class MainFrame extends JFrame implements DataUpdateListener {
         playerCountLayout.setListener(new PlayerCountLayout.PlayerCountListener() {
             @Override
             public void onPlayerCountDecided(int count) {
-                mainFrameListener.onPlayersAdded(count);
+                controllerInterface.notifyAllPlayersAdded(count);
             }
         });
         getContentPane().add(playerCountLayout);
@@ -52,10 +35,14 @@ public class MainFrame extends JFrame implements DataUpdateListener {
 
         setVisible(true);
     }
-    public void setGameController(GameController gc){
-        mGameLayout.setGameController(gc);
+
+    class GameAdapter extends GameUIAdapter {
+        @Override
+        public void showGameInterface() {
+            remove(playerCountLayout);
+            add(mGameLayout);
+            pack();
+        }
     }
-    public void setMainFrameListener(final MainFrameListener mainFrameListener){
-        this.mainFrameListener = mainFrameListener;
-    }
+
 }

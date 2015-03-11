@@ -1,7 +1,7 @@
 package solution.views;
 
 import scotlandyard.Colour;
-import solution.controllers.GameController;
+import solution.interfaces.GameControllerInterface;
 
 import javax.swing.*;
 import java.util.List;
@@ -11,28 +11,17 @@ import java.util.List;
  */
 public class PlayerInfoBar extends JPanel {
     Box horzView;
-    GameController gameControllerListener;
-    public PlayerInfoBar(){
+    public PlayerInfoBar(GameControllerInterface controllerInterface){
         horzView = Box.createHorizontalBox();
 
-    }
-
-    public void setGameControllerListener(GameController gameControllerListener) {
-        this.gameControllerListener = gameControllerListener;
-
-        setupColumns(gameControllerListener);
-    }
-
-    private void setupColumns(GameController gameControllerListener) {
-        List<Colour> allPlayers = gameControllerListener.getPlayers();
+        List<Colour> allPlayers = controllerInterface.getPlayerList();
         PlayerInfoColumn[] playerColumns = new PlayerInfoColumn[allPlayers.size()];
 
 
 
         for(int i = 0; i < allPlayers.size(); i++){
             Colour currentPlayer = allPlayers.get(i);
-            playerColumns[i] = new PlayerInfoColumn(currentPlayer);
-            playerColumns[i].setGameControllerListener(gameControllerListener);
+            playerColumns[i] = new PlayerInfoColumn(currentPlayer, controllerInterface);
 
             if(currentPlayer == Colour.Black) {
                 playerColumns[i].setMrX(true);
@@ -45,5 +34,8 @@ public class PlayerInfoBar extends JPanel {
 
 
         add(horzView);
+
     }
+
+
 }

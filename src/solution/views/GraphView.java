@@ -1,9 +1,13 @@
 package solution.views;
 
-import scotlandyard.*;
+import scotlandyard.Colour;
+import scotlandyard.Move;
+import scotlandyard.MoveTicket;
+import scotlandyard.Ticket;
 import solution.Models.CoordinateData;
 import solution.Models.GraphData;
 import solution.helpers.ColourHelper;
+import solution.interfaces.GameControllerInterface;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -30,9 +34,9 @@ public class GraphView extends JPanel implements GraphNodePopup.PopupInterface {
     private static final int CIRC_RADIUS = 20;
     private final ArrayList<CoordinateData> mNodes;
     private final Color mDrawColour;
+    private final GameControllerInterface mControllerInterface;
     private BufferedImage mGraphImage;
     private Dimension mImageSize;
-    private GraphViewListener mListener;
     private int mCurrentHoverNode;
     private int mDoubleMoveNode;
     private Map<Integer, Colour> mPlayerLocations;
@@ -53,15 +57,11 @@ public class GraphView extends JPanel implements GraphNodePopup.PopupInterface {
         mPlayerLocations.put(playerLocation, colour);
     }
 
-    public interface GraphViewListener {
-
-
-        public void onNodeClicked(int nodeId);
-    }
-    public GraphView(final String graphImageMapPath, final GraphData graphData) {
+    public GraphView(final GameControllerInterface gameController, final String graphImageMapPath, final GraphData graphData) {
         if (graphImageMapPath == null || graphData == null) {
             System.err.println("Do not pass null variables!");
         }
+        mControllerInterface = gameController;
         mNodes = graphData.getNodes();
         mAvailableMoves = new ArrayList<Move>();
         mAvailablePositions = new ArrayList<Integer>();
@@ -74,9 +74,6 @@ public class GraphView extends JPanel implements GraphNodePopup.PopupInterface {
         setupGraphImage(graphImageMapPath);
     }
 
-    public void setListener(GraphViewListener mListener) {
-        this.mListener = mListener;
-    }
 
     public void setAvailableMoves(java.util.List<Move> availableMoves) {
         mAvailableMoves.clear();
@@ -165,7 +162,7 @@ public class GraphView extends JPanel implements GraphNodePopup.PopupInterface {
     @Override
     public void onMoveSelected(Ticket ticket, int nodeId) {
 //        mDoubleMoveNode = nodeId;
-        mListener.onNodeClicked(nodeId);
+        mControllerInterface.notifyMoveSelected(null);
         mCurrentClickNode = -1;
         graphPopup = null;
         repaint();

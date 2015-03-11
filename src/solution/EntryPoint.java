@@ -11,11 +11,10 @@ public class EntryPoint {
 
 	public static void main(String[] args) {
 
-        //we setup the ui here
-		MainFrame mainFrame = new MainFrame();
+        GameController gameController = new GameController();
 
-        //and then add a reference of it to the controller
-        GameController gameController = new GameController(mainFrame);
+        //we setup the ui here
+		MainFrame mainFrame = new MainFrame(gameController);
 
 
         //now we're good to go!

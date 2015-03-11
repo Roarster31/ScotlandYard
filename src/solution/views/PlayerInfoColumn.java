@@ -2,11 +2,10 @@ package solution.views;
 
 import scotlandyard.Colour;
 import scotlandyard.Ticket;
-import solution.controllers.GameController;
 import solution.helpers.ColourHelper;
+import solution.interfaces.GameControllerInterface;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.Map;
 
 /**
@@ -16,14 +15,20 @@ public class PlayerInfoColumn extends JPanel {
     private Box vertView;
     private boolean isMrX;
     private int maxTicketNumber = 0;
-    private GameController gameController;
     private Colour currentPlayer;
-    public PlayerInfoColumn(Colour currentPlayer){
+    public PlayerInfoColumn(Colour currentPlayer, GameControllerInterface controllerInterface){
         vertView = Box.createVerticalBox();
         this.currentPlayer = currentPlayer;
+        // Check to see whether the passed player equals the current player
+        if(controllerInterface.getCurrentPlayer() == currentPlayer) {
+            //setupExtendedCols(currentPlayer);
+        } else {
+            //setupCols(currentPlayer);
+        }
+        setupCols(currentPlayer, controllerInterface.getPlayerTickets(controllerInterface.getCurrentPlayer()));
     }
 
-    private void setupCols(Colour currentPlayer) {
+    private void setupCols(Colour currentPlayer, Map<Ticket, Integer> playerTickets) {
         JLabel colour = new JLabel(" hello ");
         colour.setBackground(ColourHelper.toColor(currentPlayer));
         colour.setOpaque(true);
@@ -39,7 +44,6 @@ public class PlayerInfoColumn extends JPanel {
         }
 
         // Get players remaining tickets
-        Map<Ticket, Integer> allTickets = gameController.getPlayerTickets(currentPlayer);
         Ticket[] ticketTypes = {Ticket.Bus, Ticket.Underground, Ticket.Taxi, Ticket.DoubleMove, Ticket.SecretMove};
         String[] ticketNames = {"B", "U", "T", "DM", "SM"};
 
@@ -48,7 +52,7 @@ public class PlayerInfoColumn extends JPanel {
             Box horzView = Box.createHorizontalBox();
 
             // Add the number of tickets
-            String numOfTickets = String.valueOf(allTickets.get(ticketTypes[i]));
+            String numOfTickets = String.valueOf(playerTickets.get(ticketTypes[i]));
             JLabel ticketNumbersReaming = new JLabel(numOfTickets + ":");
             horzView.add(ticketNumbersReaming);
 
@@ -63,7 +67,7 @@ public class PlayerInfoColumn extends JPanel {
         add(vertView);
     }
 
-    private void setupExtendedCols(Colour currentPlayer){
+    private void setupExtendedCols(Colour currentPlayer, Map<Ticket, Integer> playerTickets){
         Box horzViewMain = Box.createHorizontalBox();
         JLabel colour = new JLabel(" HELLO ");
         colour.setBackground(ColourHelper.toColor(currentPlayer));
@@ -80,7 +84,6 @@ public class PlayerInfoColumn extends JPanel {
         }
 
         // Get players remaining tickets
-        Map<Ticket, Integer> allTickets = gameController.getPlayerTickets(currentPlayer);
         Ticket[] ticketTypes = {Ticket.Bus, Ticket.Underground, Ticket.Taxi, Ticket.DoubleMove, Ticket.SecretMove};
         String[] ticketNames = {"B", "U", "T", "DM", "SM"};
 
@@ -89,7 +92,7 @@ public class PlayerInfoColumn extends JPanel {
             Box horzView = Box.createHorizontalBox();
 
             // Add the number of tickets
-            String numOfTickets = String.valueOf(allTickets.get(ticketTypes[i]));
+            String numOfTickets = String.valueOf(playerTickets.get(ticketTypes[i]));
             JLabel ticketNumbersReaming = new JLabel(numOfTickets + ":");
             horzView.add(ticketNumbersReaming);
 
@@ -102,16 +105,6 @@ public class PlayerInfoColumn extends JPanel {
         }
 
         add(vertView);
-    }
-    public void setGameControllerListener(GameController gameController) {
-        this.gameController = gameController;
-        // Check to see whether the passed player equals the current player
-        if(gameController.getCurrentPlayer() == currentPlayer) {
-            //setupExtendedCols(currentPlayer);
-        } else {
-            //setupCols(currentPlayer);
-        }
-        setupCols(currentPlayer);
     }
 
     public void setMrX(boolean isMrX) {
