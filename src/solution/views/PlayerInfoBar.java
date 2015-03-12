@@ -23,6 +23,7 @@ public class PlayerInfoBar extends JPanel {
     }
 
     private void createBar() {
+        setVisible(false);
         List<Colour> allPlayers = mGameControllerInterface.getPlayerList();
         setLayout(new GridBagLayout());
         setMinimumSize(new Dimension(800, 150));
@@ -46,6 +47,7 @@ public class PlayerInfoBar extends JPanel {
             gbc.gridx = i;
             add(playerColumns[i],gbc);
         }
+        setVisible(true);
     }
 
     class GameAdapter extends GameUIAdapter {
@@ -53,6 +55,7 @@ public class PlayerInfoBar extends JPanel {
         public void onGameModelUpdated(ScotlandYardModel model) {
             removeAll();
             createBar();
+
             System.out.printf("Hello!");
         }
     }
