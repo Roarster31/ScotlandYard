@@ -3,6 +3,7 @@ package solution.views;
 import scotlandyard.Colour;
 import scotlandyard.Ticket;
 import solution.helpers.ColourHelper;
+import solution.helpers.TicketHelper;
 import solution.interfaces.GameControllerInterface;
 
 import javax.imageio.ImageIO;
@@ -68,8 +69,7 @@ public class PlayerInfoColumn extends JPanel {
 
         // Get players remaining tickets
         Ticket[] ticketTypes = {Ticket.Bus, Ticket.Underground, Ticket.Taxi, Ticket.DoubleMove, Ticket.SecretMove};
-        String[] ticketNames = {"B", "U", "T", "DM", "SM"};
-        String[] ticketImgNames = {"bus.png", "underground.png", "taxi.png" , "doublemove.png", "secretmove.png"};
+
         // Loop through all tickets
         for (int i = 0; i < maxTicketNumber; i++) {
             String numOfTickets = String.valueOf(playerTickets.get(ticketTypes[i]));
@@ -86,12 +86,10 @@ public class PlayerInfoColumn extends JPanel {
                 ticketNums.add(ticketNumbersReaming, BorderLayout.CENTER);
                 ticketNums.setBorder(new EmptyBorder(15, 0, 0, 0));
                 horzView.add(ticketNums);
-                URL resource = getClass().getClassLoader().getResource("imgs" + File.separator + ticketImgNames[i]);
-                ImageIcon ticketIcon = new ImageIcon(resource);
 
                 // Add the ticket type
                 JLabel ticketName = new JLabel("", SwingConstants.CENTER);
-                ticketName.setIcon(ticketIcon);
+                ticketName.setIcon(TicketHelper.ticketToImg(ticketTypes[i]));
 
                 // Add padding
                 ticketName.setBorder(new EmptyBorder(5, 5, 5, 5));

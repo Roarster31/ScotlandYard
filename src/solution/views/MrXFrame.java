@@ -2,12 +2,16 @@ package solution.views;
 
 import scotlandyard.Colour;
 import scotlandyard.MoveTicket;
+import scotlandyard.Ticket;
 import solution.ScotlandYardModel;
+import solution.helpers.TicketHelper;
 import solution.interfaces.GameControllerInterface;
 import solution.interfaces.adapters.GameUIAdapter;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+import java.net.URL;
 import java.util.*;
 import java.util.List;
 
@@ -23,29 +27,40 @@ public class MrXFrame extends JPanel {
     }
 
     private void createFrame() {
+        setVisible(false);
         GameControllerInterface controllerInterface = mControllerInterface;
-        GridBagConstraints gbc = new GridBagConstraints();
         setLayout(new GridBagLayout());
-        setBackground(Color.BLACK);
-        gbc.gridwidth = gbc.gridheight = 1;
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridy = 0;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 10;
+        gbc.weighty = 100;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.weighty = 10;
-        gbc.gridx = 0;
+
+        setBackground(Color.BLACK);
+        Box vertBox = Box.createVerticalBox();
+
 
         List<MoveTicket> moveHistory = controllerInterface.getMrXHistory();
         for(int i = 0; i < moveHistory.size(); i++){
             MoveTicket currentMove = moveHistory.get(i);
             JPanel panelDisplay = new JPanel();
-            panelDisplay.setBackground(Color.BLACK);
+            panelDisplay.setOpaque(false);
+            panelDisplay.setMaximumSize(new Dimension(300, 80));
 
-            String moveLocation = String.valueOf(currentMove.target);
-            JLabel moveDetails = new JLabel("Moves: "  + moveLocation);
+            JLabel moveDetails = new JLabel();
+
+            // Find the number in
+            moveDetails.setIcon(TicketHelper.ticketToImg(currentMove.ticket));
+
             moveDetails.setForeground(Color.WHITE);
             panelDisplay.add(moveDetails);
-            gbc.gridy = i;
-            add(panelDisplay, gbc);
+            gbc.gridx = i;
+            vertBox.add(panelDisplay, gbc);
         }
+        add(vertBox, gbc);
+        setVisible(true);
     }
 
     class GameAdapter extends GameUIAdapter {
@@ -53,8 +68,6 @@ public class MrXFrame extends JPanel {
         public void onGameModelUpdated(ScotlandYardModel model) {
             removeAll();
             createFrame();
-            System.out.printf("Hello®");
-
         }
     }
 

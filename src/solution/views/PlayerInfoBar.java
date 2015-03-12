@@ -55,8 +55,6 @@ public class PlayerInfoBar extends JPanel {
         public void onGameModelUpdated(ScotlandYardModel model) {
             removeAll();
             createBar();
-
-            System.out.printf("Hello!");
         }
     }
 

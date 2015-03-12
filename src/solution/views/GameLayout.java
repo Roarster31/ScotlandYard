@@ -10,6 +10,7 @@ import solution.interfaces.adapters.GameUIAdapter;
 import solution.views.map.MapView;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,6 +66,7 @@ public class GameLayout extends JPanel {
         mrXHistoryPanel.setLayout(new BoxLayout(mrXHistoryPanel, BoxLayout.Y_AXIS));
 
         JScrollPane scrollPane = new JScrollPane(mrXHistoryPanel);
+        scrollPane.setBorder(new EmptyBorder(0,0,0,0));
 
         mapView = new MapView(controllerInterface, "map.jpg", new GraphData("pos.txt", GraphData.DataFormat.STANDARD));
 
