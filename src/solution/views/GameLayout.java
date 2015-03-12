@@ -27,35 +27,52 @@ public class GameLayout extends JPanel {
     public GameLayout(GameControllerInterface controllerInterface) {
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
+        GridBagConstraints gbcInside = new GridBagConstraints();
 
-        gbc.gridy = 0;
         gbc.gridwidth = gbc.gridheight = 1;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.weighty = 80;
+
+        gbcInside.gridwidth = gbcInside.gridheight = 1;
+        gbcInside.fill = GridBagConstraints.BOTH;
+        gbcInside.anchor = GridBagConstraints.NORTHWEST;
 
         controllerInterface.addUpdateListener(new GameAdapter());
         JPanel subLayout = new JPanel();
         subLayout.setLayout(new BoxLayout(subLayout, BoxLayout.X_AXIS));
 
 
-        JPanel mrXHistoryPanel = new JPanel();
+        MrXFrame mrXHistoryPanel = new MrXFrame(controllerInterface);
         mrXHistoryPanel.setLayout(new BoxLayout(mrXHistoryPanel, BoxLayout.Y_AXIS));
         JScrollPane scrollPane = new JScrollPane(mrXHistoryPanel);
 
         mapView = new MapView(controllerInterface, "map.jpg", new GraphData("pos.txt", GraphData.DataFormat.STANDARD));
-
         playerIndicator = new CurrentPlayerIndicator();
-
         playerInfoBar = new PlayerInfoBar(controllerInterface);
-
         statusLabel = new JLabel("");
 
+        gbcInside.gridx = 0;
+        gbcInside.gridy = 0;
+        gbcInside.weightx = 20;
+        gbcInside.weighty = 100;
+        subLayout.add(mapView, gbcInside);
 
-        subLayout.add(mapView);
-        subLayout.add(scrollPane);
+        gbcInside.gridx = 1;
+        gbcInside.gridy = 0;
+        gbcInside.weightx = 80;
+        gbcInside.weighty = 100;
+        subLayout.add(scrollPane, gbcInside);
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 100;
+        gbc.weighty = 80;
         add(subLayout, gbc);
+
+
+        gbc.gridx = 0;
         gbc.gridy = 1;
+        gbc.weightx = 100;
         gbc.weighty = 20;
         add(playerInfoBar, gbc);
         //add(statusLabel);

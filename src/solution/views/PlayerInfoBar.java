@@ -1,7 +1,10 @@
 package solution.views;
 
 import scotlandyard.Colour;
+import solution.ScotlandYardModel;
 import solution.interfaces.GameControllerInterface;
+import solution.interfaces.GameUIInterface;
+import solution.interfaces.adapters.GameUIAdapter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,8 +14,16 @@ import java.util.List;
  * Created by benallen on 10/03/15.
  */
 public class PlayerInfoBar extends JPanel {
-
+    private GameControllerInterface mGameControllerInterface;
     public PlayerInfoBar(GameControllerInterface controllerInterface) {
+        mGameControllerInterface = controllerInterface;
+        controllerInterface.addUpdateListener(new GameAdapter());
+        createBar();
+
+    }
+
+    private void createBar() {
+        GameControllerInterface controllerInterface = mGameControllerInterface;
         List<Colour> allPlayers = controllerInterface.getPlayerList();
         setLayout(new GridBagLayout());
         setMinimumSize(new Dimension(800, 300));
@@ -36,10 +47,15 @@ public class PlayerInfoBar extends JPanel {
             gbc.gridx = i;
             add(playerColumns[i],gbc);
         }
-
-
-
     }
 
+    class GameAdapter extends GameUIAdapter {
+        @Override
+        public void onGameModelUpdated(ScotlandYardModel model) {
+            removeAll();
+            createBar();
+
+        }
+    }
 
 }

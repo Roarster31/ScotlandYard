@@ -5,7 +5,6 @@ import solution.interfaces.GameControllerInterface;
 import solution.interfaces.adapters.GameUIAdapter;
 
 import javax.swing.*;
-import java.awt.*;
 
 /**
  * Created by rory on 09/03/15.

@@ -25,6 +25,10 @@ public class GameController implements GameControllerInterface {
     private MrXHistoryTracker mrXHistoryTracker;
     private UIPlayer uiPlayer;
 
+    public List<MoveTicket> getMrXHistory() {
+        return mrXHistoryTracker.getMoveHistory();
+    }
+
     public GameController(){
         listeners = new ArrayList<GameUIInterface>();
         mrXHistoryTracker = new MrXHistoryTracker();
@@ -131,6 +135,7 @@ public class GameController implements GameControllerInterface {
         public List<MoveTicket> getMoveHistory() {
             return moveHistory;
         }
+
     }
 
 }

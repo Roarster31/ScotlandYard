@@ -21,4 +21,6 @@ public interface GameControllerInterface {
 
     public void notifyAllPlayersAdded(final int count);
     public void notifyMoveSelected(final Move move);
+    public List<MoveTicket> getMrXHistory();
+
 }
