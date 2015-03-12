@@ -1,11 +1,9 @@
 package solution.views.map;
 
-import scotlandyard.Colour;
-import scotlandyard.Move;
-import scotlandyard.MoveTicket;
+import scotlandyard.*;
+import solution.Constants;
 import solution.Models.GraphData;
 import solution.ScotlandYardModel;
-import solution.helpers.MoveHelper;
 import solution.interfaces.GameControllerInterface;
 import solution.interfaces.adapters.GameUIAdapter;
 
@@ -31,6 +29,8 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     private Map<Integer, Colour> mPlayerLocations;
     private List<MapPosition> mMapPositions;
     private MapNodePopup mMapPopup;
+    private MoveTicket firstMove;
+    private List<MoveTicket> secondMoves;
 
 
     public MapView(final GameControllerInterface gameController, final String graphImageMapPath, final GraphData graphData) {
@@ -89,9 +89,30 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     }
 
     @Override
-    public void onMoveSelected(Move move, int nodeId) {
-        mControllerInterface.notifyMoveSelected(move);
-        mMapPopup = null;
+    public void onTicketSelected(Ticket ticket, int nodeId) {
+        final Colour currentPlayer = mControllerInterface.getCurrentPlayer();
+        final MoveTicket moveTicket = new MoveTicket(currentPlayer, nodeId, ticket);
+        if(secondMoves != null){
+            MoveDouble chosenMove = new MoveDouble(currentPlayer, firstMove, moveTicket);
+            mControllerInterface.notifyMoveSelected(chosenMove);
+        }else {
+            if (ticket.equals(Ticket.DoubleMove)) {
+                secondMoves = mControllerInterface.getValidSingleMovesAtLocation(currentPlayer, nodeId);
+                firstMove = moveTicket;
+                for (MapPosition mapPosition : mMapPositions) {
+                    if (mapPosition.getId() == nodeId) {
+                        mapPosition.setHighlighted(true);
+                        break;
+                    }
+                }
+
+                setValidMoves(secondMoves);
+                mMapPopup = null;
+            } else {
+                mControllerInterface.notifyMoveSelected(moveTicket);
+                mMapPopup = null;
+            }
+        }
         repaint();
     }
 
@@ -102,7 +123,10 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             if (!popupClicked){
                 for(MapPosition position : mMapPositions){
                     if(position.notifyMouseClick(e.getX(), e.getY())){
-                        mMapPopup = new MapNodePopup(position, mImageSize, MapView.this);
+                        final boolean isMrX = mControllerInterface.getCurrentPlayer() == Constants.MR_X_COLOUR;
+                        final boolean hasEnoughDoubleMoves = mControllerInterface.getPlayerTickets(Constants.MR_X_COLOUR).get(Ticket.DoubleMove) > 0;
+                        final boolean canDoubleMove = isMrX && hasEnoughDoubleMoves && secondMoves == null;
+                        mMapPopup = new MapNodePopup(position, mImageSize, canDoubleMove, MapView.this);
                     }
                 }
             }
@@ -136,27 +160,34 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         @Override
         public void onGameModelUpdated(ScotlandYardModel model) {
 
-            for(MapPosition position : mMapPositions){
-                position.resetMoves();
-            }
+
 
             if(!model.isGameOver()) {
                 mPlayerLocations.clear();
                 for (Colour colour : model.getPlayers()) {
                     mPlayerLocations.put(model.getPlayerLocation(colour), colour);
                 }
-                List<Move> validMoves = model.validMoves(model.getCurrentPlayer());
+                final Colour currentPlayer = model.getCurrentPlayer();
+                List<MoveTicket> firstMoves = mControllerInterface.getValidSingleMovesAtLocation(currentPlayer, model.getRealPlayerLocation(currentPlayer));
 
-                for(Move move : validMoves){
-                    MoveTicket moveTicket = MoveHelper.getFinalMove(move);
-                    for(MapPosition position : mMapPositions){
-                        if(position.getId() == moveTicket.target){
-                            position.addMove(move);
-                        }
-                    }
-                }
+                setValidMoves(firstMoves);
             }
             repaint();
+        }
+    }
+
+    private void setValidMoves(List<MoveTicket> moves) {
+
+        for(MapPosition position : mMapPositions){
+            position.resetTickets();
+        }
+
+        for(MoveTicket moveTicket : moves){
+            for(MapPosition position : mMapPositions){
+                if(position.getId() == moveTicket.target){
+                    position.addTicket(moveTicket.ticket);
+                }
+            }
         }
     }
 

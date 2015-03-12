@@ -1,15 +1,11 @@
 package solution.views.map;
 
 import scotlandyard.Colour;
-import scotlandyard.Move;
-import scotlandyard.MoveTicket;
 import scotlandyard.Ticket;
 import solution.helpers.ColourHelper;
-import solution.helpers.MoveHelper;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -22,6 +18,7 @@ public class MapPosition {
 
     private static final int CIRC_RADIUS = 20;
     private static final Color STANDARD_COLOUR = Color.GRAY;
+    private static final Color HIGHLIGHT_COLOUR = Color.CYAN;
     private static final Color AVAILABLE_COLOUR = Color.MAGENTA;
 
     private final Integer positionId;
@@ -29,7 +26,8 @@ public class MapPosition {
     private final int y;
     private final Rectangle2D.Double rect;
     private boolean isHovered;
-    private Set<Move> possibleMoves;
+    private Set<Ticket> possibleTickets;
+    private boolean highlighted;
 
     public MapPosition(Integer positionId, Integer x, Integer y) {
         this.positionId = positionId;
@@ -37,14 +35,17 @@ public class MapPosition {
         this.y = y;
         this.rect = new Rectangle2D.Double(x - CIRC_RADIUS/2,y - CIRC_RADIUS/2,CIRC_RADIUS,CIRC_RADIUS);
 
-        possibleMoves = new HashSet<Move>();
+        possibleTickets = new HashSet<Ticket>();
     }
 
     public void draw(final Graphics2D g2d, Map<Integer, Colour> playerLocations){
 
         int radius = isHovered && isAvailable() ? (int) (CIRC_RADIUS * 1.5f) : CIRC_RADIUS;
 
-        if(playerLocations.containsKey(positionId)) {
+        if(highlighted) {
+            g2d.setColor(HIGHLIGHT_COLOUR);
+            g2d.fillOval(x - radius / 2, y - radius / 2, radius, radius);
+        }else if(playerLocations.containsKey(positionId)) {
             g2d.setColor(ColourHelper.toColor(playerLocations.get(positionId)));
             g2d.fillOval(x-radius/2, y-radius/2, radius, radius);
         }else if(isAvailable()){
@@ -90,23 +91,12 @@ public class MapPosition {
         return positionId;
     }
 
-    public void addMove(Move move) {
-        //we're not dealing with doubel moves for now
-        if(move instanceof MoveTicket) {
-            possibleMoves.add(move);
-        }
+    public void addTicket(Ticket ticket) {
+        possibleTickets.add(ticket);
     }
 
-    public ArrayList<Ticket> getTickets() {
-        ArrayList<Ticket> tickets = new ArrayList<Ticket>();
-        for(Move move : possibleMoves){
-            MoveTicket moveTicket = MoveHelper.getFinalMove(move);
-            if(moveTicket != null){
-                tickets.add(moveTicket.ticket);
-            }
-        }
-
-        return tickets;
+    public Set<Ticket> getTickets() {
+        return possibleTickets;
     }
 
     public int getX() {
@@ -118,14 +108,15 @@ public class MapPosition {
     }
 
     public boolean isAvailable() {
-        return possibleMoves.size() > 0;
+        return possibleTickets.size() > 0;
     }
 
-    public void resetMoves() {
-        possibleMoves.clear();
+    public void resetTickets() {
+        highlighted = false;
+        possibleTickets.clear();
     }
 
-    public Set<Move> getMoves() {
-        return possibleMoves;
+    public void setHighlighted(boolean highlighted) {
+        this.highlighted = highlighted;
     }
 }

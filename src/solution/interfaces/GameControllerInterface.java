@@ -2,6 +2,7 @@ package solution.interfaces;
 
 import scotlandyard.Colour;
 import scotlandyard.Move;
+import scotlandyard.MoveTicket;
 import scotlandyard.Ticket;
 
 import java.util.List;
@@ -16,6 +17,7 @@ public interface GameControllerInterface {
     public Colour getCurrentPlayer();
     public Map<Ticket,Integer> getPlayerTickets(Colour currentPlayer);
     public List<Colour> getPlayerList();
+    List<MoveTicket> getValidSingleMovesAtLocation(Colour currentPlayer, int location);
 
     public void notifyAllPlayersAdded(final int count);
     public void notifyMoveSelected(final Move move);

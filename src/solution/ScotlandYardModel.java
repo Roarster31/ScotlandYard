@@ -196,6 +196,10 @@ public class ScotlandYardModel extends ScotlandYard {
         return winningPlayers;
     }
 
+    public int getRealPlayerLocation(Colour colour){
+        return mPlayerMap.get(colour).getRealPosition();
+    }
+
     @Override
     public int getPlayerLocation(Colour colour) {
 

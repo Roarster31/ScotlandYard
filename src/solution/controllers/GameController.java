@@ -70,6 +70,11 @@ public class GameController implements GameControllerInterface {
     }
 
     @Override
+    public List<MoveTicket> getValidSingleMovesAtLocation(Colour currentPlayer, int location) {
+        return model.getAvailableSingleMoves(model.getGraph(), currentPlayer, location, model.getAllPlayerTickets(currentPlayer));
+    }
+
+    @Override
     public void notifyAllPlayersAdded(int count) {
         setupModel(count);
 
