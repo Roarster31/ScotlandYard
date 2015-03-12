@@ -19,9 +19,9 @@ import java.util.List;
  */
 public class GameLayout extends JPanel {
 
-    private final JLabel statusLabel;
-    private final MapView mapView;
-    private final PlayerInfoBar playerInfoBar;
+    private JLabel statusLabel;
+    private MapView mapView;
+    private PlayerInfoBar playerInfoBar;
 
     public GameLayout(GameControllerInterface controllerInterface) {
 
@@ -60,8 +60,6 @@ public class GameLayout extends JPanel {
 
         mapView = new MapView(controllerInterface, "map.jpg", new GraphData("pos.txt", GraphData.DataFormat.STANDARD));
         subLayout.add(mapView);
-
-        playerIndicator = new CurrentPlayerIndicator();
 
         playerInfoBar = new PlayerInfoBar(controllerInterface);
 
