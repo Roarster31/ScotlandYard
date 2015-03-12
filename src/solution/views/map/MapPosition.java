@@ -64,7 +64,7 @@ public class MapPosition {
     }
 
     public boolean notifyMouseClick(int x, int y) {
-        return rect.contains(x,y);
+        return rect.contains(x,y) && isAvailable();
     }
 
     @Override

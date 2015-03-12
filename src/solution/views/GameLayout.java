@@ -21,10 +21,25 @@ public class GameLayout extends JPanel {
 
     private final JLabel statusLabel;
     private final MapView mapView;
-    private final CurrentPlayerIndicator playerIndicator;
     private final PlayerInfoBar playerInfoBar;
 
     public GameLayout(GameControllerInterface controllerInterface) {
+
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        mapView = new MapView(controllerInterface, "map.jpg", new GraphData("pos.txt", GraphData.DataFormat.STANDARD));
+
+        final Dimension size = new Dimension(1000, 800);
+        setPreferredSize(size);
+        playerInfoBar = new PlayerInfoBar(controllerInterface);
+
+        statusLabel = new JLabel("");
+
+        add(mapView);
+
+        if(true){
+            return;
+        }
+
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         GridBagConstraints gbcInside = new GridBagConstraints();
@@ -44,6 +59,7 @@ public class GameLayout extends JPanel {
         JScrollPane scrollPane = new JScrollPane(mrXHistoryPanel);
 
         mapView = new MapView(controllerInterface, "map.jpg", new GraphData("pos.txt", GraphData.DataFormat.STANDARD));
+        subLayout.add(mapView);
 
         playerIndicator = new CurrentPlayerIndicator();
 
@@ -78,8 +94,6 @@ public class GameLayout extends JPanel {
     class GameAdapter extends GameUIAdapter {
         @Override
         public void onGameModelUpdated(ScotlandYardModel model) {
-            playerIndicator.setColours(model.getPlayers());
-            playerIndicator.setSelectedColour(model.getCurrentPlayer());
             if(!model.isGameOver()) {
                 statusLabel.setText("It is " + ColourHelper.toString(model.getCurrentPlayer()) + "'s turn");
             }else{

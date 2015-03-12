@@ -22,7 +22,7 @@ public class UIPlayer implements Player {
                 return move;
             }
         }
-        System.err.println("Something's gone wrong");
+        System.err.println("Something's gone wrong (with null move)");
         return null;
     }
 }

@@ -117,28 +117,39 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     public void onTicketSelected(Ticket ticket, int nodeId) {
         final Colour currentPlayer = mControllerInterface.getCurrentPlayer();
         final MoveTicket moveTicket = new MoveTicket(currentPlayer, nodeId, ticket);
-        if(secondMoves != null){
+        if(secondMoves != null && firstMove != null){
             MoveDouble chosenMove = new MoveDouble(currentPlayer, firstMove, moveTicket);
             mControllerInterface.notifyMoveSelected(chosenMove);
+            secondMoves = null;
+            firstMove = null;
         }else {
-            if (ticket.equals(Ticket.DoubleMove)) {
-                secondMoves = mControllerInterface.getValidSingleMovesAtLocation(currentPlayer, nodeId);
-                firstMove = moveTicket;
-                for (MapPosition mapPosition : mMapPositions) {
-                    if (mapPosition.getId() == nodeId) {
-                        mapPosition.setHighlighted(true);
-                        break;
-                    }
-                }
+            mControllerInterface.notifyMoveSelected(moveTicket);
+        }
 
-                setValidMoves(secondMoves);
-                mMapPopup = null;
-            } else {
-                mControllerInterface.notifyMoveSelected(moveTicket);
-                mMapPopup = null;
+        mMapPopup = null;
+        repaint();
+    }
+
+    @Override
+    public void onDoubleMoveSelected(Ticket ticket, int nodeId) {
+        final Colour currentPlayer = mControllerInterface.getCurrentPlayer();
+        final MoveTicket moveTicket = new MoveTicket(currentPlayer, nodeId, ticket);
+
+        secondMoves = mControllerInterface.getValidSingleMovesAtLocation(currentPlayer, nodeId);
+        firstMove = moveTicket;
+
+        for (MapPosition mapPosition : mMapPositions) {
+            if (mapPosition.getId() == nodeId) {
+                mapPosition.setHighlighted(true);
+                break;
             }
         }
+
+        setValidMoves(secondMoves);
+        mMapPopup = null;
+
         repaint();
+
     }
 
     class GraphMouseListener extends MouseAdapter implements MouseMotionListener {

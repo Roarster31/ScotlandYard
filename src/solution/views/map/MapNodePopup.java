@@ -2,43 +2,73 @@ package solution.views.map;
 
 import scotlandyard.Ticket;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Created by rory on 10/03/15.
- */
 public class MapNodePopup {
 
+    private static final int SHALLOW_BUTTON_SIZE = 25;
     private static final int BUTTON_SIZE = 50;
     private static final int TRIANGLE_SIZE = 10;
     private static final int BUTTON_PADDING = 10;
     private static final int BUTTON_CORNER_RADIUS = 15;
     private final MapPosition mapPosition;
     private final PopupInterface mInterface;
+    private final boolean mDoubleMove;
+    private Image taxiImage = null;
+    private Image trainImage = null;
+    private Image busImage = null;
     ArrayList<Ticket> fullTicketList = new ArrayList<Ticket>() {{
         add(Ticket.Bus);
-        add(Ticket.DoubleMove);
         add(Ticket.SecretMove);
         add(Ticket.Taxi);
         add(Ticket.Underground);
     }};
     Set<Ticket> ticketList = new HashSet<Ticket>();
     private Rectangle2D.Double mainRect;
+    private Rectangle2D.Double confirmOkRect;
+    private Rectangle2D.Double confirmDoubleRect;
     private ArrayList<Rectangle2D> mTicketRectList;
     private Polygon mTrianglePolygon;
-    private Rectangle2D mHoveredTicketRect;
+    private Rectangle2D mSelectedRect;
+    private Rectangle2D mHoveredRect;
+    private Ticket mSelectedTicket;
+
     public MapNodePopup(MapPosition mapPosition, final Dimension canvasSize, boolean doubleMove, PopupInterface popupInterface) {
         this.mapPosition = mapPosition;
         ticketList = mapPosition.getTickets();
-        if (doubleMove) {
-            ticketList.add(Ticket.DoubleMove);
-        }
+        mDoubleMove = doubleMove;
         mInterface = popupInterface;
         create(mapPosition.getX(), mapPosition.getY(), canvasSize);
+
+        try {
+            final ClassLoader classLoader = getClass().getClassLoader();
+
+            busImage = loadImage(new File(classLoader.getResource("imgs/actual_bus.png").toURI()));
+            taxiImage = loadImage(new File(classLoader.getResource("imgs/actual_taxi.png").toURI()));
+            trainImage = loadImage(new File(classLoader.getResource("imgs/actual_train.png").toURI()));
+
+        } catch (IOException ex) {
+            //todo handle exception...
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Image loadImage(File file) throws IOException {
+        final BufferedImage image = ImageIO.read(file);
+        float scale = BUTTON_SIZE / (float) image.getHeight();
+        final int targetImageWidth = (int) (image.getWidth() * scale);
+        final int targetImageHeight = (int) (image.getHeight() * scale);
+        return image.getScaledInstance(targetImageWidth, targetImageHeight, 0);
     }
 
     private void create(final int x, final int y, final Dimension canvasSize) {
@@ -47,7 +77,7 @@ public class MapNodePopup {
         Rectangle2D rect = getStandardRect();
 
         final int width = BUTTON_PADDING + fullTicketList.size() * (BUTTON_SIZE + BUTTON_PADDING);
-        final int height = BUTTON_SIZE + 2 * BUTTON_PADDING;
+        final int height = BUTTON_SIZE + BUTTON_PADDING + SHALLOW_BUTTON_SIZE + 2 * BUTTON_PADDING;
 
         int xPosition;
         int yPosition;
@@ -98,6 +128,16 @@ public class MapNodePopup {
             mTicketRectList.add(new Rectangle2D.Double(xPosition + BUTTON_PADDING + i * (BUTTON_SIZE + BUTTON_PADDING), yPosition + BUTTON_PADDING, BUTTON_SIZE, BUTTON_SIZE));
         }
 
+        final int confirmButtonsY = yPosition + BUTTON_PADDING * 2 + BUTTON_SIZE;
+        if(mDoubleMove){
+            final int smallButtonWidth = width / 2 - 2 * BUTTON_PADDING;
+            confirmDoubleRect = new Rectangle2D.Double(xPosition + BUTTON_PADDING, confirmButtonsY, smallButtonWidth, SHALLOW_BUTTON_SIZE);
+            confirmOkRect = new Rectangle2D.Double(xPosition + width/2 + BUTTON_PADDING, confirmButtonsY, smallButtonWidth, SHALLOW_BUTTON_SIZE);
+        }else{
+            final int largeButtonWidth = width - 2 * BUTTON_PADDING;
+            confirmOkRect = new Rectangle2D.Double(xPosition + BUTTON_PADDING, confirmButtonsY, largeButtonWidth, SHALLOW_BUTTON_SIZE);
+        }
+
         mTrianglePolygon = new Polygon(new int[]{x, triangleX1, triangleX2}, new int[]{y, triangleY1, triangleY2}, 3);
 
     }
@@ -114,26 +154,69 @@ public class MapNodePopup {
         g2d.setStroke(new BasicStroke(2f));
 
         for (int i = 0; i < fullTicketList.size(); i++) {
-            if (!ticketList.contains(fullTicketList.get(i))) {
+            final Ticket ticket = fullTicketList.get(i);
+            if (!ticketList.contains(ticket)) {
                 g2d.setColor(new Color(19, 133, 33, 120));
             } else {
                 g2d.setColor(new Color(38, 255, 0, 120));
             }
             g2d.fillRoundRect((int) mTicketRectList.get(i).getX(), (int) mTicketRectList.get(i).getY(), (int) mTicketRectList.get(i).getWidth(), (int) mTicketRectList.get(i).getHeight(), BUTTON_CORNER_RADIUS, BUTTON_CORNER_RADIUS);
 
-            if (mHoveredTicketRect == mTicketRectList.get(i)) {
-                g2d.setColor(new Color(0, 232, 58, 205));
-                g2d.drawRoundRect((int) mTicketRectList.get(i).getX(), (int) mTicketRectList.get(i).getY(), (int) mTicketRectList.get(i).getWidth(), (int) mTicketRectList.get(i).getHeight(), BUTTON_CORNER_RADIUS, BUTTON_CORNER_RADIUS);
+
+            String ticketName = String.valueOf(ticket.name().toUpperCase().charAt(0));
+
+            switch(ticket){
+                case Bus:
+                    g2d.drawImage(busImage, ((int) mTicketRectList.get(i).getCenterX() - busImage.getWidth(null)/2), ((int)mTicketRectList.get(i).getCenterY() - busImage.getHeight(null)/2), null);
+                    break;
+                case Taxi:
+                    g2d.drawImage(taxiImage, ((int) mTicketRectList.get(i).getCenterX() - busImage.getWidth(null)/2), ((int)mTicketRectList.get(i).getCenterY() - busImage.getHeight(null)/2), null);
+                    break;
+                case Underground:
+                    g2d.drawImage(trainImage, ((int) mTicketRectList.get(i).getCenterX() - busImage.getWidth(null)/2), ((int)mTicketRectList.get(i).getCenterY() - busImage.getHeight(null)/2), null);
+                    break;
             }
 
-            String ticketName = String.valueOf(fullTicketList.get(i).name().toUpperCase().charAt(0));
+        }
 
 
-            Rectangle2D r = fm.getStringBounds(ticketName, g2d);
-            int textX = (int) (mainRect.getX() + BUTTON_PADDING + BUTTON_SIZE / 2 + i * (BUTTON_SIZE + BUTTON_PADDING) - ((int) r.getWidth() / 2));
-            int textY = (int) (mainRect.getY() + mainRect.getHeight() / 2 - ((int) r.getHeight() / 2) + fm.getAscent());
+        if(mSelectedRect != null){
+            g2d.setColor(new Color(0, 207, 255, 255));
+        }else{
+            g2d.setColor(new Color(0, 207, 255, 139));
+        }
+
+        if(mDoubleMove){
+
+            g2d.fillRoundRect((int) confirmOkRect.getX(), (int) confirmOkRect.getY(), (int) confirmOkRect.getWidth(), (int) confirmOkRect.getHeight(), BUTTON_CORNER_RADIUS, BUTTON_CORNER_RADIUS);
+
+
+            g2d.fillRoundRect((int) confirmDoubleRect.getX(), (int) confirmDoubleRect.getY(), (int) confirmDoubleRect.getWidth(), (int) confirmDoubleRect.getHeight(), BUTTON_CORNER_RADIUS, BUTTON_CORNER_RADIUS);
+
+            Rectangle2D r = fm.getStringBounds("Double Move", g2d);
+            int textX = (int) (confirmDoubleRect.getCenterX() - ((int) r.getWidth() / 2));
+            int textY = (int) (confirmDoubleRect.getCenterY() - ((int) r.getHeight() / 2) + fm.getAscent());
             g2d.setColor(Color.BLACK);
-            g2d.drawString(ticketName, textX, textY);
+            g2d.drawString("Double Move", textX, textY);
+
+        } else {
+            g2d.fillRoundRect((int) confirmOkRect.getX(), (int) confirmOkRect.getY(), (int) confirmOkRect.getWidth(), (int) confirmOkRect.getHeight(), BUTTON_CORNER_RADIUS, BUTTON_CORNER_RADIUS);
+        }
+
+        Rectangle2D r = fm.getStringBounds("Ok", g2d);
+        int textX = (int) (confirmOkRect.getCenterX() - ((int) r.getWidth() / 2));
+        int textY = (int) (confirmOkRect.getCenterY() - ((int) r.getHeight() / 2) + fm.getAscent());
+        g2d.setColor(Color.BLACK);
+        g2d.drawString("Ok", textX, textY);
+
+        if (mHoveredRect != null) {
+            g2d.setColor(new Color(0, 232, 58, 205));
+            g2d.drawRoundRect((int)mHoveredRect.getX(), (int) mHoveredRect.getY(), (int) mHoveredRect.getWidth(), (int) mHoveredRect.getHeight(), BUTTON_CORNER_RADIUS, BUTTON_CORNER_RADIUS);
+        }
+
+        if (mSelectedRect != null) {
+            g2d.setColor(new Color(232, 0, 13, 205));
+            g2d.drawRoundRect((int)mSelectedRect.getX(), (int) mSelectedRect.getY(), (int) mSelectedRect.getWidth(), (int) mSelectedRect.getHeight(), BUTTON_CORNER_RADIUS, BUTTON_CORNER_RADIUS);
         }
 
         g2d.setColor(Color.BLACK);
@@ -148,22 +231,26 @@ public class MapNodePopup {
     private Rectangle2D getStandardRect() {
 
         final int width = BUTTON_PADDING + fullTicketList.size() * (BUTTON_SIZE + BUTTON_PADDING);
-        final int height = BUTTON_SIZE + 2 * BUTTON_PADDING;
+        final int height = BUTTON_SIZE + BUTTON_PADDING + SHALLOW_BUTTON_SIZE + 2 * BUTTON_PADDING;
 
         return new Rectangle2D.Double(0, 0, width, height);
     }
 
     public boolean onClick(final int x, final int y) {
         if (mainRect.contains(x, y)) {
-            for (int i = 0; i < mTicketRectList.size(); i++) {
-                Rectangle2D rect = mTicketRectList.get(i);
-                if (rect.contains(x, y)) {
+            if (confirmOkRect.contains(x, y)) {
+                mInterface.onTicketSelected(mSelectedTicket, mapPosition.getId());
+            } else if (confirmDoubleRect != null && confirmDoubleRect.contains(x, y)) {
+                mInterface.onDoubleMoveSelected(mSelectedTicket, mapPosition.getId());
+            }else {
+                for (int i = 0; i < mTicketRectList.size(); i++) {
+                    Rectangle2D rect = mTicketRectList.get(i);
                     Ticket ticket = fullTicketList.get(i);
-                    if (mapPosition.getTickets().contains(ticket)) {
-                        mInterface.onTicketSelected(ticket, mapPosition.getId());
+                    if (ticketList.contains(ticket) && rect.contains(x, y)) {
+                        mSelectedTicket = ticket;
+                        mSelectedRect = rect;
                         return true;
                     }
-                    break;
                 }
             }
             return true;
@@ -174,10 +261,19 @@ public class MapNodePopup {
 
     public boolean onMouseMoved(int x, int y) {
         if (mainRect.contains(x, y)) {
-            for (Rectangle2D rect : mTicketRectList) {
-                if (rect.contains(x, y)) {
-                    mHoveredTicketRect = rect;
-                    break;
+            mHoveredRect = null;
+            if(mSelectedRect != null && confirmOkRect != null && confirmOkRect.contains(x, y)){
+                mHoveredRect = confirmOkRect;
+            }else if(mSelectedRect != null && confirmDoubleRect != null && confirmDoubleRect.contains(x, y)){
+                mHoveredRect = confirmDoubleRect;
+            }else {
+                for (int i = 0; i < mTicketRectList.size(); i++) {
+                    Rectangle2D rect = mTicketRectList.get(i);
+                    Ticket ticket = fullTicketList.get(i);
+                    if (ticketList.contains(ticket) && rect.contains(x, y)) {
+                        mHoveredRect = rect;
+                        break;
+                    }
                 }
             }
             return true;
@@ -189,6 +285,7 @@ public class MapNodePopup {
 
     public interface PopupInterface {
         public void onTicketSelected(final Ticket ticket, final int nodeId);
+        public void onDoubleMoveSelected(final Ticket ticket, final int nodeId);
     }
 
 }
