@@ -23,6 +23,7 @@ public class MapNodePopup {
     private final MapPosition mapPosition;
     private final PopupInterface mInterface;
     private final boolean mDoubleMove;
+    private Image boatImage = null;
     private Image taxiImage = null;
     private Image trainImage = null;
     private Image busImage = null;
@@ -55,6 +56,7 @@ public class MapNodePopup {
             busImage = loadImage(new File(classLoader.getResource("imgs/actual_bus.png").toURI()));
             taxiImage = loadImage(new File(classLoader.getResource("imgs/actual_taxi.png").toURI()));
             trainImage = loadImage(new File(classLoader.getResource("imgs/actual_train.png").toURI()));
+            boatImage = loadImage(new File(classLoader.getResource("imgs/actual_boat.png").toURI()));
 
         } catch (IOException ex) {
             //todo handle exception...
@@ -65,7 +67,7 @@ public class MapNodePopup {
 
     private Image loadImage(File file) throws IOException {
         final BufferedImage image = ImageIO.read(file);
-        float scale = BUTTON_SIZE / (float) image.getHeight();
+        float scale = (BUTTON_SIZE*0.8f) / (float) image.getHeight();
         final int targetImageWidth = (int) (image.getWidth() * scale);
         final int targetImageHeight = (int) (image.getHeight() * scale);
         return image.getScaledInstance(targetImageWidth, targetImageHeight, 0);
@@ -145,45 +147,55 @@ public class MapNodePopup {
     public void draw(final Graphics2D g2d) {
         Color initialColour = g2d.getColor();
 
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.8f));
+
         g2d.setColor(Color.BLACK);
         FontMetrics fm = g2d.getFontMetrics();
 
-
         g2d.fillRoundRect((int) mainRect.getX(), (int) mainRect.getY(), (int) mainRect.getWidth(), (int) mainRect.getHeight(), BUTTON_CORNER_RADIUS, BUTTON_CORNER_RADIUS);
 
-        g2d.setStroke(new BasicStroke(2f));
 
         for (int i = 0; i < fullTicketList.size(); i++) {
             final Ticket ticket = fullTicketList.get(i);
+
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+
             if (!ticketList.contains(ticket)) {
-                g2d.setColor(new Color(19, 133, 33, 120));
+                g2d.setColor(new Color(134, 134, 134));
             } else {
-                g2d.setColor(new Color(38, 255, 0, 120));
+                g2d.setColor(Color.WHITE);
             }
             g2d.fillRoundRect((int) mTicketRectList.get(i).getX(), (int) mTicketRectList.get(i).getY(), (int) mTicketRectList.get(i).getWidth(), (int) mTicketRectList.get(i).getHeight(), BUTTON_CORNER_RADIUS, BUTTON_CORNER_RADIUS);
 
-
-            String ticketName = String.valueOf(ticket.name().toUpperCase().charAt(0));
+            if (!ticketList.contains(ticket)) {
+                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+            } else {
+                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+            }
 
             switch(ticket){
                 case Bus:
                     g2d.drawImage(busImage, ((int) mTicketRectList.get(i).getCenterX() - busImage.getWidth(null)/2), ((int)mTicketRectList.get(i).getCenterY() - busImage.getHeight(null)/2), null);
                     break;
                 case Taxi:
-                    g2d.drawImage(taxiImage, ((int) mTicketRectList.get(i).getCenterX() - busImage.getWidth(null)/2), ((int)mTicketRectList.get(i).getCenterY() - busImage.getHeight(null)/2), null);
+                    g2d.drawImage(taxiImage, ((int) mTicketRectList.get(i).getCenterX() - taxiImage.getWidth(null)/2), ((int)mTicketRectList.get(i).getCenterY() - taxiImage.getHeight(null)/2), null);
                     break;
                 case Underground:
-                    g2d.drawImage(trainImage, ((int) mTicketRectList.get(i).getCenterX() - busImage.getWidth(null)/2), ((int)mTicketRectList.get(i).getCenterY() - busImage.getHeight(null)/2), null);
+                    g2d.drawImage(trainImage, ((int) mTicketRectList.get(i).getCenterX() - trainImage.getWidth(null)/2), ((int)mTicketRectList.get(i).getCenterY() - trainImage.getHeight(null)/2), null);
+                    break;
+                case SecretMove:
+                    g2d.drawImage(boatImage, ((int) mTicketRectList.get(i).getCenterX() - boatImage.getWidth(null)/2), ((int)mTicketRectList.get(i).getCenterY() - boatImage.getHeight(null)/2), null);
                     break;
             }
 
         }
 
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
 
         if(mSelectedRect != null){
-            g2d.setColor(new Color(0, 207, 255, 255));
+            g2d.setColor(Color.WHITE);
         }else{
-            g2d.setColor(new Color(0, 207, 255, 139));
+            g2d.setColor(new Color(134, 134, 134));
         }
 
         if(mDoubleMove){
@@ -209,13 +221,18 @@ public class MapNodePopup {
         g2d.setColor(Color.BLACK);
         g2d.drawString("Ok", textX, textY);
 
+        g2d.setStroke(new BasicStroke(3f));
+
         if (mHoveredRect != null) {
-            g2d.setColor(new Color(0, 232, 58, 205));
+            g2d.setColor(new Color(182, 182, 182, 205));
             g2d.drawRoundRect((int)mHoveredRect.getX(), (int) mHoveredRect.getY(), (int) mHoveredRect.getWidth(), (int) mHoveredRect.getHeight(), BUTTON_CORNER_RADIUS, BUTTON_CORNER_RADIUS);
         }
 
+        g2d.setStroke(new BasicStroke(4f));
+
+
         if (mSelectedRect != null) {
-            g2d.setColor(new Color(232, 0, 13, 205));
+            g2d.setColor(new Color(14, 220, 0, 205));
             g2d.drawRoundRect((int)mSelectedRect.getX(), (int) mSelectedRect.getY(), (int) mSelectedRect.getWidth(), (int) mSelectedRect.getHeight(), BUTTON_CORNER_RADIUS, BUTTON_CORNER_RADIUS);
         }
 
