@@ -20,10 +20,20 @@ public class GameRecordTracker implements Spectator {
 
     private final ArrayList<Move> mMoveList;
     private final HashMap<Colour, Integer> startPositions;
-    private SaveData loadData;
-    private ScotlandYardModel mModel;
-    private int mCurrentMove;
 
+    private int mCurrentPosInQueue;
+    private Move[] mQueuedMoves;
+    private ScotlandYardModel mModel;
+
+    public GameRecordTracker(){
+        mMoveList = new ArrayList<Move>();
+        startPositions = new HashMap<Colour, Integer>();
+    }
+
+    /**
+     * be sure to call this after all players have been added to the model
+     * but before any moves have been made
+     */
     public void track(ScotlandYardModel model) {
         mModel = model;
         model.spectate(this);
@@ -32,15 +42,6 @@ public class GameRecordTracker implements Spectator {
         for(Colour colour : model.getPlayers()){
             startPositions.put(colour, model.getRealPlayerLocation(colour));
         }
-    }
-
-    public interface GameReplayInterface {
-        public void onMoveApplied();
-    }
-
-    public GameRecordTracker(){
-        mMoveList = new ArrayList<Move>();
-        startPositions = new HashMap<Colour, Integer>();
     }
 
     public void save(File fileLocation, ScotlandYardModel model) throws FileNotFoundException, UnsupportedEncodingException {
@@ -69,7 +70,7 @@ public class GameRecordTracker implements Spectator {
 
     }
 
-    public void load(File fileLocation) throws IOException {
+    public ScotlandYardModel load(File fileLocation, Player uiPlayer, boolean replay) throws IOException {
 
         String input = StringUtils.join(Files.readAllLines(fileLocation.toPath()), "");
 
@@ -77,20 +78,13 @@ public class GameRecordTracker implements Spectator {
         GsonBuilder gson = new GsonBuilder();
         gson.registerTypeAdapter(Move.class, new MoveClassAdapter());
 
-        loadData = gson.create().fromJson(input, SaveData.class);
+        SaveData loadData = gson.create().fromJson(input, SaveData.class);
 
+        mCurrentPosInQueue = 0;
+        mQueuedMoves = loadData.getMovesList();
         System.out.println("loaded");
 
         System.out.println(loadData);
-
-    }
-
-    /**
-     * applies all of the loaddata to a new scotland yard model and returns it
-     * @return
-     * @param uiPlayer
-     */
-    public ScotlandYardModel apply(Player uiPlayer, boolean replay){
 
         HashMap<Colour, Map<Ticket, Integer>> startingTickets = loadData.getTickets();
 
@@ -125,15 +119,20 @@ public class GameRecordTracker implements Spectator {
         }
 
         return model;
+
     }
 
+
+
     public void playNextMove(){
-        mModel.turn();
-        mCurrentMove++;
+        if(hasNextMove()) {
+            mModel.turn();
+            mCurrentPosInQueue++;
+        }
     }
 
     public boolean hasNextMove(){
-        return mCurrentMove < loadData.getMovesList().length;
+        return mCurrentPosInQueue < mQueuedMoves.length;
     }
 
     class PlayerSpoofer implements Player {
@@ -165,24 +164,12 @@ public class GameRecordTracker implements Spectator {
 
     }
 
-    public ArrayList<Move> getPlayerMoveList(final Colour colour){
-        ArrayList<Move> out = new ArrayList<Move>();
-
-        for(Move move : mMoveList){
-            if(move.colour.equals(colour)){
-                out.add(move);
-            }
-        }
-
-        return out;
-    }
-
     @Override
     public void notify(Move move) {
         if(move instanceof MoveTicket && move.colour == Constants.MR_X_COLOUR){
             MoveTicket moveTicket  = (MoveTicket) move;
             mMoveList.add(new MoveTicket(moveTicket.colour, mModel.getRealPlayerLocation(Constants.MR_X_COLOUR), moveTicket.ticket));
-        }else{
+        }else if(!(move instanceof MoveDouble)){
             mMoveList.add(move);
         }
     }

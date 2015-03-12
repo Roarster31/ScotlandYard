@@ -48,8 +48,7 @@ public class GameController implements GameControllerInterface {
     @Override
     public void loadGame(File fileLocation, boolean replay) {
         try {
-            gameRecordTracker.load(fileLocation);
-            model = gameRecordTracker.apply(uiPlayer, replay);
+            model = gameRecordTracker.load(fileLocation, uiPlayer, replay);
 
             model.spectate(mrXHistoryTracker);
 
