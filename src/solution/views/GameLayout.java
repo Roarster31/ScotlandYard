@@ -53,7 +53,7 @@ public class GameLayout extends JPanel {
 
 
         subLayout.add(mapView);
-        subLayout.add(scrollPane);
+//        subLayout.add(scrollPane);
         add(subLayout, gbc);
         gbc.gridy = 1;
         gbc.weighty = 20;
