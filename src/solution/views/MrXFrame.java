@@ -26,6 +26,7 @@ public class MrXFrame extends JPanel {
         GameControllerInterface controllerInterface = mControllerInterface;
         GridBagConstraints gbc = new GridBagConstraints();
         setLayout(new GridBagLayout());
+        setBackground(Color.BLACK);
         gbc.gridwidth = gbc.gridheight = 1;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.anchor = GridBagConstraints.NORTHWEST;

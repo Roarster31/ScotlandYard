@@ -23,11 +23,10 @@ public class PlayerInfoBar extends JPanel {
     }
 
     private void createBar() {
-        GameControllerInterface controllerInterface = mGameControllerInterface;
-        List<Colour> allPlayers = controllerInterface.getPlayerList();
+        List<Colour> allPlayers = mGameControllerInterface.getPlayerList();
         setLayout(new GridBagLayout());
-        setMinimumSize(new Dimension(800, 300));
-        setPreferredSize(new Dimension(800, 300));
+        setMinimumSize(new Dimension(800, 150));
+        setPreferredSize(new Dimension(800, 150));
         GridBagConstraints gbc = new GridBagConstraints();
 
         gbc.gridy = 0;
@@ -42,7 +41,7 @@ public class PlayerInfoBar extends JPanel {
         for(int i = 0; i < allPlayers.size(); i++){
 
             Colour currentPlayer = allPlayers.get(i);
-            playerColumns[i] = new PlayerInfoColumn(currentPlayer, controllerInterface);
+            playerColumns[i] = new PlayerInfoColumn(currentPlayer, mGameControllerInterface);
             playerColumns[i].setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Color.DARK_GRAY));
             gbc.gridx = i;
             add(playerColumns[i],gbc);
@@ -54,7 +53,7 @@ public class PlayerInfoBar extends JPanel {
         public void onGameModelUpdated(ScotlandYardModel model) {
             removeAll();
             createBar();
-
+            System.out.printf("Hello!");
         }
     }
 

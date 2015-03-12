@@ -34,32 +34,40 @@ public class GameLayout extends JPanel {
 
         statusLabel = new JLabel("");
 
-        add(mapView);
-
-        if(true){
-            return;
-        }
+//        add(mapView);
+//
+//        if(true){
+//            return;
+//        }
 
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         GridBagConstraints gbcInside = new GridBagConstraints();
+
         gbc.gridy = 0;
         gbc.gridwidth = gbc.gridheight = 1;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.weighty = 80;
 
+        gbcInside.gridy = 0;
+        gbcInside.gridwidth = gbcInside.gridheight = 1;
+        gbcInside.fill = GridBagConstraints.BOTH;
+        gbcInside.anchor = GridBagConstraints.NORTHWEST;
+        gbcInside.weighty = 80;
+
         controllerInterface.addUpdateListener(new GameAdapter());
         JPanel subLayout = new JPanel();
-        subLayout.setLayout(new BoxLayout(subLayout, BoxLayout.X_AXIS));
+        //subLayout.setLayout(new BoxLayout(subLayout, BoxLayout.X_AXIS));
+        subLayout.setLayout(new GridBagLayout());
 
-
-        JPanel mrXHistoryPanel = new JPanel();
+        MrXFrame mrXHistoryPanel = new MrXFrame(controllerInterface);
         mrXHistoryPanel.setLayout(new BoxLayout(mrXHistoryPanel, BoxLayout.Y_AXIS));
+
         JScrollPane scrollPane = new JScrollPane(mrXHistoryPanel);
 
         mapView = new MapView(controllerInterface, "map.jpg", new GraphData("pos.txt", GraphData.DataFormat.STANDARD));
-        subLayout.add(mapView);
+
 
         playerInfoBar = new PlayerInfoBar(controllerInterface);
 
@@ -74,7 +82,6 @@ public class GameLayout extends JPanel {
 
         gbcInside.gridx = 1;
         gbcInside.weightx = 20;
-
         subLayout.add(scrollPane, gbcInside);
 
         gbc.gridx = 0;
