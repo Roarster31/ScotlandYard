@@ -5,6 +5,7 @@ import scotlandyard.Colour;
 /**
  * Created by benallen on 04/03/15.
  */
+@Deprecated
 public class PlayerInfo {
     private String name;
     protected Colour colour;

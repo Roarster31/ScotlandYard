@@ -9,6 +9,7 @@ import java.util.Set;
 /**
  * Created by benallen on 04/03/15.
  */
+@Deprecated
 public class InterfaceInterrupts {
     public InterfaceInterrupts(){
 

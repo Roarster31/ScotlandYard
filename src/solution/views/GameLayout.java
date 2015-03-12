@@ -10,6 +10,7 @@ import solution.interfaces.adapters.GameUIAdapter;
 import solution.views.map.MapView;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,11 +25,11 @@ public class GameLayout extends JPanel {
     private final PlayerInfoBar playerInfoBar;
 
     public GameLayout(GameControllerInterface controllerInterface) {
-        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         controllerInterface.addUpdateListener(new GameAdapter());
         JPanel subLayout = new JPanel();
-        subLayout.setLayout(new BoxLayout(subLayout, BoxLayout.Y_AXIS));
+        subLayout.setLayout(new BoxLayout(subLayout, BoxLayout.X_AXIS));
 
 
         JPanel mrXHistoryPanel = new JPanel();
@@ -43,11 +44,12 @@ public class GameLayout extends JPanel {
 
         statusLabel = new JLabel("");
 
-        subLayout.add(mapView);
-        subLayout.add(playerInfoBar);
+
+        //subLayout.add(mapView);
+        subLayout.add(scrollPane);
         add(subLayout);
-        add(scrollPane);
-        add(statusLabel);
+        add(playerInfoBar);
+        //add(statusLabel);
 
     }
 

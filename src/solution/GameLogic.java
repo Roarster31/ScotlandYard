@@ -8,6 +8,7 @@ import java.util.*;
 /**
  * Created by benallen on 04/03/15.
  */
+@Deprecated
 public class GameLogic {
     private ScotlandYardModel mGame;
     private List<Boolean> mRounds;

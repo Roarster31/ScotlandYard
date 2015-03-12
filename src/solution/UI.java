@@ -14,6 +14,7 @@ import java.util.Map;
 /**
  * Created by benallen on 04/03/15.
  */
+@Deprecated
 public class UI {
     private JFrame window;
     GameLogic gl;

@@ -12,7 +12,7 @@ import java.util.*;
 
 import javax.imageio.*;
 import javax.swing.*;
-
+@Deprecated
 public class GraphDisplay {
 
     public static void main(String[] args) {
