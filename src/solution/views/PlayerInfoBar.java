@@ -34,11 +34,6 @@ public class PlayerInfoBar extends JPanel {
             Colour currentPlayer = allPlayers.get(i);
             playerColumns[i] = new PlayerInfoColumn(currentPlayer, controllerInterface);
             playerColumns[i].setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Color.DARK_GRAY));
-            if(currentPlayer == Colour.Black) {
-                playerColumns[i].setMrX(true);
-            } else {
-                playerColumns[i].setMrX(false);
-            }
             gbc.gridx = i;
             add(playerColumns[i],gbc);
         }

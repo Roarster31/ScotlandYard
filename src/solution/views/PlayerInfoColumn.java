@@ -23,7 +23,6 @@ import java.util.Map;
  * Created by benallen on 10/03/15.
  */
 public class PlayerInfoColumn extends JPanel {
-    private boolean isMrX;
     private int maxTicketNumber = 0;
     private Colour currentPlayer;
 
@@ -37,12 +36,10 @@ public class PlayerInfoColumn extends JPanel {
         } else {
             //setupCols(currentPlayer, controllerInterface.getPlayerTickets(controllerInterface.getCurrentPlayer()));
         }
-        setupCols(currentPlayer, controllerInterface.getPlayerTickets(controllerInterface.getCurrentPlayer()));
-        System.out.printf("Hi");
+        setupCols(currentPlayer, controllerInterface.getPlayerTickets(currentPlayer));
     }
 
     private void setupCols(Colour currentPlayer, Map<Ticket, Integer> playerTickets) {
-        System.out.printf("Current:" + currentPlayer.toString());
         setLayout(new GridBagLayout());
         Box vertView = Box.createVerticalBox();
         JPanel tickets = new JPanel();
@@ -63,7 +60,7 @@ public class PlayerInfoColumn extends JPanel {
         add(colour, gbc);
 
         // Max limit of tickets
-        if(isMrX){
+        if(currentPlayer == Colour.Black){
             maxTicketNumber = 5;
         } else {
             maxTicketNumber = 3;
@@ -75,33 +72,33 @@ public class PlayerInfoColumn extends JPanel {
         String[] ticketImgNames = {"bus.png", "underground.png", "taxi.png" , "doublemove.png", "secretmove.png"};
         // Loop through all tickets
         for (int i = 0; i < maxTicketNumber; i++) {
-            Box horzView = Box.createVerticalBox();
-            JPanel ticketNums = new JPanel();
-            ticketNums.setOpaque(false);
-            if(i == 0){
-                //ticketNums.setBorder(new EmptyBorder(0, 5, 0, 0) );
-            } else {
-
-            }
-            // Add the number of tickets
             String numOfTickets = String.valueOf(playerTickets.get(ticketTypes[i]));
-            JLabel ticketNumbersReaming = new JLabel(numOfTickets, SwingConstants.CENTER);
-            ticketNumbersReaming.setForeground(Color.LIGHT_GRAY);
-            ticketNumbersReaming.setFont(ticketNumbersReaming.getFont().deriveFont(16.0f));
-            ticketNums.add(ticketNumbersReaming, BorderLayout.CENTER);
-            horzView.add(ticketNums);
-            URL resource = getClass().getClassLoader().getResource("imgs" + File.separator + ticketImgNames[i]);
-            ImageIcon ticketIcon = new ImageIcon(resource);
+            if(!numOfTickets.equals("0")) {
+                // Create Panel
+                Box horzView = Box.createHorizontalBox();
+                JPanel ticketNums = new JPanel();
+                ticketNums.setOpaque(false);
 
-            // Add the ticket type
-            JLabel ticketName = new JLabel("", SwingConstants.CENTER);
-            ticketName.setIcon(ticketIcon);
+                // Add the number of tickets
+                JLabel ticketNumbersReaming = new JLabel(numOfTickets, SwingConstants.CENTER);
+                ticketNumbersReaming.setForeground(Color.LIGHT_GRAY);
+                ticketNumbersReaming.setFont(ticketNumbersReaming.getFont().deriveFont(16.0f));
+                ticketNums.add(ticketNumbersReaming, BorderLayout.CENTER);
+                ticketNums.setBorder(new EmptyBorder(15, 0, 0, 0));
+                horzView.add(ticketNums);
+                URL resource = getClass().getClassLoader().getResource("imgs" + File.separator + ticketImgNames[i]);
+                ImageIcon ticketIcon = new ImageIcon(resource);
 
-            ticketName.setBorder(new EmptyBorder(5, 5, 5, 5) );
-            horzView.add(ticketName, BorderLayout.CENTER);
+                // Add the ticket type
+                JLabel ticketName = new JLabel("", SwingConstants.CENTER);
+                ticketName.setIcon(ticketIcon);
 
-            vertView.add(horzView, BorderLayout.CENTER);
+                // Add padding
+                ticketName.setBorder(new EmptyBorder(5, 5, 5, 5));
+                horzView.add(ticketName, BorderLayout.CENTER);
 
+                vertView.add(horzView, BorderLayout.CENTER);
+            }
         }
         gbc.weighty = 95;
         gbc.gridy = 1;
@@ -191,7 +188,5 @@ public class PlayerInfoColumn extends JPanel {
 //        add(horzViewMain);
 //    }
 
-    public void setMrX(boolean isMrX) {
-        this.isMrX = isMrX;
-    }
+
 }
