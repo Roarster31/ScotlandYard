@@ -5,6 +5,7 @@ import scotlandyard.Move;
 import scotlandyard.MoveTicket;
 import scotlandyard.Ticket;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -22,5 +23,7 @@ public interface GameControllerInterface {
     public void notifyAllPlayersAdded(final int count);
     public void notifyMoveSelected(final Move move);
     public List<MoveTicket> getMrXHistory();
+    public void saveGame(File fileLocation);
+    public void loadGame(File fileLocation, boolean replay);
 
 }

@@ -1,6 +1,7 @@
 package solution;
 
 import scotlandyard.*;
+import solution.Models.ScotlandYardModel;
 
 import java.io.IOException;
 import java.util.*;
@@ -198,7 +199,6 @@ public class GameLogic {
         } else if(ticketType.equals("Bus")){
             theMove = new MoveTicket(mGame.getCurrentPlayer(), target, Ticket.Bus);
         }
-        mGame.play(theMove);
         // Player has finished turn
         mGame.turn();
     }

@@ -5,18 +5,13 @@ import scotlandyard.Ticket;
 import solution.helpers.ColourHelper;
 import solution.interfaces.GameControllerInterface;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.util.Map;
 
 /**

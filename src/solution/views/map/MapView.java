@@ -6,7 +6,7 @@ import scotlandyard.MoveTicket;
 import scotlandyard.Ticket;
 import solution.Constants;
 import solution.Models.GraphData;
-import solution.ScotlandYardModel;
+import solution.Models.ScotlandYardModel;
 import solution.interfaces.GameControllerInterface;
 import solution.interfaces.adapters.GameUIAdapter;
 
@@ -31,7 +31,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     private BufferedImage mGraphImage;
     private Map<Integer, Colour> mPlayerLocations;
     private List<MapPosition> mMapPositions;
-    private final MapNodePopup mMapPopup;
+    private MapNodePopup mMapPopup;
     private MoveTicket firstMove;
     private List<MoveTicket> secondMoves;
     private AffineTransform transform;
@@ -46,10 +46,17 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         mControllerInterface.addUpdateListener(new GameAdapter());
         transform = new AffineTransform();
         inverseTransform = new AffineTransform();
-        mMapPopup = new MapNodePopup(this);
         addMouseListener(new GraphMouseListener());
         addMouseMotionListener(new GraphMouseListener());
         setupGraphImage(graphImageMapPath);
+
+        try {
+            mMapPopup = new MapNodePopup(this);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
 
         addComponentListener(new ComponentAdapter() {

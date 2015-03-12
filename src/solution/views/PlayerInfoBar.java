@@ -1,7 +1,7 @@
 package solution.views;
 
 import scotlandyard.Colour;
-import solution.ScotlandYardModel;
+import solution.Models.ScotlandYardModel;
 import solution.interfaces.GameControllerInterface;
 import solution.interfaces.adapters.GameUIAdapter;
 

@@ -1,6 +1,8 @@
-package solution;
+package solution.Models;
 
 import scotlandyard.*;
+import solution.Constants;
+import solution.PlayerHolder;
 import solution.helpers.GraphHelper;
 
 import java.io.IOException;
@@ -17,12 +19,14 @@ public class ScotlandYardModel extends ScotlandYard {
     private final List<Spectator> mSpectators;
     private final ArrayList<Colour> colourList;
     private final int mNumberOfDetectives;
+    private final String mGraphName;
 
     private Colour mCurrentPlayerColour = Constants.MR_X_COLOUR;
     private int mCurrentRound = 0;
 
     public ScotlandYardModel(int numberOfDetectives, List<Boolean> rounds, String graphFileName) throws IOException {
         super(numberOfDetectives, rounds, graphFileName);
+        mGraphName = graphFileName;
         mRounds = rounds;
         final URL resource = getClass().getClassLoader().getResource(graphFileName);
         final String filename = URLDecoder.decode(resource.getFile());
@@ -316,5 +320,9 @@ public class ScotlandYardModel extends ScotlandYard {
 
     public Graph<Integer, Route> getGraph() {
         return mGraph;
+    }
+
+    public String getGraphName() {
+        return mGraphName;
     }
 }

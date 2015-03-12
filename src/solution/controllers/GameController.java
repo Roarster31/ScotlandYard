@@ -2,13 +2,17 @@ package solution.controllers;
 
 import scotlandyard.*;
 import solution.Constants;
-import solution.ScotlandYardModel;
+import solution.Models.GameRecordTracker;
+import solution.Models.ScotlandYardModel;
 import solution.helpers.ColourHelper;
 import solution.helpers.SetupHelper;
 import solution.interfaces.GameControllerInterface;
 import solution.interfaces.GameUIInterface;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,15 +28,64 @@ public class GameController implements GameControllerInterface {
     private int mSelectedNode;
     private MrXHistoryTracker mrXHistoryTracker;
     private UIPlayer uiPlayer;
+    private final GameRecordTracker gameRecordTracker;
 
     public List<MoveTicket> getMrXHistory() {
         return mrXHistoryTracker.getMoveHistory();
+    }
+
+    @Override
+    public void saveGame(File fileLocation) {
+        try {
+            gameRecordTracker.save(fileLocation, model);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void loadGame(File fileLocation, boolean replay) {
+        try {
+            gameRecordTracker.load(fileLocation);
+            model = gameRecordTracker.apply(uiPlayer, replay);
+
+            model.spectate(mrXHistoryTracker);
+
+            if(replay){
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        while(gameRecordTracker.hasNextMove()){
+                            gameRecordTracker.playNextMove();
+
+                            notifyModelUpdated();
+
+                            try {
+                                Thread.sleep(2000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }).start();
+            }
+
+            //parts of the ui rely on the model being created so this has to
+            //come after setupModel
+            listeners.get(0).showGameInterface();
+            notifyModelUpdated();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public GameController(){
         listeners = new ArrayList<GameUIInterface>();
         mrXHistoryTracker = new MrXHistoryTracker();
         uiPlayer = new UIPlayer();
+        gameRecordTracker = new GameRecordTracker();
     }
     public void addUpdateListener(GameUIInterface listener){
         listeners.add(listener);
@@ -49,6 +102,8 @@ public class GameController implements GameControllerInterface {
                 final Colour colour = ColourHelper.getColour(i);
                 model.join(uiPlayer, colour, new Random().nextInt(190), SetupHelper.getTickets(colour.equals(Colour.Black)));
             }
+
+            gameRecordTracker.track(model);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -105,6 +160,13 @@ public class GameController implements GameControllerInterface {
         rounds.add(false);
         rounds.add(true);
         rounds.add(false);
+        rounds.add(false);
+        rounds.add(false);
+        rounds.add(true);
+        rounds.add(false);
+        rounds.add(false);
+        rounds.add(false);
+        rounds.add(true);
         rounds.add(false);
         return rounds;
     }

@@ -3,7 +3,7 @@ package solution.views;
 import com.sun.deploy.util.StringUtils;
 import scotlandyard.Colour;
 import solution.Models.GraphData;
-import solution.ScotlandYardModel;
+import solution.Models.ScotlandYardModel;
 import solution.helpers.ColourHelper;
 import solution.interfaces.GameControllerInterface;
 import solution.interfaces.adapters.GameUIAdapter;

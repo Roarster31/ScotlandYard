@@ -1,5 +1,5 @@
 import scotlandyard.*;
-import solution.*;
+import solution.Models.ScotlandYardModel;
 
 import java.util.*;
 import java.io.IOException;

@@ -1,6 +1,6 @@
 package solution.interfaces.adapters;
 
-import solution.ScotlandYardModel;
+import solution.Models.ScotlandYardModel;
 import solution.interfaces.GameUIInterface;
 
 /**

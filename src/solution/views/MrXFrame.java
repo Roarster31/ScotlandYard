@@ -1,14 +1,12 @@
 package solution.views;
 
-import scotlandyard.Colour;
 import scotlandyard.MoveTicket;
-import solution.ScotlandYardModel;
+import solution.Models.ScotlandYardModel;
 import solution.interfaces.GameControllerInterface;
 import solution.interfaces.adapters.GameUIAdapter;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.*;
 import java.util.List;
 
 /**
