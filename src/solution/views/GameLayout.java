@@ -27,7 +27,7 @@ public class GameLayout extends JPanel {
     public GameLayout(GameControllerInterface controllerInterface) {
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-
+        GridBagConstraints gbcInside = new GridBagConstraints();
         gbc.gridy = 0;
         gbc.gridwidth = gbc.gridheight = 1;
         gbc.fill = GridBagConstraints.BOTH;
@@ -51,11 +51,16 @@ public class GameLayout extends JPanel {
 
         statusLabel = new JLabel("");
 
+        gbcInside.weighty = 100;
+        gbcInside.gridy = 0;
+
+        gbcInside.gridx = 0;
+        gbcInside.weightx = 80;
+        subLayout.add(mapView, gbcInside);
 
         gbcInside.gridx = 1;
-        gbcInside.gridy = 0;
-        gbcInside.weightx = 80;
-        gbcInside.weighty = 100;
+        gbcInside.weightx = 20;
+
         subLayout.add(scrollPane, gbcInside);
 
         gbc.gridx = 0;
