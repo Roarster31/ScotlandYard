@@ -34,12 +34,6 @@ public class GameLayout extends JPanel {
 
         statusLabel = new JLabel("");
 
-//        add(mapView);
-//
-//        if(true){
-//            return;
-//        }
-
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         GridBagConstraints gbcInside = new GridBagConstraints();

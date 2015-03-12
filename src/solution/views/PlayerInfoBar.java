@@ -3,7 +3,6 @@ package solution.views;
 import scotlandyard.Colour;
 import solution.ScotlandYardModel;
 import solution.interfaces.GameControllerInterface;
-import solution.interfaces.GameUIInterface;
 import solution.interfaces.adapters.GameUIAdapter;
 
 import javax.swing.*;

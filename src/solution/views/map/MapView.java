@@ -31,7 +31,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     private BufferedImage mGraphImage;
     private Map<Integer, Colour> mPlayerLocations;
     private List<MapPosition> mMapPositions;
-    private MapNodePopup mMapPopup;
+    private final MapNodePopup mMapPopup;
     private MoveTicket firstMove;
     private List<MoveTicket> secondMoves;
     private AffineTransform transform;
@@ -46,6 +46,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         mControllerInterface.addUpdateListener(new GameAdapter());
         transform = new AffineTransform();
         inverseTransform = new AffineTransform();
+        mMapPopup = new MapNodePopup(this);
         addMouseListener(new GraphMouseListener());
         addMouseMotionListener(new GraphMouseListener());
         setupGraphImage(graphImageMapPath);
@@ -126,7 +127,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             mControllerInterface.notifyMoveSelected(moveTicket);
         }
 
-        mMapPopup = null;
+        mMapPopup.reset();
         repaint();
     }
 
@@ -146,7 +147,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         }
 
         setValidMoves(secondMoves);
-        mMapPopup = null;
+        mMapPopup.reset();
 
         repaint();
 
@@ -164,7 +165,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
                         final boolean isMrX = mControllerInterface.getCurrentPlayer() == Constants.MR_X_COLOUR;
                         final boolean hasEnoughDoubleMoves = mControllerInterface.getPlayerTickets(Constants.MR_X_COLOUR).get(Ticket.DoubleMove) > 0;
                         final boolean canDoubleMove = isMrX && hasEnoughDoubleMoves && secondMoves == null;
-                        mMapPopup = new MapNodePopup(position, getSize(), canDoubleMove, MapView.this);
+                        mMapPopup.create(position, getSize(), canDoubleMove);
                     }
                 }
             }
@@ -186,7 +187,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             }
 
             if(!positionHovered && !popupHovered){
-                mMapPopup = null;
+                mMapPopup.reset();
             }
 
             repaint();
