@@ -25,7 +25,14 @@ public class GameLayout extends JPanel {
     private final PlayerInfoBar playerInfoBar;
 
     public GameLayout(GameControllerInterface controllerInterface) {
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+
+        gbc.gridy = 0;
+        gbc.gridwidth = gbc.gridheight = 1;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.weighty = 80;
 
         controllerInterface.addUpdateListener(new GameAdapter());
         JPanel subLayout = new JPanel();
@@ -47,8 +54,10 @@ public class GameLayout extends JPanel {
 
         subLayout.add(mapView);
         subLayout.add(scrollPane);
-        add(subLayout);
-        add(playerInfoBar);
+        add(subLayout, gbc);
+        gbc.gridy = 1;
+        gbc.weighty = 20;
+        add(playerInfoBar, gbc);
         //add(statusLabel);
 
     }

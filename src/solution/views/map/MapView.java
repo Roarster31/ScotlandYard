@@ -1,6 +1,9 @@
 package solution.views.map;
 
-import scotlandyard.*;
+import scotlandyard.Colour;
+import scotlandyard.MoveDouble;
+import scotlandyard.MoveTicket;
+import scotlandyard.Ticket;
 import solution.Constants;
 import solution.Models.GraphData;
 import solution.ScotlandYardModel;
@@ -10,9 +13,10 @@ import solution.interfaces.adapters.GameUIAdapter;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
+import java.awt.event.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -25,12 +29,13 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     private final Color mDrawColour = Color.gray;
     private final GameControllerInterface mControllerInterface;
     private BufferedImage mGraphImage;
-    private Dimension mImageSize;
     private Map<Integer, Colour> mPlayerLocations;
     private List<MapPosition> mMapPositions;
     private MapNodePopup mMapPopup;
     private MoveTicket firstMove;
     private List<MoveTicket> secondMoves;
+    private AffineTransform transform;
+    private Dimension mImageSize;
 
 
     public MapView(final GameControllerInterface gameController, final String graphImageMapPath, final GraphData graphData) {
@@ -38,9 +43,39 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         generatePositionList(graphData.getPositionMap());
         mPlayerLocations = new HashMap<Integer, Colour>();
         mControllerInterface.addUpdateListener(new GameAdapter());
+        transform = new AffineTransform();
         addMouseListener(new GraphMouseListener());
         addMouseMotionListener(new GraphMouseListener());
         setupGraphImage(graphImageMapPath);
+
+        setMinimumSize(new Dimension(800, 300));
+        setPreferredSize(new Dimension(800, 300));
+
+        addComponentListener(new ComponentListener() {
+
+            @Override
+            public void componentResized(ComponentEvent e) {
+                Dimension size = getSize();
+
+                transform.setToScale(size.getWidth() / mImageSize.getWidth(), size.getHeight() / mImageSize.getHeight());
+                repaint();
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+
+            }
+
+            @Override
+            public void componentShown(ComponentEvent e) {
+
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent e) {
+
+            }
+        });
     }
 
     private void generatePositionList(Map<Integer, Integer[]> positionMap) {
@@ -59,9 +94,9 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             final URL resource = getClass().getClassLoader().getResource(graphImageMapPath);
             mGraphImage = ImageIO.read(new File(resource.toURI()));
             mImageSize = new Dimension(mGraphImage.getWidth(), mGraphImage.getHeight());
-            setSize(mImageSize);
-            setMinimumSize(mImageSize);
-            setPreferredSize(mImageSize);
+//            setSize(mImageSize);
+//            setMinimumSize(mImageSize);
+//            setPreferredSize(mImageSize);
         } catch (IOException ex) {
             //todo handle exception...
         } catch (URISyntaxException e) {
@@ -73,6 +108,8 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     protected void paintComponent(final Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
+
+        g2d.setTransform(transform);
 
         g2d.drawImage(mGraphImage, null, 0, 0);
 
@@ -119,14 +156,20 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     class GraphMouseListener extends MouseAdapter implements MouseMotionListener {
         @Override
         public void mouseClicked(MouseEvent e) {
-            final boolean popupClicked = mMapPopup != null && mMapPopup.onClick(e.getX(), e.getY());
+            Point2D transformedPoint = null;
+            try {
+                transformedPoint = transform.inverseTransform(new Point2D.Double(e.getX(), e.getY()), null);
+            } catch (NoninvertibleTransformException e1) {
+                e1.printStackTrace();
+            }
+            final boolean popupClicked = mMapPopup != null && mMapPopup.onClick((int) transformedPoint.getX(), (int) transformedPoint.getY());
             if (!popupClicked){
                 for(MapPosition position : mMapPositions){
-                    if(position.notifyMouseClick(e.getX(), e.getY())){
+                    if(position.notifyMouseClick((int) transformedPoint.getX(), (int) transformedPoint.getY())){
                         final boolean isMrX = mControllerInterface.getCurrentPlayer() == Constants.MR_X_COLOUR;
                         final boolean hasEnoughDoubleMoves = mControllerInterface.getPlayerTickets(Constants.MR_X_COLOUR).get(Ticket.DoubleMove) > 0;
                         final boolean canDoubleMove = isMrX && hasEnoughDoubleMoves && secondMoves == null;
-                        mMapPopup = new MapNodePopup(position, mImageSize, canDoubleMove, MapView.this);
+                        mMapPopup = new MapNodePopup(position, getSize(), canDoubleMove, MapView.this);
                     }
                 }
             }
@@ -135,11 +178,17 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
 
         @Override
         public void mouseMoved(MouseEvent e) {
+            Point2D transformedPoint = null;
+            try {
+                transformedPoint = transform.inverseTransform(new Point2D.Double(e.getX(), e.getY()), null);
+            } catch (NoninvertibleTransformException e1) {
+                e1.printStackTrace();
+            }
             boolean positionHovered = false;
-            final boolean popupHovered = mMapPopup != null && mMapPopup.onMouseMoved(e.getX(), e.getY());
+            final boolean popupHovered = mMapPopup != null && mMapPopup.onMouseMoved((int) transformedPoint.getX(), (int) transformedPoint.getY());
             if (!popupHovered) {
                 for(MapPosition position : mMapPositions){
-                    if(position.notifyMouseMove(e.getX(),e.getY())){
+                    if(position.notifyMouseMove((int) transformedPoint.getX(), (int) transformedPoint.getY())){
                         positionHovered = true;
                     }
                 }
@@ -190,5 +239,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             }
         }
     }
+
+
 
 }

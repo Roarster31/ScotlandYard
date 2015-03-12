@@ -4,7 +4,6 @@ import scotlandyard.Colour;
 import solution.interfaces.GameControllerInterface;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.util.List;
 
