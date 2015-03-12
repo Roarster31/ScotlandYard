@@ -45,7 +45,7 @@ public class GameLayout extends JPanel {
         statusLabel = new JLabel("");
 
 
-        //subLayout.add(mapView);
+        subLayout.add(mapView);
         subLayout.add(scrollPane);
         add(subLayout);
         add(playerInfoBar);
