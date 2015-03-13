@@ -2,7 +2,9 @@ package solution.views;
 
 import scotlandyard.Colour;
 import scotlandyard.Ticket;
+import solution.Constants;
 import solution.helpers.ColourHelper;
+import solution.helpers.TicketHelper;
 import solution.interfaces.GameControllerInterface;
 
 import javax.swing.*;
@@ -20,17 +22,12 @@ import java.util.Map;
 public class PlayerInfoColumn extends JPanel {
     private int maxTicketNumber = 0;
     private Colour currentPlayer;
-
+    private GameControllerInterface mController;
     public PlayerInfoColumn(Colour currentPlayer, GameControllerInterface controllerInterface){
 
-
+        mController = controllerInterface;
         this.currentPlayer = currentPlayer;
         // Check to see whether the passed player equals the current player
-        if(controllerInterface.getCurrentPlayer() == currentPlayer) {
-            //setupExtendedCols(currentPlayer, controllerInterface.getPlayerTickets(controllerInterface.getCurrentPlayer()));
-        } else {
-            //setupCols(currentPlayer, controllerInterface.getPlayerTickets(controllerInterface.getCurrentPlayer()));
-        }
         setupCols(currentPlayer, controllerInterface.getPlayerTickets(currentPlayer));
     }
 
@@ -47,15 +44,31 @@ public class PlayerInfoColumn extends JPanel {
         gbc.gridy = 0;
         gbc.gridwidth = 100;
         gbc.weightx = 100;
-        gbc.weighty = 5;
+        gbc.weighty = 10;
+        if(mController.getCurrentPlayer() == currentPlayer){
+            //gbc.weighty = 50;
+            //gbc.gridheight = 500;
+            colour.setMinimumSize(new Dimension(100,50));
+            colour.setSize(new Dimension(100,50));
+            colour.setPreferredSize(new Dimension(100,50));
+            colour.setMaximumSize(new Dimension(100,50));
+        } else {
+            //gbc.weighty = 10;
+            //gbc.gridheight = 100;
+            colour.setMaximumSize(new Dimension(100, 23));
+            colour.setPreferredSize(new Dimension(100,23));
+            colour.setMinimumSize(new Dimension(100,23));
+            colour.setSize(new Dimension(100,23));
+        }
         colour.setBackground(ColourHelper.toColor(currentPlayer));
         colour.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.DARK_GRAY));
         colour.setOpaque(true);
+        //colour.setMinimumSize(new Dimension(100, 50));
 
         add(colour, gbc);
 
         // Max limit of tickets
-        if(currentPlayer == Colour.Black){
+        if(currentPlayer == Constants.MR_X_COLOUR){
             maxTicketNumber = 5;
         } else {
             maxTicketNumber = 3;
@@ -63,8 +76,7 @@ public class PlayerInfoColumn extends JPanel {
 
         // Get players remaining tickets
         Ticket[] ticketTypes = {Ticket.Bus, Ticket.Underground, Ticket.Taxi, Ticket.DoubleMove, Ticket.SecretMove};
-        String[] ticketNames = {"B", "U", "T", "DM", "SM"};
-        String[] ticketImgNames = {"bus.png", "underground.png", "taxi.png" , "doublemove.png", "secretmove.png"};
+
         // Loop through all tickets
         for (int i = 0; i < maxTicketNumber; i++) {
             String numOfTickets = String.valueOf(playerTickets.get(ticketTypes[i]));
@@ -81,12 +93,10 @@ public class PlayerInfoColumn extends JPanel {
                 ticketNums.add(ticketNumbersReaming, BorderLayout.CENTER);
                 ticketNums.setBorder(new EmptyBorder(15, 0, 0, 0));
                 horzView.add(ticketNums);
-                URL resource = getClass().getClassLoader().getResource("imgs" + File.separator + ticketImgNames[i]);
-                ImageIcon ticketIcon = new ImageIcon(resource);
 
                 // Add the ticket type
                 JLabel ticketName = new JLabel("", SwingConstants.CENTER);
-                ticketName.setIcon(ticketIcon);
+                ticketName.setIcon(TicketHelper.ticketToImg(ticketTypes[i]));
 
                 // Add padding
                 ticketName.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -144,44 +154,7 @@ public class PlayerInfoColumn extends JPanel {
         g2.setPaint(oldPaint);
     }
 
-//    private void setupExtendedCols(Colour currentPlayer, Map<Ticket, Integer> playerTickets){
-//        Box horzViewMain = Box.createHorizontalBox();
-//        JLabel colour = new JLabel(" HELLO ");
-//        colour.setBackground(ColourHelper.toColor(currentPlayer));
-//        colour.setOpaque(true);
-//
-//        horzViewMain.add(colour);
-//
-//        // Max limit of tickets
-//        if(isMrX){
-//            maxTicketNumber = 5;
-//        } else {
-//            maxTicketNumber = 3;
-//        }
-//
-//        // Get players remaining tickets
-//        Ticket[] ticketTypes = {Ticket.Bus, Ticket.Underground, Ticket.Taxi, Ticket.DoubleMove, Ticket.SecretMove};
-//        String[] ticketNames = {"B", "U", "T", "DM", "SM"};
-//        String[] ticketImgNames = {"bus.png", "underground.png", "taxi.png" , "doublemove.png", "secretmove.png"};
-//        // Loop through all tickets
-//        for (int i = 0; i < maxTicketNumber; i++) {
-//            Box horzView = Box.createHorizontalBox();
-//
-//            // Add the number of tickets
-//            String numOfTickets = String.valueOf(playerTickets.get(ticketTypes[i]));
-//            JLabel ticketNumbersReaming = new JLabel(numOfTickets + ":");
-//            horzView.add(ticketNumbersReaming);
-//
-//            // Add the ticket type
-//            JLabel ticketName = new JLabel(ticketNames[i]);
-//            horzView.add(ticketName);
-//
-//            horzViewMain.add(horzView);
-//
-//        }
-//
-//        add(horzViewMain);
-//    }
+
 
 
 }

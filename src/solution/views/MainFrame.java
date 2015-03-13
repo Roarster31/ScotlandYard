@@ -5,6 +5,7 @@ import solution.interfaces.GameControllerInterface;
 import solution.interfaces.adapters.GameUIAdapter;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -28,6 +29,17 @@ public class MainFrame extends JFrame implements ActionListener {
         mControllerInterface = controllerInterface;
         controllerInterface.addUpdateListener(new GameAdapter());
 
+        JPanel mainFrame = (JPanel)getGlassPane();
+
+        // Add in some end game views
+        GameOverView endOfGame = new GameOverView(mControllerInterface);
+        endOfGame.setPreferredSize(new Dimension(1000,800));
+        endOfGame.setOpaque(false);
+        endOfGame.setVisible(false);
+        mainFrame.add(endOfGame);
+
+        // Show the frame
+        mainFrame.setVisible(true);
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -132,14 +144,22 @@ public class MainFrame extends JFrame implements ActionListener {
                 mGameLayout = null;
             }
             if(playerCountLayout != null){
+                // Remove the player counter
                 remove(playerCountLayout);
                 playerCountLayout = null;
             }
 
+            setSize(new Dimension(1000, 800));
+
+
             mGameLayout = new GameLayout(mControllerInterface);
 
+            // Add the new the game in
             add(mGameLayout);
-            pack();
+
+
+
+
         }
     }
 

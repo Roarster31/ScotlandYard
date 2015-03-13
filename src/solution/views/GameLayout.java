@@ -10,6 +10,7 @@ import solution.interfaces.adapters.GameUIAdapter;
 import solution.views.map.MapView;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,8 +29,7 @@ public class GameLayout extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         mapView = new MapView(controllerInterface, "map.jpg", new GraphData("pos.txt", GraphData.DataFormat.STANDARD));
 
-        final Dimension size = new Dimension(1000, 800);
-        setPreferredSize(size);
+
         playerInfoBar = new PlayerInfoBar(controllerInterface);
 
         statusLabel = new JLabel("");
@@ -52,13 +52,13 @@ public class GameLayout extends JPanel {
 
         controllerInterface.addUpdateListener(new GameAdapter());
         JPanel subLayout = new JPanel();
-        //subLayout.setLayout(new BoxLayout(subLayout, BoxLayout.X_AXIS));
         subLayout.setLayout(new GridBagLayout());
 
         MrXFrame mrXHistoryPanel = new MrXFrame(controllerInterface);
         mrXHistoryPanel.setLayout(new BoxLayout(mrXHistoryPanel, BoxLayout.Y_AXIS));
 
         JScrollPane scrollPane = new JScrollPane(mrXHistoryPanel);
+        scrollPane.setBorder(new EmptyBorder(0,0,0,0));
 
         mapView = new MapView(controllerInterface, "map.jpg", new GraphData("pos.txt", GraphData.DataFormat.STANDARD));
 
@@ -86,7 +86,8 @@ public class GameLayout extends JPanel {
         gbc.gridy = 1;
         gbc.weighty = 20;
         add(playerInfoBar, gbc);
-        //add(statusLabel);
+
+
 
     }
 
