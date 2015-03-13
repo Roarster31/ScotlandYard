@@ -5,6 +5,7 @@ import solution.interfaces.GameControllerInterface;
 import solution.interfaces.adapters.GameUIAdapter;
 
 import javax.swing.*;
+import java.awt.*;
 
 /**
  * Created by rory on 09/03/15.
@@ -40,11 +41,28 @@ public class MainFrame extends JFrame {
     class GameAdapter extends GameUIAdapter {
         @Override
         public void showGameInterface() {
+            // Grab the frame
+            JPanel mainFrame = (JPanel)getGlassPane();
+            setSize(new Dimension(1000,800));
+
+            // Remove the player counter
+            remove(playerCountLayout);
             mGameLayout = new GameLayout(mControllerInterface);
 
-            remove(playerCountLayout);
+            // Add the new the game in
             add(mGameLayout);
-            pack();
+
+
+            // Add in some end game views
+            GameOverView endOfGame = new GameOverView(mControllerInterface);
+            endOfGame.setPreferredSize(new Dimension(1000,800));
+            endOfGame.setOpaque(false);
+            endOfGame.setVisible(false);
+            mainFrame.add(endOfGame);
+
+            // Show the frame
+            mainFrame.setVisible(true);
+
         }
     }
 

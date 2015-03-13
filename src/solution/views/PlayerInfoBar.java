@@ -2,6 +2,7 @@ package solution.views;
 
 import scotlandyard.Colour;
 import solution.ScotlandYardModel;
+import solution.helpers.ColourHelper;
 import solution.interfaces.GameControllerInterface;
 import solution.interfaces.GameUIInterface;
 import solution.interfaces.adapters.GameUIAdapter;
@@ -41,7 +42,7 @@ public class PlayerInfoBar extends JPanel {
 
         for(int i = 0; i < allPlayers.size(); i++){
 
-            Colour currentPlayer = allPlayers.get(i);
+            Colour currentPlayer = ColourHelper.getColour(i);
             playerColumns[i] = new PlayerInfoColumn(currentPlayer, mGameControllerInterface);
             playerColumns[i].setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Color.DARK_GRAY));
             gbc.gridx = i;

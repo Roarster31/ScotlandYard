@@ -29,8 +29,7 @@ public class GameLayout extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         mapView = new MapView(controllerInterface, "map.jpg", new GraphData("pos.txt", GraphData.DataFormat.STANDARD));
 
-        final Dimension size = new Dimension(1000, 800);
-        setPreferredSize(size);
+
         playerInfoBar = new PlayerInfoBar(controllerInterface);
 
         statusLabel = new JLabel("");
@@ -59,7 +58,6 @@ public class GameLayout extends JPanel {
 
         controllerInterface.addUpdateListener(new GameAdapter());
         JPanel subLayout = new JPanel();
-        //subLayout.setLayout(new BoxLayout(subLayout, BoxLayout.X_AXIS));
         subLayout.setLayout(new GridBagLayout());
 
         MrXFrame mrXHistoryPanel = new MrXFrame(controllerInterface);
@@ -94,7 +92,8 @@ public class GameLayout extends JPanel {
         gbc.gridy = 1;
         gbc.weighty = 20;
         add(playerInfoBar, gbc);
-        //add(statusLabel);
+
+
 
     }
 

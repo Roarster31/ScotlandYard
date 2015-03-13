@@ -9,10 +9,7 @@ import solution.interfaces.GameControllerInterface;
 import solution.interfaces.GameUIInterface;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Created by rory on 10/03/15.
@@ -27,6 +24,11 @@ public class GameController implements GameControllerInterface {
 
     public List<MoveTicket> getMrXHistory() {
         return mrXHistoryTracker.getMoveHistory();
+    }
+
+    @Override
+    public Set<Colour> getWinningPlayers() {
+        return model.getWinningPlayers();
     }
 
     public GameController(){
@@ -47,7 +49,7 @@ public class GameController implements GameControllerInterface {
             for (int i = 0; i < playerCount; i++) {
                 //todo do proper location
                 final Colour colour = ColourHelper.getColour(i);
-                model.join(uiPlayer, colour, new Random().nextInt(190), SetupHelper.getTickets(colour.equals(Colour.Black)));
+                model.join(uiPlayer, colour, new Random().nextInt(190), SetupHelper.getTickets(colour.equals(Constants.MR_X_COLOUR)));
             }
         } catch (IOException e) {
             e.printStackTrace();
