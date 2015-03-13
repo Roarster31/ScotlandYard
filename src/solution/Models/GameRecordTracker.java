@@ -8,10 +8,7 @@ import solution.Constants;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by rory on 12/03/15.
@@ -24,6 +21,7 @@ public class GameRecordTracker implements Spectator {
     private int mCurrentPosInQueue;
     private Move[] mQueuedMoves;
     private ScotlandYardModel mModel;
+    private int mIgnoreMoveCount;
 
     public GameRecordTracker(){
         mMoveList = new ArrayList<Move>();
@@ -84,18 +82,10 @@ public class GameRecordTracker implements Spectator {
         mQueuedMoves = loadData.getMovesList();
         System.out.println("loaded");
 
-        System.out.println(loadData);
 
-        HashMap<Colour, Map<Ticket, Integer>> startingTickets = loadData.getTickets();
+        HashMap<Colour, Map<Ticket, Integer>> startingTickets = rebuildTickets(loadData.getMovesList(), loadData.getTickets());
 
-        //we need to get the starting values for the tickets now, yay...
-        for(Move move : loadData.getMovesList()){
-            if(move instanceof MoveTicket){
-                MoveTicket moveTicket = (MoveTicket) move;
-                Map<Ticket, Integer> ticketMap = startingTickets.get(moveTicket.colour);
-                ticketMap.put(moveTicket.ticket, ticketMap.get(moveTicket.ticket)+1);
-            }
-        }
+
 
         ScotlandYardModel model = null;
         try {
@@ -106,8 +96,10 @@ public class GameRecordTracker implements Spectator {
         }
 
 
+        final PlayerSpoofer playerSpoofer = new PlayerSpoofer(uiPlayer, loadData.getMovesList());
+
         for(Colour colour : loadData.getColourList()){
-            model.join(new PlayerSpoofer(uiPlayer, loadData.getMovesList(), colour), colour, loadData.getStartPositions().get(colour), startingTickets.get(colour));
+            model.join(playerSpoofer, colour, loadData.getStartPositions().get(colour), startingTickets.get(colour));
         }
 
         track(model);
@@ -122,6 +114,68 @@ public class GameRecordTracker implements Spectator {
 
     }
 
+    /**
+     * returns a map of tickets and their count values as should have originally been added to the model
+     */
+    private HashMap<Colour, Map<Ticket, Integer>> rebuildTickets(Move[] moveList, HashMap<Colour, Map<Ticket, Integer>> startingTickets) {
+        HashMap<Colour, Map<Ticket, Integer>> out = new HashMap<Colour, Map<Ticket, Integer>>(startingTickets);
+        //we need to get the starting values for the tickets now, yay...
+
+        //go through each move, and work out the tickets used to complete it
+        for(Move move : moveList){
+
+            Map<Ticket, Integer> ticketsMap = out.get(move.colour);
+            final HashMap<Ticket, Integer> moveTickets = getMoveTickets(move);
+            Iterator it = moveTickets.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry)it.next();
+
+                final Ticket ticket = (Ticket) pair.getKey();
+                final Integer value = (Integer) pair.getValue();
+                ticketsMap.put(ticket, ticketsMap.get(ticket) + value);
+
+                if(move.colour != Constants.MR_X_COLOUR) {
+                    //if it's not MrX we're dealing with we need to take the tickets off him
+                    Map<Ticket, Integer> mrXTicketMap = out.get(Constants.MR_X_COLOUR);
+                    mrXTicketMap.put(ticket, mrXTicketMap.get(ticket)-value);
+                }
+
+                it.remove(); // avoids a ConcurrentModificationException
+            }
+
+
+        }
+        return out;
+    }
+
+    /**
+     * returns the total number of tickets required to complete a move
+     */
+    private HashMap<Ticket, Integer> getMoveTickets(Move move){
+        HashMap<Ticket, Integer> tickets = new HashMap<Ticket, Integer>();
+        if(move instanceof MoveTicket){
+            tickets.put(((MoveTicket) move).ticket, 1);
+        }else if(move instanceof MoveDouble){
+            for(Move innerMove : ((MoveDouble)move).moves){
+                Iterator it = getMoveTickets(innerMove).entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry pair = (Map.Entry)it.next();
+
+                    Ticket ticket = (Ticket) pair.getKey();
+                    Integer value = (Integer) pair.getValue();
+
+                    if(tickets.containsKey(ticket)){
+                        tickets.put(ticket, tickets.get(ticket)+value);
+                    }else{
+                        tickets.put(ticket,value);
+                    }
+
+                    it.remove(); // avoids a ConcurrentModificationException
+                }
+            }
+        }
+        return tickets;
+    }
 
 
     public void playNextMove(){
@@ -141,13 +195,11 @@ public class GameRecordTracker implements Spectator {
         private final Player mRealPlayer;
         private int count = 0;
 
-        public PlayerSpoofer(Player realPlayer, Move[] movesList, Colour colour) {
+        public PlayerSpoofer(Player realPlayer, Move[] movesList) {
             mRealPlayer = realPlayer;
             playerMoveList = new ArrayList<Move>();
             for(Move move : movesList){
-                if(move.colour.equals(colour)){
-                    playerMoveList.add(move);
-                }
+                playerMoveList.add(move);
             }
         }
 
@@ -155,22 +207,35 @@ public class GameRecordTracker implements Spectator {
         public Move notify(int location, List<Move> list) {
             if(count < playerMoveList.size()) {
                 Move move = playerMoveList.get(count);
-                count++;
-                return move;
-            }else{
-                return mRealPlayer.notify(location, list);
+                if(move != null) {
+                    count++;
+                    System.out.println("mCurrentPosInQueue: "+mCurrentPosInQueue+" move: "+move);
+                    return move;
+                }
             }
+            final Move move = mRealPlayer.notify(location, list);
+            System.out.println("fallback mCurrentPosInQueue: "+mCurrentPosInQueue+" move: "+move);
+            return move;
         }
 
     }
 
     @Override
     public void notify(Move move) {
-        if(move instanceof MoveTicket && move.colour == Constants.MR_X_COLOUR){
-            MoveTicket moveTicket  = (MoveTicket) move;
-            mMoveList.add(new MoveTicket(moveTicket.colour, mModel.getRealPlayerLocation(Constants.MR_X_COLOUR), moveTicket.ticket));
-        }else if(!(move instanceof MoveDouble)){
-            mMoveList.add(move);
+
+        if(mIgnoreMoveCount > 0){
+            mIgnoreMoveCount--;
+        }else {
+            if (move instanceof MoveTicket && move.colour == Constants.MR_X_COLOUR) {
+                MoveTicket moveTicket = (MoveTicket) move;
+                mMoveList.add(new MoveTicket(moveTicket.colour, mModel.getRealPlayerLocation(Constants.MR_X_COLOUR), moveTicket.ticket));
+            } else {
+                mMoveList.add(move);
+            }
+
+            if (move instanceof MoveDouble) {
+                mIgnoreMoveCount = 2;
+            }
         }
     }
 

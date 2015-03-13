@@ -59,15 +59,18 @@ public class GameController implements GameControllerInterface {
                     @Override
                     public void run() {
                         while(gameRecordTracker.hasNextMove()){
-                            gameRecordTracker.playNextMove();
-
-                            notifyModelUpdated();
 
                             try {
                                 Thread.sleep(2000);
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
+
+                            gameRecordTracker.playNextMove();
+
+                            notifyModelUpdated();
+
+
                         }
                     }
                 }).start();

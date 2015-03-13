@@ -142,6 +142,8 @@ public class MainFrame extends JFrame implements ActionListener {
             if(mGameLayout != null){
                 remove(mGameLayout);
                 mGameLayout = null;
+            }else{
+                setSize(new Dimension(1000, 800));
             }
             if(playerCountLayout != null){
                 // Remove the player counter
@@ -149,7 +151,6 @@ public class MainFrame extends JFrame implements ActionListener {
                 playerCountLayout = null;
             }
 
-            setSize(new Dimension(1000, 800));
 
 
             mGameLayout = new GameLayout(mControllerInterface);
