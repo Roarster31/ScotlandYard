@@ -60,7 +60,7 @@ public class GameLayout extends JPanel {
         JScrollPane scrollPane = new JScrollPane(mrXHistoryPanel);
         scrollPane.setBorder(new EmptyBorder(0,0,0,0));
 
-        mapView = new MapView(controllerInterface, "map.jpg", new GraphData("pos.txt", GraphData.DataFormat.STANDARD));
+        mapView = new MapView(controllerInterface, "map.jpg", new GraphData("custom.txt", GraphData.DataFormat.CUSTOM));
 
 
         playerInfoBar = new PlayerInfoBar(controllerInterface);

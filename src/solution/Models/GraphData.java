@@ -2,16 +2,16 @@ package solution.Models;
 
 import com.google.gson.Gson;
 import com.sun.deploy.util.StringUtils;
-import solution.development.MapData;
-import solution.development.PathNode;
+import solution.development.CompatibleData;
+import solution.views.map.MapPath;
+import solution.views.map.MapPosition;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 
 /**
  * Created by rory on 09/03/15.
@@ -23,13 +23,15 @@ public class GraphData {
     private static final String TXT = "txt";
     private static final String JSON = "json";
 
-    private final Map<Integer,Integer[]> mPositionMap;
+    private final ArrayList<MapPosition> mPositionList;
+    private final ArrayList<MapPath> mPathList;
 
     public GraphData(final String dataFilePath, final DataFormat dataFormat){
 
         final String extension = dataFilePath.substring(dataFilePath.lastIndexOf(".")+1, dataFilePath.length());
 
-        mPositionMap = new HashMap<Integer, Integer[]>();
+        mPositionList = new ArrayList<MapPosition>();
+        mPathList = new ArrayList<MapPath>();
 
         if(dataFormat == DataFormat.STANDARD){
             parseStandardTextFile(dataFilePath);
@@ -50,7 +52,7 @@ public class GraphData {
                 if(pieces.length < 3) {
                     System.err.println("bad line: "+line);
                 }else{
-                    mPositionMap.put(Integer.parseInt(pieces[0]), new Integer[]{Integer.parseInt(pieces[1]), Integer.parseInt(pieces[2])});
+                    mPositionList.add(new MapPosition(Integer.parseInt(pieces[0]), Integer.parseInt(pieces[1]), Integer.parseInt(pieces[2])));
                 }
             }
         } catch (IOException e) {
@@ -75,15 +77,18 @@ public class GraphData {
 
         Gson gson = new Gson();
 
-        MapData mapData = gson.fromJson(input, MapData.class);
+        CompatibleData compatMapData = gson.fromJson(input, CompatibleData.class);
 
-        for(PathNode pathNode : mapData.getPathNodeList()){
-            mPositionMap.put(pathNode.getId(), new Integer[]{pathNode.getX(),pathNode.getY()});
-        }
+        mPositionList.addAll(compatMapData.getPositions());
+        mPathList.addAll(compatMapData.getPaths());
 
     }
 
-    public Map<Integer, Integer[]> getPositionMap() {
-        return mPositionMap;
+    public ArrayList<MapPosition> getPositionList() {
+        return mPositionList;
+    }
+
+    public ArrayList<MapPath> getPathList() {
+        return mPathList;
     }
 }

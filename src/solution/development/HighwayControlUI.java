@@ -20,16 +20,21 @@ public class HighwayControlUI extends JFrame implements MapCanvas.CanvasInterfac
 	public static final String CONNECT_NODE_TOOL = "connect_node_tool";
 	public static final String EDIT_PATH_TOOL = "edit_path_tool";
 	private static final String MENU_LOAD = "menu_load";
-	private static final String MENU_SAVE = "menu_save";
+	private static final String MENU_SAVE_RAW = "menu_save";
+    private static final String MENU_SAVE_PARSABLE= "menu_save_2";
+    public static final String VIEW_ALL = "view_all";
+    public static final String VIEW_BUS = "view_bus";
+    public static final String VIEW_UNDERGROUND = "view_underground";
 
-	private final JPanel mImagePanel;
+    private final JPanel mImagePanel;
 	private final MapCanvas mCanvas;
 	private final DataParser mDataParser;
 	private String mCurrentTool = ADD_EDIT_NODE_TOOL;
-	private JFileChooser fileChooser;
-	private JTextField selectedNodeTextField;
-	private JButton deleteSelectedNodeButton;
-	private ActionListener mMenuListener = new ActionListener() {
+    private String mCurrentView = VIEW_ALL;
+    private JFileChooser fileChooser;
+    private JTextField selectedNodeTextField;
+    private JButton deleteSelectedNodeButton;
+    private ActionListener mMenuListener = new ActionListener() {
 		@Override
 		public void actionPerformed(final ActionEvent e) {
 			if(MENU_LOAD.equals(e.getActionCommand())){
@@ -46,13 +51,17 @@ public class HighwayControlUI extends JFrame implements MapCanvas.CanvasInterfac
 				} else {
 					System.out.println("Load command cancelled by user.");
 				}
-			}else if(MENU_SAVE.equals(e.getActionCommand())){
+			}else if(MENU_SAVE_RAW.equals(e.getActionCommand()) || MENU_SAVE_PARSABLE.equals(e.getActionCommand())){
 				int returnVal = fileChooser.showSaveDialog(HighwayControlUI.this);
 
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					File file = fileChooser.getSelectedFile();
 					try {
-						mDataParser.saveData(new MapData(mCanvas.curHighId, mCanvas.mNodeList, mCanvas.mEdgeList), file);
+                        if(MENU_SAVE_RAW.equals(e.getActionCommand())) {
+                            mDataParser.saveData(new MapData(mCanvas.curHighId, mCanvas.mNodeList, mCanvas.mEdgeList, mCanvas.mBusNodeList, mCanvas.mBusEdgeList, mCanvas.mUndergroundNodeList, mCanvas.mUndergroundEdgeList), file);
+                        }else if(MENU_SAVE_PARSABLE.equals(e.getActionCommand())) {
+                            mDataParser.saveCompatibleFile(new MapData(mCanvas.curHighId, mCanvas.mNodeList, mCanvas.mEdgeList, mCanvas.mBusNodeList, mCanvas.mBusEdgeList, mCanvas.mUndergroundNodeList, mCanvas.mUndergroundEdgeList), file);
+                        }
 					} catch (FileNotFoundException e1) {
 						e1.printStackTrace();
 					} catch (UnsupportedEncodingException e1) {
@@ -65,7 +74,8 @@ public class HighwayControlUI extends JFrame implements MapCanvas.CanvasInterfac
 			}
 		}
 	};
-	public HighwayControlUI(final File mapImage)
+
+    public HighwayControlUI(final File mapImage)
 	{
 
 		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.X_AXIS));
@@ -167,6 +177,24 @@ public class HighwayControlUI extends JFrame implements MapCanvas.CanvasInterfac
 		nodeActionGroup.add(moveButton);
 		nodeActionGroup.add(pathEditTool);
 
+        JRadioButton viewAllButton = new JRadioButton();
+        viewAllButton.setText("View all");
+        viewAllButton.setActionCommand(VIEW_ALL);
+        viewAllButton.setSelected(true);
+
+        JRadioButton viewBusButton = new JRadioButton();
+        viewBusButton.setText("View Bus");
+        viewBusButton.setActionCommand(VIEW_BUS);
+
+        JRadioButton viewUndergroundButton = new JRadioButton();
+        viewUndergroundButton.setText("View Underground");
+        viewUndergroundButton.setActionCommand(VIEW_UNDERGROUND);
+
+        ButtonGroup viewGroup = new ButtonGroup();
+        viewGroup.add(viewAllButton);
+        viewGroup.add(viewBusButton);
+        viewGroup.add(viewUndergroundButton);
+
 		ActionListener nodeToolListener = new ActionListener(){
 			@Override
 			public void actionPerformed(final ActionEvent e) {
@@ -176,13 +204,28 @@ public class HighwayControlUI extends JFrame implements MapCanvas.CanvasInterfac
 			}
 		};
 
+        ActionListener viewToolListener = new ActionListener(){
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                mCurrentView = e.getActionCommand();
 
+                updateMapView();
+            }
+        };
 
 		addNodeButton.addActionListener(nodeToolListener);
 		connectNodeButton.addActionListener(nodeToolListener);
 		moveButton.addActionListener(nodeToolListener);
 		pathEditTool.addActionListener(nodeToolListener);
 
+
+        viewAllButton.addActionListener(viewToolListener);
+        viewBusButton.addActionListener(viewToolListener);
+        viewUndergroundButton.addActionListener(viewToolListener);
+
+        toolbarPanel.add(viewAllButton);
+        toolbarPanel.add(viewBusButton);
+        toolbarPanel.add(viewUndergroundButton);
 
 		toolbarPanel.add(idPanel);
 		toolbarPanel.add(deleteSelectedNodeButton);
@@ -195,7 +238,7 @@ public class HighwayControlUI extends JFrame implements MapCanvas.CanvasInterfac
 		return toolbarPanel;
 	}
 
-	private void createMenu() {
+    private void createMenu() {
 
 		fileChooser = new JFileChooser();
 		File workingDirectory = new File(System.getProperty("user.dir"));
@@ -222,19 +265,33 @@ public class HighwayControlUI extends JFrame implements MapCanvas.CanvasInterfac
 		menuItem.addActionListener(mMenuListener);
 		menu.add(menuItem);
 
-		menuItem = new JMenuItem("Save Map Data",
+		menuItem = new JMenuItem("Save Raw Map Data",
 				KeyEvent.VK_S);
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(
 				KeyEvent.VK_S, InputEvent.CTRL_MASK));
 		menuItem.getAccessibleContext().setAccessibleDescription(
-				"Save map data");
-		menuItem.setActionCommand(MENU_SAVE);
+				"Save raw map data");
+		menuItem.setActionCommand(MENU_SAVE_RAW);
 		menuItem.addActionListener(mMenuListener);
 		menu.add(menuItem);
 
+        menuItem = new JMenuItem("Save Parsable Map Data",
+                KeyEvent.VK_S);
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_S, InputEvent.CTRL_MASK));
+        menuItem.getAccessibleContext().setAccessibleDescription(
+                "Save parsable map data");
+        menuItem.setActionCommand(MENU_SAVE_PARSABLE);
+        menuItem.addActionListener(mMenuListener);
+        menu.add(menuItem);
+
 		setJMenuBar(menuBar);
 	}
-	private void updateImageCursor() {
+
+    private void updateMapView() {
+        mCanvas.setViewType(mCurrentView);
+    }
+    private void updateImageCursor() {
 		if(ADD_EDIT_NODE_TOOL.equals(mCurrentTool) || EDIT_PATH_TOOL.equals(mCurrentTool)){
 			mImagePanel.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
 		}else if(MOVE_ELEMENT_TOOL.equals(mCurrentTool)){

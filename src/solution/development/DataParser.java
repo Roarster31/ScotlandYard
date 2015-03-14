@@ -30,7 +30,7 @@ public class DataParser {
         Gson gson = new Gson();
 
         PrintWriter writer = new PrintWriter(file, "UTF-8");
-        writer.write(gson.toJson(mapData));
+        writer.write(gson.toJson(new CompatibleData(mapData)));
         writer.close();
 
     }

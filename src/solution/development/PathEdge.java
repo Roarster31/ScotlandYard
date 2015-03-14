@@ -46,4 +46,23 @@ public class PathEdge {
 		return mPath;
 	}
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PathEdge edge = (PathEdge) o;
+
+        if (mPathNode1 != null ? !mPathNode1.equals(edge.mPathNode1) : edge.mPathNode1 != null) return false;
+        if (mPathNode2 != null ? !mPathNode2.equals(edge.mPathNode2) : edge.mPathNode2 != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = mPathNode1 != null ? mPathNode1.hashCode() : 0;
+        result = 31 * result + (mPathNode2 != null ? mPathNode2.hashCode() : 0);
+        return result;
+    }
 }
