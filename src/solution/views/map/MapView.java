@@ -105,17 +105,19 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
 
         g2d.setStroke(new BasicStroke(5f));
 
-        System.out.println("iterating");
-
         for(MapPath mapPath : mMapPaths){
             mapPath.drawBackground(g2d);
         }
 
-        g2d.setStroke(new BasicStroke(3f));
+        g2d.setStroke(new BasicStroke(3f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND));
 
 
         for(MapPath mapPath : mMapPaths){
             mapPath.drawIfAvailable(g2d);
+        }
+
+        for(MapPath mapPath : mMapPaths){
+            mapPath.drawIfHighlighted(g2d);
         }
 
         for(MapPosition position : mMapPositions){
@@ -242,7 +244,6 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             position.resetTickets();
         }
 
-        System.out.println("resetting availability");
         for(MapPath mapPath : mMapPaths){
             mapPath.resetAvailability();
         }

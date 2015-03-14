@@ -27,7 +27,7 @@ public class GameLayout extends JPanel {
     public GameLayout(GameControllerInterface controllerInterface) {
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        mapView = new MapView(controllerInterface, "map.jpg", new GraphData("pos.txt", GraphData.DataFormat.STANDARD));
+        mapView = new MapView(controllerInterface, "custom_map.png", new GraphData("custom.txt", GraphData.DataFormat.CUSTOM));
 
 
         playerInfoBar = new PlayerInfoBar(controllerInterface);
@@ -59,8 +59,6 @@ public class GameLayout extends JPanel {
 
         JScrollPane scrollPane = new JScrollPane(mrXHistoryPanel);
         scrollPane.setBorder(new EmptyBorder(0,0,0,0));
-
-        mapView = new MapView(controllerInterface, "map.jpg", new GraphData("custom.txt", GraphData.DataFormat.CUSTOM));
 
 
         playerInfoBar = new PlayerInfoBar(controllerInterface);

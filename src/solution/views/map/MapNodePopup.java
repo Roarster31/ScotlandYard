@@ -92,10 +92,9 @@ public class MapNodePopup {
 
     private void init(final int x, final int y, final Dimension canvasSize) {
 
-        Rectangle2D rect = getStandardRect();
 
-        final int width = BUTTON_PADDING + fullTicketList.size() * (BUTTON_SIZE + BUTTON_PADDING);
-        final int height = BUTTON_SIZE + BUTTON_PADDING + SHALLOW_BUTTON_SIZE + 2 * BUTTON_PADDING;
+        int width = BUTTON_PADDING + fullTicketList.size() * (BUTTON_SIZE + BUTTON_PADDING) + TRIANGLE_SIZE;
+        int height = BUTTON_SIZE + BUTTON_PADDING + SHALLOW_BUTTON_SIZE + 2 * BUTTON_PADDING + TRIANGLE_SIZE;
 
         int xPosition;
         int yPosition;
@@ -104,7 +103,7 @@ public class MapNodePopup {
         int triangleY1;
         int triangleY2;
 
-        if (x < rect.getWidth() / 2) {
+        if (x < width / 2) {
             //to right
             xPosition = x + TRIANGLE_SIZE;
             yPosition = y - height / 2;
@@ -112,7 +111,7 @@ public class MapNodePopup {
             triangleX2 = x + TRIANGLE_SIZE;
             triangleY1 = y + TRIANGLE_SIZE;
             triangleY2 = y - TRIANGLE_SIZE;
-        } else if (canvasSize.width - x < rect.getWidth() / 2) {
+        } else if (canvasSize.width - x < width / 2) {
             //to left
             xPosition = x - width - TRIANGLE_SIZE;
             yPosition = y - height / 2;
@@ -120,7 +119,7 @@ public class MapNodePopup {
             triangleX2 = x - TRIANGLE_SIZE;
             triangleY1 = y + TRIANGLE_SIZE;
             triangleY2 = y - TRIANGLE_SIZE;
-        } else if (y > rect.getHeight()) {
+        } else if (y > height) {
             //above
             xPosition = x - width / 2;
             yPosition = y - height - TRIANGLE_SIZE;
@@ -268,17 +267,9 @@ public class MapNodePopup {
 
         g2d.setColor(Color.BLACK);
 
+        g2d.fillPolygon(mTrianglePolygon);
 
 
-
-    }
-
-    private Rectangle2D getStandardRect() {
-
-        final int width = BUTTON_PADDING + fullTicketList.size() * (BUTTON_SIZE + BUTTON_PADDING);
-        final int height = BUTTON_SIZE + BUTTON_PADDING + SHALLOW_BUTTON_SIZE + 2 * BUTTON_PADDING;
-
-        return new Rectangle2D.Double(0, 0, width, height);
     }
 
     public boolean onClick(final int x, final int y) {

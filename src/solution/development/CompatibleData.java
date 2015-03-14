@@ -122,12 +122,13 @@ public class CompatibleData {
                 }
             }
 
-            paths.add(new MapPath(path, idArray[0], idArray[idArray.length-1]));
+            paths.add(new MapPath(path, xArray.length, idArray[0], idArray[idArray.length-1]));
 
         }
 
         return paths;
     }
+
 
     public ArrayList<MapPosition> getPositions() {
         return positions;

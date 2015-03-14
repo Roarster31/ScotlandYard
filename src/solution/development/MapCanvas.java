@@ -74,7 +74,7 @@ public class MapCanvas extends JPanel implements MouseListener, MouseMotionListe
 
 		g2d.setStroke(stroke);
 
-		g2d.setColor(new Color(250,250,250,200));
+		g2d.setColor(new Color(250,250,250, 111));
 
 		g2d.fill(new Rectangle2D.Double(0,0,getSize().getWidth(), getSize().getHeight()));
 
@@ -432,6 +432,20 @@ public class MapCanvas extends JPanel implements MouseListener, MouseMotionListe
                     break;
                 }
             }
+
+
+        }
+
+        if(viewType.equals(HighwayControlUI.VIEW_UNDERGROUND)){
+
+            for(PathNode node : mBusNodeList){
+                if(node.getShape().contains(x,y)){
+                    correctedX = (int) node.getShape().getCenterX();
+                    correctedY = (int) node.getShape().getCenterY();
+                    break;
+                }
+            }
+
         }
 
 		for(PathNode node : nodeList){
