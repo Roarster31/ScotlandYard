@@ -7,6 +7,7 @@ import scotlandyard.Ticket;
 import solution.Constants;
 import solution.Models.GraphData;
 import solution.Models.ScotlandYardModel;
+import solution.helpers.InterpolatorHelper;
 import solution.interfaces.GameControllerInterface;
 import solution.interfaces.adapters.GameUIAdapter;
 
@@ -14,9 +15,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.NoninvertibleTransformException;
-import java.awt.geom.Point2D;
+import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -40,6 +39,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     private AffineTransform transform;
     private AffineTransform inverseTransform;
     private Dimension mImageSize;
+    private float[] animationCoords;
 
 
     public MapView(final GameControllerInterface gameController, final String graphImageMapPath, final GraphData graphData) {
@@ -128,19 +128,74 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             mMapPopup.draw(g2d);
         }
 
+        g2d.setColor(Color.GREEN);
+
+        if(animationCoords != null){
+            g2d.fillOval((int) animationCoords[0]-5, (int) animationCoords[1]-5,10,10);
+        }
+
     }
 
     @Override
-    public void onTicketSelected(Ticket ticket, int nodeId) {
+    public void onTicketSelected(Ticket ticket, final int nodeId) {
         final Colour currentPlayer = mControllerInterface.getCurrentPlayer();
         final MoveTicket moveTicket = new MoveTicket(currentPlayer, nodeId, ticket);
         if(secondMoves != null && firstMove != null){
             MoveDouble chosenMove = new MoveDouble(currentPlayer, firstMove, moveTicket);
-            mControllerInterface.notifyMoveSelected(chosenMove);
-            secondMoves = null;
-            firstMove = null;
+//            mControllerInterface.notifyMoveSelected(chosenMove);
+//            secondMoves = null;
+//            firstMove = null;
         }else {
-            mControllerInterface.notifyMoveSelected(moveTicket);
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+
+                    Path2D chosenPath = null;
+
+                    for(MapPath path : mMapPaths){
+                        if(path.isAvailable() && path.hasNode(nodeId)){
+                            if(path.getStartingNode() == nodeId) {
+                                chosenPath = InterpolatorHelper.reverse(path.getPath2D());
+                            }else{
+                                chosenPath = path.getPath2D();
+                            }
+                            break;
+                        }
+                    }
+
+
+                    if(chosenPath != null){
+
+                        Path2D interpolatedPath = InterpolatorHelper.interpolate(chosenPath, 5f);
+
+                        PathIterator iterator = interpolatedPath.getPathIterator(null, 0.1f);
+
+                        while(!iterator.isDone()){
+
+                            animationCoords = new float[6];
+                            iterator.currentSegment(animationCoords);
+                            iterator.next();
+                            repaint();
+
+                            try {
+                                Thread.sleep(50);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        animationCoords = null;
+                        mControllerInterface.notifyMoveSelected(moveTicket);
+
+
+                    }
+
+
+                }
+            }).start();
+
+//            mControllerInterface.notifyMoveSelected(moveTicket);
         }
 
         mMapPopup.reset();
@@ -256,7 +311,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             }
 
             for(MapPath mapPath : mMapPaths){
-                mapPath.notifyAvailableNode(currentPosition, moveTicket);
+                mapPath.setAvailable(currentPosition, moveTicket);
             }
         }
     }

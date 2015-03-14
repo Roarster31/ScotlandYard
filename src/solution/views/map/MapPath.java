@@ -43,15 +43,16 @@ public class MapPath {
         }
     }
 
-    public void notifyAvailableNode(int currentPosition, MoveTicket move){
-        if(currentPosition == nodeId1 || currentPosition == nodeId2 ){
+    public boolean setAvailable(int startNode, MoveTicket move){
+        if(startNode == nodeId1 || startNode == nodeId2 ){
             System.out.println();
         }
-        boolean available = (nodeId1 == move.target && currentPosition == nodeId2) || (nodeId1 == currentPosition && move.target == nodeId2);
+        boolean available = (nodeId1 == move.target && startNode == nodeId2) || (nodeId1 == startNode && move.target == nodeId2);
 
         if(available){
             pathAvailable = available;
         }
+        return available;
     }
 
     public void resetAvailability() {
@@ -60,10 +61,26 @@ public class MapPath {
     }
 
     public void notifyPositionHovered(MapPosition position) {
-        hovered = position != null && (position.getId() == nodeId1 || position.getId() == nodeId2);
+        hovered = position != null && hasNode(position.getId());
     }
 
     public int getPathLength() {
         return pathLength;
+    }
+
+    public boolean isAvailable() {
+        return pathAvailable;
+    }
+
+    public boolean hasNode(int nodeId) {
+        return nodeId == nodeId1 || nodeId == nodeId2;
+    }
+
+    public Path2D getPath2D() {
+        return path;
+    }
+
+    public int getStartingNode(){
+        return nodeId1;
     }
 }
