@@ -4,7 +4,7 @@ import solution.views.map.MapPath;
 import solution.views.map.MapPosition;
 
 import java.awt.geom.Path2D;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * Created by rory on 09/03/15.
@@ -104,8 +104,8 @@ public class CompatibleData {
         return pathPoints;
     }
 
-    public ArrayList<MapPath> getPaths() {
-        ArrayList<MapPath> paths = new ArrayList<MapPath>();
+    public Set<MapPath> getPaths() {
+        Set<MapPath> paths = new HashSet<MapPath>();
 
         for (int i = 0; i < pathXCoords.size(); i++) {
             int[] xArray = pathXCoords.get(i);
@@ -128,6 +128,7 @@ public class CompatibleData {
 
         return paths;
     }
+
 
 
     public ArrayList<MapPosition> getPositions() {

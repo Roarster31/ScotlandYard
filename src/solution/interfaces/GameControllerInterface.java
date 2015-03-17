@@ -1,9 +1,6 @@
 package solution.interfaces;
 
-import scotlandyard.Colour;
-import scotlandyard.Move;
-import scotlandyard.MoveTicket;
-import scotlandyard.Ticket;
+import scotlandyard.*;
 
 import java.io.File;
 import java.util.List;
@@ -20,12 +17,15 @@ public interface GameControllerInterface {
     public Map<Ticket,Integer> getPlayerTickets(Colour currentPlayer);
     public List<Colour> getPlayerList();
     List<MoveTicket> getValidSingleMovesAtLocation(Colour currentPlayer, int location);
+    public int getCurrentPlayerRealPosition();
 
     public void notifyAllPlayersAdded(final int count);
     public void notifyMoveSelected(final Move move);
     public List<MoveTicket> getMrXHistory();
     public void saveGame(File fileLocation);
     public Set<Colour> getWinningPlayers();
+
     public void loadGame(File fileLocation, boolean replay);
 
+    List<Edge<Integer, Route>> getGraphRoutes();
 }

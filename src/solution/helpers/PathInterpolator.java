@@ -7,9 +7,17 @@ import java.util.ArrayList;
 /**
  * Created by rory on 14/03/15.
  */
-public class InterpolatorHelper {
+public class PathInterpolator {
 
-    public static Path2D reverse(Path2D path){
+    private Path2D path;
+    private ArrayList<Segment> segments;
+    private int currentSegmentIndex = 0;
+
+    public PathInterpolator(Path2D path2D){
+        this.path = path2D;
+    }
+
+    public PathInterpolator reverse(){
 
         PathIterator iterator = path.getPathIterator(null);
 
@@ -35,14 +43,17 @@ public class InterpolatorHelper {
 
         }
 
-        return newPath;
+        path = newPath;
+
+        return this;
     }
 
-    public static Path2D interpolate(Path2D path, float step){
+    public PathInterpolator interpolate(float step){
         PathIterator iterator = path.getPathIterator(null);
 
         ArrayList<Float> xs = new ArrayList<Float>();
         ArrayList<Float> ys = new ArrayList<Float>();
+        ArrayList<Float> rs = new ArrayList<Float>();
 
         while(!iterator.isDone()){
             float[] coords = new float[2];
@@ -51,7 +62,6 @@ public class InterpolatorHelper {
             ys.add(coords[1]);
             iterator.next();
         }
-
 
         int i = 0;
         while(i < xs.size()-1){
@@ -81,7 +91,8 @@ public class InterpolatorHelper {
 
             if(newDx == 0){
                 i++;
-                continue;
+                float rotation = (float) Math.atan2(dy,dx);
+                rs.add(rotation);
             }else {
                 float newX = curX - newDx;
                 float newY = curY - newDy;
@@ -91,20 +102,69 @@ public class InterpolatorHelper {
             }
         }
 
-        Path2D newPath = new Path2D.Double();
-        for (int j = 0; j < xs.size(); j++) {
-            Float x = xs.get(j);
-            Float y = ys.get(j);
+        rs.add(0,rs.get(0));
 
-            if(j == 0){
-                newPath.moveTo(x,y);
+        segments = new ArrayList<Segment>();
+
+        path = new Path2D.Double(Path2D.WIND_EVEN_ODD, xs.size());
+
+        for (int i1 = 0; i1 < xs.size(); i1++) {
+            float x = xs.get(i1);
+            float y = ys.get(i1);
+            float r = rs.get(i1);
+
+            if(i1 == 0){
+                path.moveTo(x,y);
             }else{
-                newPath.lineTo(x,y);
+                path.lineTo(x,y);
             }
+
+            segments.add(new Segment(x,y,r));
 
         }
 
-        return newPath;
 
+        return this;
+
+    }
+
+    public void nextSegment(){
+        currentSegmentIndex++;
+    }
+    public Segment getCurrentSegment() {
+        return segments != null ? segments.get(currentSegmentIndex) : null;
+    }
+
+    public boolean isDone() {
+        return segments == null || currentSegmentIndex > segments.size()-1;
+    }
+
+    public class Segment {
+
+        private final float x;
+        private final float y;
+        private final float rotation;
+
+        public Segment(float x, float y, float rotation) {
+            this.x = x;
+            this.y = y;
+            this.rotation = rotation;
+        }
+
+        public float getX() {
+            return x;
+        }
+
+        public float getY() {
+            return y;
+        }
+
+        public float getRotation() {
+            return rotation;
+        }
+    }
+
+    public Path2D getPath() {
+        return path;
     }
 }

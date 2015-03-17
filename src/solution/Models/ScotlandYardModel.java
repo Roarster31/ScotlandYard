@@ -35,7 +35,6 @@ public class ScotlandYardModel extends ScotlandYard {
         mPlayerMap = new HashMap<Colour, PlayerHolder>();
         mSpectators = new ArrayList<Spectator>();
         colourList = new ArrayList<Colour>();
-
     }
 
     @Override

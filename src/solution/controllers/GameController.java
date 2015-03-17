@@ -85,6 +85,11 @@ public class GameController implements GameControllerInterface {
         }
     }
 
+    @Override
+    public List<Edge<Integer, Route>> getGraphRoutes() {
+        return model.getGraph().getEdges();
+    }
+
     public GameController(){
         listeners = new ArrayList<GameUIInterface>();
         mrXHistoryTracker = new MrXHistoryTracker();
@@ -135,6 +140,11 @@ public class GameController implements GameControllerInterface {
     @Override
     public List<MoveTicket> getValidSingleMovesAtLocation(Colour currentPlayer, int location) {
         return model.getAvailableSingleMoves(model.getGraph(), currentPlayer, location, model.getAllPlayerTickets(currentPlayer));
+    }
+
+    @Override
+    public int getCurrentPlayerRealPosition() {
+        return model.getRealPlayerLocation(model.getCurrentPlayer());
     }
 
     @Override

@@ -16,7 +16,7 @@ import java.util.Set;
  */
 public class MapPosition {
 
-    private static final int CIRC_RADIUS = 20;
+    public static final int CIRC_RADIUS = 20;
     private static final Color STANDARD_COLOUR = Color.GRAY;
     private static final Color HIGHLIGHT_COLOUR = Color.CYAN;
     private static final Color AVAILABLE_COLOUR = Color.MAGENTA;

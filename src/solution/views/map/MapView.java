@@ -1,13 +1,10 @@
 package solution.views.map;
 
-import scotlandyard.Colour;
-import scotlandyard.MoveDouble;
-import scotlandyard.MoveTicket;
-import scotlandyard.Ticket;
+import scotlandyard.*;
 import solution.Constants;
 import solution.Models.GraphData;
 import solution.Models.ScotlandYardModel;
-import solution.helpers.InterpolatorHelper;
+import solution.helpers.PathInterpolator;
 import solution.interfaces.GameControllerInterface;
 import solution.interfaces.adapters.GameUIAdapter;
 
@@ -15,7 +12,9 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -29,17 +28,18 @@ import java.util.Map;
 public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     private final Color mDrawColour = Color.gray;
     private final GameControllerInterface mControllerInterface;
-    private BufferedImage mGraphImage;
-    private Map<Integer, Colour> mPlayerLocations;
     private final List<MapPosition> mMapPositions;
     private final ArrayList<MapPath> mMapPaths;
+    private BufferedImage mGraphImage;
+    private Map<Integer, Colour> mPlayerLocations;
     private MapNodePopup mMapPopup;
     private MoveTicket firstMove;
     private List<MoveTicket> secondMoves;
     private AffineTransform transform;
     private AffineTransform inverseTransform;
     private Dimension mImageSize;
-    private float[] animationCoords;
+    private TransportSprite transportSprite;
+    private AnimationWorker animationWorker;
 
 
     public MapView(final GameControllerInterface gameController, final String graphImageMapPath, final GraphData graphData) {
@@ -50,6 +50,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         mControllerInterface.addUpdateListener(new GameAdapter());
         transform = new AffineTransform();
         inverseTransform = new AffineTransform();
+        animationWorker = new AnimationWorker(this);
         addMouseListener(new GraphMouseListener());
         addMouseMotionListener(new GraphMouseListener());
         setupGraphImage(graphImageMapPath);
@@ -105,101 +106,176 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
 
         g2d.setStroke(new BasicStroke(5f));
 
-        for(MapPath mapPath : mMapPaths){
-            mapPath.drawBackground(g2d);
+        g2d.setStroke(new BasicStroke(2f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND));
+
+        for (MapPath mapPath : mMapPaths) {
+            mapPath.draw(g2d, Ticket.Underground);
+        }
+        for (MapPath mapPath : mMapPaths) {
+            mapPath.draw(g2d, Ticket.Bus);
+        }
+        for (MapPath mapPath : mMapPaths) {
+            mapPath.draw(g2d, Ticket.Taxi);
         }
 
-        g2d.setStroke(new BasicStroke(3f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND));
+//        for (MapPath mapPath : mMapPaths) {
+//            if(mapPath.isAvailable()){
+//                g2d.setColor(Color.BLACK);
+//            }else{
+//                g2d.setColor(new Color(209, 161, 134));
+//            }
+//            mapPath.draw(g2d);
+//
+//        }
 
+//        Path2D path2D = new Path2D.Double();
+//
+//        path2D.moveTo(500,500);
+//        path2D.lineTo(700, 700);
+//        path2D.lineTo(900,00);
+//
+//        path2D.lineTo(1000,500);
+//        path2D.lineTo(900,300);
 
-        for(MapPath mapPath : mMapPaths){
-            mapPath.drawIfAvailable(g2d);
+//        new Stacked2DPath(path2D, 3).draw(g2d);
+
+        for (MapPath mapPath : mMapPaths) {
+            if(mapPath.isHighlighted()){
+                mapPath.draw(g2d);
+            }
         }
 
-        for(MapPath mapPath : mMapPaths){
-            mapPath.drawIfHighlighted(g2d);
-        }
-
-        for(MapPosition position : mMapPositions){
+        for (MapPosition position : mMapPositions) {
             position.draw(g2d, mPlayerLocations);
         }
 
-        if(mMapPopup != null){
+        if (mMapPopup != null) {
             mMapPopup.draw(g2d);
         }
 
         g2d.setColor(Color.GREEN);
 
-        if(animationCoords != null){
-            g2d.fillOval((int) animationCoords[0]-5, (int) animationCoords[1]-5,10,10);
+
+        if (transportSprite != null) {
+            transportSprite.draw(g2d);
         }
 
     }
 
     @Override
-    public void onTicketSelected(Ticket ticket, final int nodeId) {
+    public void onTicketSelected(final Ticket ticket, final int nodeId) {
         final Colour currentPlayer = mControllerInterface.getCurrentPlayer();
-        final MoveTicket moveTicket = new MoveTicket(currentPlayer, nodeId, ticket);
-        if(secondMoves != null && firstMove != null){
-            MoveDouble chosenMove = new MoveDouble(currentPlayer, firstMove, moveTicket);
-//            mControllerInterface.notifyMoveSelected(chosenMove);
-//            secondMoves = null;
-//            firstMove = null;
-        }else {
-
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-
-                    Path2D chosenPath = null;
-
-                    for(MapPath path : mMapPaths){
-                        if(path.isAvailable() && path.hasNode(nodeId)){
-                            if(path.getStartingNode() == nodeId) {
-                                chosenPath = InterpolatorHelper.reverse(path.getPath2D());
-                            }else{
-                                chosenPath = path.getPath2D();
-                            }
-                            break;
-                        }
-                    }
+        final MoveTicket singleMove = new MoveTicket(currentPlayer, nodeId, ticket);
+        if (secondMoves != null && firstMove != null) {
 
 
-                    if(chosenPath != null){
+            animateMove(firstMove, singleMove);
 
-                        Path2D interpolatedPath = InterpolatorHelper.interpolate(chosenPath, 5f);
+        } else {
 
-                        PathIterator iterator = interpolatedPath.getPathIterator(null, 0.1f);
+            animateMove(singleMove, null);
 
-                        while(!iterator.isDone()){
-
-                            animationCoords = new float[6];
-                            iterator.currentSegment(animationCoords);
-                            iterator.next();
-                            repaint();
-
-                            try {
-                                Thread.sleep(50);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        animationCoords = null;
-                        mControllerInterface.notifyMoveSelected(moveTicket);
-
-
-                    }
-
-
-                }
-            }).start();
-
-//            mControllerInterface.notifyMoveSelected(moveTicket);
         }
 
         mMapPopup.reset();
         repaint();
+    }
+
+    private void animateMove(final MoveTicket firstMove, final MoveTicket secondMove) {
+
+        PathInterpolator firstMoveInterpolator = null;
+        PathInterpolator secondMoveInterpolator = null;
+
+
+        for (MapPath path : mMapPaths) {
+            if (path.hasNode(mControllerInterface.getCurrentPlayerRealPosition()) && path.hasNode(firstMove.target)) {
+                firstMoveInterpolator = new PathInterpolator(path.getPath2D());
+                if (path.getStartingNode() == firstMove.target) {
+                    firstMoveInterpolator.reverse();
+                }
+                if(secondMove == null || secondMoveInterpolator != null) {
+                    break;
+                }
+            }
+
+            if(secondMove != null) {
+                if (path.hasNode(firstMove.target) && path.hasNode(secondMove.target)) {
+                    secondMoveInterpolator = new PathInterpolator(path.getPath2D());
+                    if (path.getStartingNode() == secondMove.target) {
+                        secondMoveInterpolator.reverse();
+                    }
+                    if (firstMoveInterpolator != null) {
+                        break;
+                    }
+                }
+            }
+
+        }
+
+        if (firstMoveInterpolator != null) {
+
+            firstMoveInterpolator.interpolate(2f);
+
+            transportSprite = new TransportSprite(firstMove.ticket);
+
+
+            final PathInterpolator finalFirstMoveInterpolator = firstMoveInterpolator;
+            final PathInterpolator finalSecondMoveInterpolator = secondMoveInterpolator;
+            animationWorker.addWork(new AnimationWorker.AnimationInterface() {
+                @Override
+                public boolean onTick() {
+
+
+                    transportSprite.setSegment(finalFirstMoveInterpolator.getCurrentSegment());
+
+                    finalFirstMoveInterpolator.nextSegment();
+
+                    return finalFirstMoveInterpolator.isDone();
+                }
+
+                @Override
+                public void onFinished() {
+
+                    if(finalSecondMoveInterpolator != null){
+
+
+                        finalSecondMoveInterpolator.interpolate(2f);
+
+                        transportSprite = new TransportSprite(secondMove.ticket);
+
+
+                        animationWorker.addWork(new AnimationWorker.AnimationInterface() {
+                            @Override
+                            public boolean onTick() {
+
+
+                                transportSprite.setSegment(finalSecondMoveInterpolator.getCurrentSegment());
+
+                                finalSecondMoveInterpolator.nextSegment();
+
+                                return finalSecondMoveInterpolator.isDone();
+                            }
+
+                            @Override
+                            public void onFinished() {
+
+                                transportSprite = null;
+                                secondMoves = null;
+                                MapView.this.firstMove = null;
+                                mControllerInterface.notifyMoveSelected(new MoveDouble(mControllerInterface.getCurrentPlayer(), firstMove, secondMove));
+                            }
+                        });
+
+                    }else{
+                        transportSprite = null;
+                        mControllerInterface.notifyMoveSelected(firstMove);
+                    }
+
+                }
+            });
+
+        }
+
     }
 
     @Override
@@ -217,11 +293,36 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             }
         }
 
-        setValidMoves(secondMoves, nodeId);
+        showValidMoves(secondMoves, nodeId);
         mMapPopup.reset();
 
         repaint();
 
+    }
+
+    private void showValidMoves(List<MoveTicket> moves, int currentPosition) {
+
+        for (MapPosition position : mMapPositions) {
+            position.resetTickets();
+        }
+
+        for (MapPath mapPath : mMapPaths) {
+            mapPath.resetAvailability();
+        }
+
+        for (MoveTicket moveTicket : moves) {
+            for (MapPosition position : mMapPositions) {
+                if (position.getId() == moveTicket.target) {
+                    //if this position is in the move list then add the move type
+                    //to it
+                    position.addTicket(moveTicket.ticket);
+                }
+            }
+
+            for (MapPath mapPath : mMapPaths) {
+                mapPath.setAvailable(currentPosition, moveTicket);
+            }
+        }
     }
 
     class GraphMouseListener extends MouseAdapter implements MouseMotionListener {
@@ -230,9 +331,9 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             Point2D transformedPoint = inverseTransform.transform(new Point2D.Double(e.getX(), e.getY()), null);
 
             final boolean popupClicked = mMapPopup != null && mMapPopup.onClick((int) transformedPoint.getX(), (int) transformedPoint.getY());
-            if (!popupClicked){
-                for(MapPosition position : mMapPositions){
-                    if(position.notifyMouseClick((int) transformedPoint.getX(), (int) transformedPoint.getY())){
+            if (!popupClicked) {
+                for (MapPosition position : mMapPositions) {
+                    if (position.notifyMouseClick((int) transformedPoint.getX(), (int) transformedPoint.getY())) {
                         final boolean isMrX = mControllerInterface.getCurrentPlayer() == Constants.MR_X_COLOUR;
                         final boolean hasEnoughDoubleMoves = mControllerInterface.getPlayerTickets(Constants.MR_X_COLOUR).get(Ticket.DoubleMove) > 0;
                         final boolean canDoubleMove = isMrX && hasEnoughDoubleMoves && secondMoves == null;
@@ -250,10 +351,10 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             boolean positionHovered = false;
             final boolean popupHovered = mMapPopup != null && mMapPopup.onMouseMoved((int) transformedPoint.getX(), (int) transformedPoint.getY());
             if (!popupHovered) {
-                for(MapPosition position : mMapPositions){
-                    if(position.notifyMouseMove((int) transformedPoint.getX(), (int) transformedPoint.getY())){
+                for (MapPosition position : mMapPositions) {
+                    if (position.notifyMouseMove((int) transformedPoint.getX(), (int) transformedPoint.getY())) {
                         positionHovered = true;
-                        for(MapPath path : mMapPaths){
+                        for (MapPath path : mMapPaths) {
                             path.notifyPositionHovered(position);
                         }
                     }
@@ -261,9 +362,9 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
                 }
             }
 
-            if(!positionHovered && !popupHovered){
+            if (!positionHovered && !popupHovered) {
                 mMapPopup.reset();
-                for(MapPath path : mMapPaths){
+                for (MapPath path : mMapPaths) {
                     path.notifyPositionHovered(null);
                 }
             }
@@ -279,7 +380,9 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         @Override
         public void onGameModelUpdated(ScotlandYardModel model) {
 
-            if(!model.isGameOver()) {
+
+
+            if (!model.isGameOver()) {
                 mPlayerLocations.clear();
                 for (Colour colour : model.getPlayers()) {
                     mPlayerLocations.put(model.getPlayerLocation(colour), colour);
@@ -287,35 +390,24 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
                 final Colour currentPlayer = model.getCurrentPlayer();
                 List<MoveTicket> firstMoves = mControllerInterface.getValidSingleMovesAtLocation(currentPlayer, model.getRealPlayerLocation(currentPlayer));
 
-                setValidMoves(firstMoves, model.getRealPlayerLocation(currentPlayer));
+                showValidMoves(firstMoves, model.getRealPlayerLocation(currentPlayer));
             }
+
+                List<Edge<Integer, Route>> edges = mControllerInterface.getGraphRoutes();
+
+                for (MapPath mapPath : mMapPaths) {
+
+                    for(Edge<Integer, Route> edge : edges){
+                        if(mapPath.hasNode(edge.source()) && mapPath.hasNode(edge.target())){
+                            //weeeee, we have it
+                            mapPath.addRoute(edge.data());
+                        }
+                    }
+                }
+
             repaint();
         }
     }
-
-    private void setValidMoves(List<MoveTicket> moves, int currentPosition) {
-
-        for(MapPosition position : mMapPositions){
-            position.resetTickets();
-        }
-
-        for(MapPath mapPath : mMapPaths){
-            mapPath.resetAvailability();
-        }
-
-        for(MoveTicket moveTicket : moves){
-            for(MapPosition position : mMapPositions){
-                if(position.getId() == moveTicket.target){
-                    position.addTicket(moveTicket.ticket);
-                }
-            }
-
-            for(MapPath mapPath : mMapPaths){
-                mapPath.setAvailable(currentPosition, moveTicket);
-            }
-        }
-    }
-
 
 
 }
