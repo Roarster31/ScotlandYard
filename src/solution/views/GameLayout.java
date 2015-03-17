@@ -27,7 +27,7 @@ public class GameLayout extends JPanel {
     public GameLayout(GameControllerInterface controllerInterface) {
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        mapView = new MapView(controllerInterface, "custom_map.png", new GraphData("custom.txt", GraphData.DataFormat.CUSTOM));
+        mapView = new MapView(controllerInterface, "map.jpg", new GraphData("out.txt", GraphData.DataFormat.CUSTOM));
 
 
         playerInfoBar = new PlayerInfoBar(controllerInterface);

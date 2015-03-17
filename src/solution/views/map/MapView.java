@@ -108,36 +108,14 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
 
         g2d.setStroke(new BasicStroke(2f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND));
 
-        for (MapPath mapPath : mMapPaths) {
-            mapPath.draw(g2d, Ticket.Underground);
-        }
-        for (MapPath mapPath : mMapPaths) {
-            mapPath.draw(g2d, Ticket.Bus);
-        }
-        for (MapPath mapPath : mMapPaths) {
-            mapPath.draw(g2d, Ticket.Taxi);
-        }
 
-//        for (MapPath mapPath : mMapPaths) {
-//            if(mapPath.isAvailable()){
-//                g2d.setColor(Color.BLACK);
-//            }else{
-//                g2d.setColor(new Color(209, 161, 134));
-//            }
-//            mapPath.draw(g2d);
-//
-//        }
+        for (MapPath mapPath : mMapPaths) {
+            if(mapPath.isAvailable()){
+                g2d.setColor(Color.BLACK);
+                mapPath.draw(g2d);
+            }
 
-//        Path2D path2D = new Path2D.Double();
-//
-//        path2D.moveTo(500,500);
-//        path2D.lineTo(700, 700);
-//        path2D.lineTo(900,00);
-//
-//        path2D.lineTo(1000,500);
-//        path2D.lineTo(900,300);
-
-//        new Stacked2DPath(path2D, 3).draw(g2d);
+        }
 
         for (MapPath mapPath : mMapPaths) {
             if(mapPath.isHighlighted()){

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class MapPath {
 
     private final int length;
-    private Stacked2DPath path;
+    private Path2D path;
     private int nodeId1;
     private int nodeId2;
     private boolean pathAvailable;
@@ -22,7 +22,7 @@ public class MapPath {
     private ArrayList<Ticket> tickets;
 
     public MapPath(Path2D path2D, int length, int nodeId1, int nodeId2) {
-        this.path = new Stacked2DPath(path2D,1);
+        this.path = path2D;
         this.nodeId1 = nodeId1;
         this.nodeId2 = nodeId2;
         this.length = length;
@@ -52,24 +52,10 @@ public class MapPath {
 //            g2d.draw(path);
 //        }
 
+        g2d.draw(path);
 
     }
 
-    public void draw(Graphics2D g2d, Ticket ticket) {
-//        if(tickets.contains(ticket)){
-//            if(ticket.equals(Ticket.Taxi)) {
-//                g2d.setStroke(new BasicStroke(3f));
-//                g2d.setColor(Color.ORANGE);
-//            } else if(ticket.equals(Ticket.Bus)) {
-//                g2d.setStroke(new BasicStroke(6f));
-//                g2d.setColor(Color.GREEN);
-//            } else if (ticket.equals(Ticket.Underground)) {
-//                g2d.setStroke(new BasicStroke(8f));
-//                g2d.setColor(Color.RED);
-//            }
-//        }
-        path.draw(g2d);
-    }
 
     public boolean setAvailable(int startNode, MoveTicket move) {
         if (startNode == nodeId1 || startNode == nodeId2) {
@@ -101,7 +87,7 @@ public class MapPath {
     }
 
     public Path2D getPath2D() {
-        return path.getmPath();
+        return path;
     }
 
     public int getStartingNode() {
