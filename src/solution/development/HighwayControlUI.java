@@ -1,5 +1,8 @@
 package solution.development;
 
+import scotlandyard.ScotlandYardGraphReader;
+import solution.development.models.DataPosition;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -20,30 +23,36 @@ public class HighwayControlUI extends JFrame implements MapCanvas.CanvasInterfac
 	public static final String CONNECT_NODE_TOOL = "connect_node_tool";
 	public static final String EDIT_PATH_TOOL = "edit_path_tool";
 	private static final String MENU_LOAD = "menu_load";
-	private static final String MENU_SAVE_RAW = "menu_save";
+    private static final String MENU_LOAD_GRAPH = "menu_load_graph";
+    private static final String MENU_SAVE_RAW = "menu_save";
     private static final String MENU_SAVE_PARSABLE= "menu_save_2";
-    public static final String VIEW_ALL = "view_all";
-    public static final String VIEW_BUS = "view_bus";
-    public static final String VIEW_UNDERGROUND = "view_underground";
+    public static final String PREVIEW = "preview";
+    public static final String EDIT_NODES = "edit_nodes";
+    public static final String VIEW_UNDERGROUND = null;
+    private static final String EDIT_ROUTES = "edit_routes";
 
     private final JPanel mImagePanel;
 	private final MapCanvas mCanvas;
 	private final DataParser mDataParser;
 	private String mCurrentTool = ADD_EDIT_NODE_TOOL;
-    private String mCurrentView = VIEW_ALL;
+    private String mCurrentView = PREVIEW;
     private JFileChooser fileChooser;
     private JTextField selectedNodeTextField;
     private JButton deleteSelectedNodeButton;
     private ActionListener mMenuListener = new ActionListener() {
 		@Override
 		public void actionPerformed(final ActionEvent e) {
-			if(MENU_LOAD.equals(e.getActionCommand())){
+			if(MENU_LOAD.equals(e.getActionCommand()) || MENU_LOAD_GRAPH.equals(e.getActionCommand())){
 				int returnVal = fileChooser.showOpenDialog(HighwayControlUI.this);
 
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					File file = fileChooser.getSelectedFile();
 					try {
-						mCanvas.setData(mDataParser.loadData(file));
+                        if(MENU_LOAD.equals(e.getActionCommand())) {
+                            mCanvas.setData(mDataParser.loadV3Data(file));
+                        }else{
+                            mCanvas.setGraph(new ScotlandYardGraphReader().readGraph(file.getAbsolutePath()));
+                        }
 					} catch (IOException e1) {
 						e1.printStackTrace();
 					}
@@ -58,9 +67,9 @@ public class HighwayControlUI extends JFrame implements MapCanvas.CanvasInterfac
 					File file = fileChooser.getSelectedFile();
 					try {
                         if(MENU_SAVE_RAW.equals(e.getActionCommand())) {
-                            mDataParser.saveData(new MapData(mCanvas.curHighId, mCanvas.mNodeList, mCanvas.mEdgeList, mCanvas.mBusNodeList, mCanvas.mBusEdgeList, mCanvas.mUndergroundNodeList, mCanvas.mUndergroundEdgeList), file);
+                            mDataParser.saveV3Data(mCanvas.getData(), file);
                         }else if(MENU_SAVE_PARSABLE.equals(e.getActionCommand())) {
-                            mDataParser.saveCompatibleFile(new MapData(mCanvas.curHighId, mCanvas.mNodeList, mCanvas.mEdgeList, mCanvas.mBusNodeList, mCanvas.mBusEdgeList, mCanvas.mUndergroundNodeList, mCanvas.mUndergroundEdgeList), file);
+                            mDataParser.saveCompatibleFile(null, file);
                         }
 					} catch (FileNotFoundException e1) {
 						e1.printStackTrace();
@@ -97,9 +106,8 @@ public class HighwayControlUI extends JFrame implements MapCanvas.CanvasInterfac
 
 
 
-		mCanvas = new MapCanvas();
+		mCanvas = new MapCanvas(this);
 		mCanvas.setSize(image.getIconWidth(), image.getIconHeight());
-		mCanvas.setInterface(this);
 
 		mImagePanel.add(mCanvas);
 		mImagePanel.add(imageLabel);
@@ -117,6 +125,8 @@ public class HighwayControlUI extends JFrame implements MapCanvas.CanvasInterfac
 		updateImageCursor();
 
 		mDataParser = new DataParser();
+
+
 	}
 	private JPanel createToolbar() {
 		JPanel toolbarPanel = new JPanel();
@@ -136,8 +146,14 @@ public class HighwayControlUI extends JFrame implements MapCanvas.CanvasInterfac
 		selectedNodeTextField.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
-				mCanvas.getSelectedNode().setName(selectedNodeTextField.getText());
-				mCanvas.repaint();
+                try {
+                    if (!mCanvas.setSelectedPositionId(Integer.parseInt(selectedNodeTextField.getText()))) {
+                        throw new NumberFormatException();
+                    }
+                } catch (NumberFormatException ex){
+                    System.err.println("could not save with specified id");
+                    selectedNodeTextField.setText(null);
+                }
 			}
 		});
 
@@ -150,7 +166,7 @@ public class HighwayControlUI extends JFrame implements MapCanvas.CanvasInterfac
 		deleteSelectedNodeButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
-				mCanvas.deleteNode(mCanvas.getSelectedNode());
+//				mCanvas.deleteNode(mCanvas.getSelectedNode());
 			}
 		});
 
@@ -177,23 +193,24 @@ public class HighwayControlUI extends JFrame implements MapCanvas.CanvasInterfac
 		nodeActionGroup.add(moveButton);
 		nodeActionGroup.add(pathEditTool);
 
-        JRadioButton viewAllButton = new JRadioButton();
-        viewAllButton.setText("View all");
-        viewAllButton.setActionCommand(VIEW_ALL);
-        viewAllButton.setSelected(true);
+        JRadioButton previewButton = new JRadioButton();
+        previewButton.setText("Preview");
+        previewButton.setActionCommand(PREVIEW);
 
-        JRadioButton viewBusButton = new JRadioButton();
-        viewBusButton.setText("View Bus");
-        viewBusButton.setActionCommand(VIEW_BUS);
+        JRadioButton editNodeButton = new JRadioButton();
+        editNodeButton.setText("Edit Nodes");
+        editNodeButton.setActionCommand(EDIT_NODES);
+        editNodeButton.setSelected(true);
 
-        JRadioButton viewUndergroundButton = new JRadioButton();
-        viewUndergroundButton.setText("View Underground");
-        viewUndergroundButton.setActionCommand(VIEW_UNDERGROUND);
+        JRadioButton editRouteButton = new JRadioButton();
+        editRouteButton.setText("Edit Routes");
+        editRouteButton.setActionCommand(EDIT_ROUTES);
+
 
         ButtonGroup viewGroup = new ButtonGroup();
-        viewGroup.add(viewAllButton);
-        viewGroup.add(viewBusButton);
-        viewGroup.add(viewUndergroundButton);
+        viewGroup.add(previewButton);
+        viewGroup.add(editNodeButton);
+        viewGroup.add(editRouteButton);
 
 		ActionListener nodeToolListener = new ActionListener(){
 			@Override
@@ -208,8 +225,13 @@ public class HighwayControlUI extends JFrame implements MapCanvas.CanvasInterfac
             @Override
             public void actionPerformed(final ActionEvent e) {
                 mCurrentView = e.getActionCommand();
-
-                updateMapView();
+                if(PREVIEW.equals(mCurrentView)){
+                    mCanvas.setViewMode(MapCanvas.ViewType.PREVIEW);
+                }else if(EDIT_NODES.equals(mCurrentView)){
+                    mCanvas.setViewMode(MapCanvas.ViewType.NODES);
+                }else if(EDIT_ROUTES.equals(mCurrentView)){
+                    mCanvas.setViewMode(MapCanvas.ViewType.ROUTES);
+                }
             }
         };
 
@@ -219,13 +241,13 @@ public class HighwayControlUI extends JFrame implements MapCanvas.CanvasInterfac
 		pathEditTool.addActionListener(nodeToolListener);
 
 
-        viewAllButton.addActionListener(viewToolListener);
-        viewBusButton.addActionListener(viewToolListener);
-        viewUndergroundButton.addActionListener(viewToolListener);
+        previewButton.addActionListener(viewToolListener);
+        editNodeButton.addActionListener(viewToolListener);
+        editRouteButton.addActionListener(viewToolListener);
 
-        toolbarPanel.add(viewAllButton);
-        toolbarPanel.add(viewBusButton);
-        toolbarPanel.add(viewUndergroundButton);
+        toolbarPanel.add(previewButton);
+        toolbarPanel.add(editNodeButton);
+        toolbarPanel.add(editRouteButton);
 
 		toolbarPanel.add(idPanel);
 		toolbarPanel.add(deleteSelectedNodeButton);
@@ -265,6 +287,16 @@ public class HighwayControlUI extends JFrame implements MapCanvas.CanvasInterfac
 		menuItem.addActionListener(mMenuListener);
 		menu.add(menuItem);
 
+        menuItem = new JMenuItem("Load Graph Data",
+                KeyEvent.VK_L);
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_L, InputEvent.CTRL_MASK));
+        menuItem.getAccessibleContext().setAccessibleDescription(
+                "Load graph route data");
+        menuItem.setActionCommand(MENU_LOAD_GRAPH);
+        menuItem.addActionListener(mMenuListener);
+        menu.add(menuItem);
+
 		menuItem = new JMenuItem("Save Raw Map Data",
 				KeyEvent.VK_S);
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(
@@ -288,29 +320,33 @@ public class HighwayControlUI extends JFrame implements MapCanvas.CanvasInterfac
 		setJMenuBar(menuBar);
 	}
 
-    private void updateMapView() {
-        mCanvas.setViewType(mCurrentView);
-    }
     private void updateImageCursor() {
-		if(ADD_EDIT_NODE_TOOL.equals(mCurrentTool) || EDIT_PATH_TOOL.equals(mCurrentTool)){
+		if(ADD_EDIT_NODE_TOOL.equals(mCurrentTool)){
 			mImagePanel.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
-		}else if(MOVE_ELEMENT_TOOL.equals(mCurrentTool)){
+            mCanvas.setTool(MapCanvas.ToolType.ADD);
+		}else if(EDIT_PATH_TOOL.equals(mCurrentTool)){
+            mImagePanel.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+            mCanvas.setTool(MapCanvas.ToolType.EDIT);
+        }else if(MOVE_ELEMENT_TOOL.equals(mCurrentTool)){
 			mImagePanel.setCursor(new Cursor(Cursor.MOVE_CURSOR));
+            mCanvas.setTool(MapCanvas.ToolType.MOVE);
 		}else if(CONNECT_NODE_TOOL.equals(mCurrentTool)){
 			mImagePanel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		}
-		mCanvas.setCurrentTool(mCurrentTool);
-	}
-	@Override
-	public void onNodeSelected(final PathNode node) {
-		if(node != null){
-			selectedNodeTextField.setText(node.getName());
-			selectedNodeTextField.grabFocus();
-		}else{
-			selectedNodeTextField.setText("");
+            mCanvas.setTool(MapCanvas.ToolType.CONNECT);
 		}
 
-		selectedNodeTextField.setEnabled(node != null);
-		deleteSelectedNodeButton.setEnabled(node != null);
 	}
+
+    @Override
+    public void onPositionSelected(DataPosition pos) {
+        if(pos != null){
+            selectedNodeTextField.setText(pos.id > 0 ? String.valueOf(pos.id) : "");
+            selectedNodeTextField.grabFocus();
+        }else{
+            selectedNodeTextField.setText("");
+        }
+
+        selectedNodeTextField.setEnabled(pos != null);
+        deleteSelectedNodeButton.setEnabled(pos != null);
+    }
 }

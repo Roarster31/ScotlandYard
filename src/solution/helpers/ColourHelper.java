@@ -1,6 +1,7 @@
 package solution.helpers;
 
 import scotlandyard.Colour;
+import scotlandyard.Ticket;
 
 import java.awt.*;
 
@@ -27,6 +28,21 @@ public class ColourHelper {
                 throw new IllegalStateException("We don't have a colour for position "+pos);
         }
     }
+
+    public static Color ticketColour(Ticket ticket){
+        switch (ticket){
+            case Taxi:
+                return new Color(253, 255, 0);
+            case Bus:
+                return Color.GREEN;
+            case Underground:
+                return Color.RED;
+            case SecretMove:
+                return Color.BLACK;
+        }
+        return Color.BLACK;
+    }
+
 
     public static String toString(Colour colour) {
         switch (colour){

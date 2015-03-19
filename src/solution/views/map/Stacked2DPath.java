@@ -1,5 +1,7 @@
 package solution.views.map;
 
+import scotlandyard.Ticket;
+import solution.helpers.ColourHelper;
 import solution.helpers.PathInterpolator;
 
 import java.awt.*;
@@ -12,16 +14,16 @@ import java.util.ArrayList;
  */
 public class Stacked2DPath {
 
-    private static final float LINE_WIDTH = 2f;
+    private static final float LINE_WIDTH = 4f;
     private final ArrayList<Path2D> paths;
-    private final int mLineCount;
     private final Path2D mPath;
+    private final ArrayList<Ticket> mTickets;
 
-    public Stacked2DPath(Path2D path, int lineCount){
+    public Stacked2DPath(Path2D path, ArrayList<Ticket> tickets){
         paths = new ArrayList<Path2D>();
-        mLineCount = lineCount;
+        mTickets = tickets;
         mPath = path;
-        stackPath(path, lineCount);
+        stackPath(path, mTickets.size());
 
     }
 
@@ -435,23 +437,8 @@ public class Stacked2DPath {
         for (int i = 0; i < paths.size(); i++) {
             Path2D path2D = paths.get(i);
 
-            switch(i){
-                case 0:
-                    g2d.setColor(Color.RED);
-                    break;
-                case 1:
-                    g2d.setColor(Color.GREEN);
-                    break;
-                case 2:
-                    g2d.setColor(Color.PINK);
-                    break;
-                case 3:
-                    g2d.setColor(Color.CYAN);
-                    break;
-                default:
-                    g2d.setColor(Color.ORANGE);
-                    break;
-            }
+            g2d.setColor(ColourHelper.ticketColour(mTickets.get(i)));
+
 
             g2d.draw(path2D);
         }

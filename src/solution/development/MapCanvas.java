@@ -1,612 +1,543 @@
 package solution.development;
 
+import scotlandyard.Edge;
+import scotlandyard.Graph;
+import scotlandyard.Route;
+import scotlandyard.Ticket;
+import solution.development.models.*;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
+import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by rory on 04/03/15.
  */
 public class MapCanvas extends JPanel implements MouseListener, MouseMotionListener {
-	private static final double WAYPOINT_SIZE = 4;
-	public static double CIRC_SIZE = 10;
-	private final BasicStroke stroke;
-	ArrayList<PathNode> mNodeList;
-	ArrayList<PathEdge> mEdgeList;
-    ArrayList<PathNode> mBusNodeList;
-    ArrayList<PathEdge> mBusEdgeList;
-    ArrayList<PathNode> mUndergroundNodeList;
-    ArrayList<PathEdge> mUndergroundEdgeList;
-	private String mCurrentTool;
-	private int mouseX;
-	private int mouseY;
-	private PathNode draggingNode;
-	private PathNode selectedNode;
-	private CanvasInterface mInterface;
-	private boolean mConnectingNodes;
-	public int curHighId = 0;
-    private String viewType = HighwayControlUI.VIEW_ALL;
 
-    public PathNode getDraggingNode() {
-		return draggingNode;
-	}
-	public PathNode getSelectedNode() {
-		return selectedNode;
-	}
+    private static final int POS_CIRC_SIZE = 20;
+    public static final int EDIT_POINT_CIRC_SIZE = 8;
+    private int mouseX;
+    private int mouseY;
+    private ArrayList<ViewPosition> mViewPositionList;
+    private ArrayList<ViewPath> mViewPathList;
+    private ArrayList<ViewRoute> mViewRouteList;
+    private ArrayList<DataPosition> mPositionList;
+    private ArrayList<DataPath> mPathList;
+    private ArrayList<DataRoute> mRouteList;
+    private ToolType currentTool = ToolType.ADD;
+    private ViewType currentView = ViewType.NODES;
+    private CanvasInterface mInterface;
+    private ViewRoute hoveringRoute;
+    private ViewRoute selectedRoute;
+    private DataPath hoveringpath;
+    private DataPath selectedPath;
+    private DataPosition selectedPosition;
+    private DataPosition connectingPosition;
 
-    public void setViewType(String mCurrentView) {
-        viewType = mCurrentView;
+    public MapCanvas(CanvasInterface canvasInterface) {
+        mInterface = canvasInterface;
+        setOpaque(false);
+        mPositionList = new ArrayList<DataPosition>();
+        mPathList = new ArrayList<DataPath>();
+        mRouteList = new ArrayList<DataRoute>();
+
+        addMouseListener(this);
+        addMouseMotionListener(this);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        Graphics2D g2d = (Graphics2D) g;
+
+        g2d.setFont(new Font(null, Font.PLAIN, getSize().width / 100));
+
+        FontMetrics fm = g2d.getFontMetrics();
+
+        g2d.setColor(Color.DARK_GRAY);
+
+        if (currentView == ViewType.PREVIEW) {
+
+            for (ViewPath viewPath : mViewPathList) {
+                viewPath.path.draw(g2d);
+            }
+
+            g2d.setColor(Color.DARK_GRAY);
+
+            for (ViewPosition viewPosition : mViewPositionList) {
+                g2d.fillOval(viewPosition.x - POS_CIRC_SIZE / 2, viewPosition.y - POS_CIRC_SIZE / 2, POS_CIRC_SIZE, POS_CIRC_SIZE);
+            }
+
+            for (ViewPosition viewPosition : mViewPositionList) {
+                final String nodeName = String.valueOf(viewPosition.id);
+                Rectangle2D r = fm.getStringBounds(nodeName, g2d);
+                int x = viewPosition.x - ((int) r.getWidth() / 2);
+                int y = viewPosition.y - ((int) r.getHeight() / 2) + fm.getAscent();
+                g2d.setColor(Color.WHITE);
+                g.drawString(nodeName, x, y);
+            }
+
+        } else if (currentView == ViewType.ROUTES) {
+
+            g2d.setStroke(new BasicStroke(3f));
+
+
+            Random randomColour = new Random();
+            for (ViewRoute viewRoute : mViewRouteList) {
+                //we don't care about single path routes
+                if (viewRoute.positionList.size() > 2) {
+                    g2d.setColor(new Color(randomColour.nextFloat(), randomColour.nextFloat(), randomColour.nextFloat()));
+
+                    g2d.draw(viewRoute.path);
+                }
+            }
+
+            for (ViewRoute viewRoute : mViewRouteList) {
+                //we don't care about single path routes
+                if (viewRoute.positionList.size() > 2) {
+                    if (selectedRoute != null && selectedRoute.id1 == viewRoute.id1 && selectedRoute.id2 == viewRoute.id2) {
+
+                        g2d.setColor(Color.BLACK);
+
+                        g2d.setStroke(new BasicStroke(5f));
+
+                        g2d.draw(viewRoute.path);
+                    } else if (hoveringRoute != null && hoveringRoute.id1 == viewRoute.id1 && hoveringRoute.id2 == viewRoute.id2) {
+
+                        g2d.setColor(Color.darkGray);
+
+                        g2d.setStroke(new BasicStroke(5f));
+
+                        g2d.draw(viewRoute.path);
+                    }
+                }
+
+
+            }
+
+
+            for (ViewPosition viewPosition : mViewPositionList) {
+                if (selectedRoute != null && selectedRoute.positionList.contains(new DataPosition(viewPosition.x, viewPosition.y, viewPosition.id))) {
+                    g2d.setColor(Color.MAGENTA);
+                } else {
+                    g2d.setColor(Color.DARK_GRAY);
+                }
+                g2d.fillOval(viewPosition.x - POS_CIRC_SIZE / 2, viewPosition.y - POS_CIRC_SIZE / 2, POS_CIRC_SIZE, POS_CIRC_SIZE);
+            }
+
+            for (ViewPosition viewPosition : mViewPositionList) {
+                final String nodeName = String.valueOf(viewPosition.id);
+                Rectangle2D r = fm.getStringBounds(nodeName, g2d);
+                int x = viewPosition.x - ((int) r.getWidth() / 2);
+                int y = viewPosition.y - ((int) r.getHeight() / 2) + fm.getAscent();
+                g2d.setColor(Color.WHITE);
+                g.drawString(nodeName, x, y);
+            }
+
+        } else if (currentView == ViewType.NODES) {
+
+            g2d.setStroke(new BasicStroke(3f));
+
+            if (connectingPosition != null) {
+                Path2D.Double connectingPath = new Path2D.Double(Path2D.WIND_EVEN_ODD, 2);
+                connectingPath.moveTo(connectingPosition.x, connectingPosition.y);
+                connectingPath.lineTo(mouseX, mouseY);
+                g2d.draw(connectingPath);
+            }
+
+            for (DataPath dataPath : mPathList) {
+
+                if(hoveringpath != null && hoveringpath.id1 == dataPath.id1 && hoveringpath.id2 == dataPath.id2) {
+                    g2d.setStroke(new BasicStroke(4f));
+                    g2d.setColor(Color.CYAN);
+                }else if (selectedPath != null && selectedPath.id1 == dataPath.id1 && selectedPath.id2 == dataPath.id2) {
+                    g2d.setStroke(new BasicStroke(4f));
+                    g2d.setColor(Color.CYAN);
+                } else {
+                    g2d.setColor(Color.darkGray);
+                    g2d.setStroke(new BasicStroke(3f));
+                }
+
+                for (int i = 0; i < dataPath.pathXCoords.length; i++) {
+                    g2d.fillOval(dataPath.pathXCoords[i] - EDIT_POINT_CIRC_SIZE/2, dataPath.pathYCoords[i] - EDIT_POINT_CIRC_SIZE/2, EDIT_POINT_CIRC_SIZE, EDIT_POINT_CIRC_SIZE);
+                }
+
+
+                g2d.draw(dataPath.getPath());
+            }
+
+            for (DataPosition dataPosition : mPositionList) {
+                g2d.fillOval(dataPosition.x - POS_CIRC_SIZE / 2, dataPosition.y - POS_CIRC_SIZE / 2, POS_CIRC_SIZE, POS_CIRC_SIZE);
+            }
+
+            for (DataPosition dataPosition : mPositionList) {
+                final String nodeName = String.valueOf(dataPosition.id);
+                Rectangle2D r = fm.getStringBounds(nodeName, g2d);
+                int x = dataPosition.x - ((int) r.getWidth() / 2);
+                int y = dataPosition.y - ((int) r.getHeight() / 2) + fm.getAscent();
+                g2d.setColor(Color.WHITE);
+                g.drawString(nodeName, x, y);
+            }
+
+        }
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+
+    }
+
+    private DataPosition addPosition(MouseEvent e) {
+        DataPosition dataPosition = new DataPosition(e.getX(), e.getY());
+        mPositionList.add(dataPosition);
+        return dataPosition;
+    }
+
+    private DataPosition selectPosition(MouseEvent e) {
+        Rectangle2D.Double rect = new Rectangle2D.Double();
+        for (DataPosition position : mPositionList) {
+            rect.setRect(position.x - POS_CIRC_SIZE / 2, position.y - POS_CIRC_SIZE / 2, POS_CIRC_SIZE, POS_CIRC_SIZE);
+            if (rect.contains(e.getX(), e.getY())) {
+                return position;
+            }
+        }
+        return null;
+    }
+
+    private DataPath selectPath(MouseEvent e) {
+        for (DataPath dataPath : mPathList) {
+            BasicStroke stroke = new BasicStroke(3f);
+            if (stroke.createStrokedShape(dataPath.getPath()).contains(e.getX(), e.getY())) {
+                return dataPath;
+            }
+        }
+        return null;
+    }
+
+    private ViewRoute selectRoute(MouseEvent e) {
+        for (ViewRoute viewRoute : mViewRouteList) {
+            if (viewRoute.positionList.size() > 2) {
+                BasicStroke stroke = new BasicStroke(3f);
+                if (stroke.createStrokedShape(viewRoute.path).contains(e.getX(), e.getY())) {
+                    return viewRoute;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+
+        if (currentView == ViewType.NODES) {
+            unselectCurrentSelectedPosition();
+            DataPosition clickedPosition = selectPosition(e);
+            switch (currentTool) {
+                case ADD:
+                    selectedPosition = clickedPosition;
+                    if (selectedPosition == null) {
+                        selectedPosition = addPosition(e);
+                    }
+                    mInterface.onPositionSelected(selectedPosition);
+                    repaint();
+                    break;
+                case CONNECT:
+                    if (clickedPosition != null) {
+                        if (connectingPosition == null) {
+                            connectingPosition = clickedPosition;
+                        } else {
+                            if (connectingPosition.id == clickedPosition.id) {
+                                System.err.println("Cannot link a position to itself");
+                                connectingPosition = null;
+                                break;
+                            }
+
+                            for (DataPath dataPath : mPathList) {
+                                if ((dataPath.id1 == connectingPosition.id && dataPath.id2 == clickedPosition.id) || (dataPath.id2 == connectingPosition.id && dataPath.id1 == clickedPosition.id)) {
+                                    System.err.println("Path already exists with " + dataPath.id1 + " & " + dataPath.id2);
+                                    connectingPosition = null;
+                                    break;
+                                }
+                            }
+                            DataPath dataPath = new DataPath(connectingPosition.id, clickedPosition.id);
+                            dataPath.pathXCoords = new int[]{connectingPosition.x, clickedPosition.x};
+                            dataPath.pathYCoords = new int[]{connectingPosition.y, clickedPosition.y};
+                            mPathList.add(dataPath);
+                            connectingPosition = null;
+                        }
+                        repaint();
+                    }
+                    break;
+                case EDIT:
+                    selectedPath = selectPath(e);
+                    if(selectedPath != null) {
+                        selectedPath.onSelected(e.getX(), e.getY());
+                    }
+                    repaint();
+
+            }
+        } else if (currentView == ViewType.ROUTES) {
+            if (currentTool == ToolType.EDIT) {
+                ViewRoute route = selectRoute(e);
+                selectedRoute = route;
+                repaint();
+            } else if (currentTool == ToolType.ADD) {
+                if (selectedRoute != null) {
+                    DataPosition position = selectPosition(e);
+                    for (DataRoute dataRoute : mRouteList) {
+                        if (dataRoute.waypointIdList.get(0) == selectedRoute.id1 && dataRoute.waypointIdList.get(dataRoute.waypointIdList.size() - 1) == selectedRoute.id2
+                                || dataRoute.waypointIdList.get(0) == selectedRoute.id2 && dataRoute.waypointIdList.get(dataRoute.waypointIdList.size() - 1) == selectedRoute.id1) {
+                            PathIterator iterator = selectedRoute.path.getPathIterator(null);
+                            dataRoute.waypointIdList.add(1, position.id);
+                            System.out.println("new waypoint list is " + dataRoute.waypointIdList);
+                        }
+                    }
+                    calculateViewObjects();
+                    for (ViewRoute viewRoute : mViewRouteList) {
+                        if (viewRoute.id1 == selectedRoute.id1 && viewRoute.id2 == selectedRoute.id2
+                                || viewRoute.id1 == selectedRoute.id2 && viewRoute.id2 == selectedRoute.id1) {
+                            selectedRoute = viewRoute;
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+
+    private void unselectCurrentSelectedPosition() {
+        if (selectedPosition != null) {
+            if (selectedPosition.id <= 0) {
+                mPositionList.remove(selectedPosition);
+            } else {
+                selectedPosition = null;
+            }
+        }
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        if(currentView == ViewType.NODES){
+            if(currentTool == ToolType.EDIT){
+                if(selectedPath != null) {
+                    selectedPath.onDragStop();
+                    selectedPath = null;
+                }
+            }
+        }
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        if (currentView == ViewType.NODES) {
+            switch (currentTool) {
+                case MOVE:
+                    selectedPosition = selectPosition(e);
+                    if (selectedPosition != null) {
+                        Rectangle2D.Double rect = new Rectangle2D.Double();
+                        rect.setRect(selectedPosition.x, selectedPosition.y, POS_CIRC_SIZE, POS_CIRC_SIZE);
+
+                        if (rect.contains(e.getX(), e.getY())) {
+
+                            selectedPosition.x = e.getX();
+                            selectedPosition.y = e.getY();
+
+                            for (DataPath dataPath : mPathList) {
+                                if (dataPath.id1 == selectedPosition.id || dataPath.id2 == selectedPosition.id) {
+
+                                }
+                            }
+
+                        }
+
+                    }
+                    break;
+                case EDIT:
+                    if(selectedPath != null) {
+                        selectedPath.onPointDrag(e.getX(), e.getY());
+                    }
+                    repaint();
+                    break;
+            }
+        }
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        mouseX = e.getX();
+        mouseY = e.getY();
+        if (currentView == ViewType.NODES) {
+            if (currentTool == ToolType.EDIT) {
+                hoveringpath = selectPath(e);
+                repaint();
+            } else {
+                if (connectingPosition != null) {
+                    repaint();
+                }
+            }
+
+
+        } else if (currentView == ViewType.ROUTES) {
+            ViewRoute route = selectRoute(e);
+            hoveringRoute = route;
+            repaint();
+        }
+    }
+
+    public boolean setSelectedPositionId(int id) {
+
+        if (selectedPosition == null || id <= 0) {
+            return false;
+        }
+
+        for (DataPosition dataPosition : mPositionList) {
+            if (dataPosition.x == selectedPosition.x && dataPosition.y == selectedPosition.y) {
+                dataPosition.id = id;
+                selectedPosition.id = id;
+                repaint();
+                return true;
+            } else if (dataPosition.id == id) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    public DataSave getData() {
+        return new DataSave(mPositionList, mPathList, mRouteList);
+    }
+
+    public void setData(DataSave savedData) {
+        mPositionList = savedData.positionList;
+        mPathList = savedData.pathList;
+        mRouteList = savedData.routeList;
+
+        if (mPositionList == null) {
+            mPositionList = new ArrayList<DataPosition>();
+        }
+
+        if (mPathList == null) {
+            mPathList = new ArrayList<DataPath>();
+        }
+
+        if (mRouteList == null) {
+            mRouteList = new ArrayList<DataRoute>();
+        }
+
         repaint();
     }
 
+    public void setViewMode(ViewType preview) {
+        currentView = preview;
+        selectedRoute = null;
+
+        if (currentView == ViewType.PREVIEW || currentView == ViewType.ROUTES) {
+            calculateViewObjects();
+        }
+        repaint();
+    }
+
+    private void calculateViewObjects() {
+
+        mViewPositionList = new ArrayList<ViewPosition>();
+        mViewPathList = new ArrayList<ViewPath>();
+        mViewRouteList = new ArrayList<ViewRoute>();
+
+        for (DataRoute dataRoute : mRouteList) {
+            mViewRouteList.add(new ViewRoute(dataRoute, mPositionList, mPathList));
+        }
+
+        for (DataPosition dataPosition : mPositionList) {
+            ViewPosition viewPosition = new ViewPosition(dataPosition);
+            mViewPositionList.add(viewPosition);
+
+            ArrayList<Ticket> ticketTypes = new ArrayList<Ticket>();
+            for (ViewRoute viewRoute : mViewRouteList) {
+                if (viewRoute.positionList.get(0).id == dataPosition.id || viewRoute.positionList.get(viewRoute.positionList.size() - 1).id == dataPosition.id) {
+                    ticketTypes.add(viewRoute.type);
+                }
+            }
+
+            viewPosition.setTypes(ticketTypes);
+
+        }
+
+        for (DataPath dataPath : mPathList) {
+            ViewPath viewPath = new ViewPath(dataPath);
+            mViewPathList.add(viewPath);
+
+            ArrayList<Ticket> ticketTypes = new ArrayList<Ticket>();
+
+            for (ViewRoute viewRoute : mViewRouteList) {
+                for (int i = 0; i < viewRoute.positionList.size() - 1; i++) {
+                    if (viewRoute.positionList.get(i).id == dataPath.id1 && viewRoute.positionList.get(i + 1).id == dataPath.id2
+                            || viewRoute.positionList.get(i).id == dataPath.id2 && viewRoute.positionList.get(i + 1).id == dataPath.id1) {
+                        ticketTypes.add(viewRoute.type);
+                        if (viewPath.id1 == 50 && viewPath.id2 == 67
+                                || viewPath.id2 == 50 && viewPath.id1 == 67) {
+                            System.err.println("viewRoute passing through from " + viewRoute.id1 + " to " + viewRoute.id2);
+                        }
+                    }
+
+                }
+
+
+            }
+
+            viewPath.setTypes(ticketTypes);
+
+
+        }
+
+
+        repaint();
+    }
+
+    public void setGraph(Graph<Integer, Route> graph) {
+
+        mRouteList.clear();
+
+        for (Edge<Integer, Route> edge : graph.getEdges()) {
+            mRouteList.add(new DataRoute(edge.source(), edge.target(), edge.data()));
+        }
+
+        System.out.println("routes calculated!");
+
+    }
+
+    public void setTool(ToolType tool) {
+        this.currentTool = tool;
+        unselectCurrentSelectedPosition();
+        connectingPosition = selectedPosition = null;
+    }
+
+    public enum ViewType {PREVIEW, NODES, ROUTES;}
+
+    public enum ToolType {ADD, MOVE, CONNECT, EDIT}
+
     public interface CanvasInterface {
-		public void onNodeSelected(PathNode node);
-	}
-	public MapCanvas() {
-		setOpaque(false);
-		mNodeList = new ArrayList<PathNode>();
-		mEdgeList = new ArrayList<PathEdge>();
-        mBusNodeList = new ArrayList<PathNode>();
-        mBusEdgeList = new ArrayList<PathEdge>();
-        mUndergroundNodeList = new ArrayList<PathNode>();
-        mUndergroundEdgeList = new ArrayList<PathEdge>();
+        public void onPositionSelected(DataPosition pos);
 
-		stroke = new BasicStroke(3.0f);
 
-		addMouseListener(this);
-		addMouseMotionListener(this);
-
-	}
-
-	public void setInterface(final CanvasInterface anInterface) {
-		mInterface = anInterface;
-	}
-
-
-	private void doDrawing(Graphics g) {
-
-		Graphics2D g2d = (Graphics2D) g;
-
-		g2d.setStroke(stroke);
-
-		g2d.setColor(new Color(250,250,250, 111));
-
-		g2d.fill(new Rectangle2D.Double(0,0,getSize().getWidth(), getSize().getHeight()));
-
-		g2d.setColor(Color.YELLOW);
-
-		g2d.setFont(new Font(null, Font.PLAIN, getSize().width/100));
-
-		FontMetrics fm = g2d.getFontMetrics();
-
-
-
-
-
-        if(!viewType.equals(HighwayControlUI.VIEW_ALL)){
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC,0.5f));
-        }
-
-        for(PathEdge edge : mEdgeList){
-
-            GeneralPath polyLine = edge.getPath();
-            if(HighwayControlUI.EDIT_PATH_TOOL.equals(mCurrentTool) && stroke.createStrokedShape(polyLine).contains(mouseX, mouseY) && viewType.equals(HighwayControlUI.VIEW_ALL)){
-                final BasicStroke tempStroke = new BasicStroke(5.0f);
-                g2d.setStroke(tempStroke);
-                g2d.draw(polyLine);
-                g2d.setStroke(stroke);
-            }else{
-                g2d.draw(polyLine);
-            }
-        }
-
-		for(PathNode node : mNodeList){
-
-			if(selectedNode != null && node.getId() == selectedNode.getId() && mConnectingNodes){
-				GeneralPath polyLine = new GeneralPath(GeneralPath.WIND_EVEN_ODD, 2);
-				polyLine.moveTo(node.getShape().getCenterX(), node.getShape().getCenterY());
-				polyLine.lineTo(mouseX, mouseY);
-				g2d.draw(polyLine);
-			}
-
-			if (selectedNode != null && node.getId() == selectedNode.getId()) {
-				g2d.setColor(Color.magenta);
-				g2d.fill(node.getShape());
-				g2d.setColor(Color.YELLOW);
-			}else {
-				g2d.fill(node.getShape());
-			}
-
-
-		}
-
-        if(!viewType.equals(HighwayControlUI.VIEW_ALL)){
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC,1f));
-
-            ArrayList<PathNode> nodeList = mNodeList;
-            ArrayList<PathEdge> edgeList = mEdgeList;
-            Color color = Color.GREEN;
-            if(viewType.equals(HighwayControlUI.VIEW_BUS)){
-
-                nodeList = mBusNodeList;
-                edgeList = mBusEdgeList;
-            }else{
-                color = Color.RED;
-
-                nodeList = mUndergroundNodeList;
-                edgeList = mUndergroundEdgeList;
-            }
-
-            g2d.setColor(color);
-
-            for(PathEdge edge : edgeList){
-
-                GeneralPath polyLine = edge.getPath();
-                if(HighwayControlUI.EDIT_PATH_TOOL.equals(mCurrentTool) && stroke.createStrokedShape(polyLine).contains(mouseX, mouseY)){
-                    final BasicStroke tempStroke = new BasicStroke(5.0f);
-                    g2d.setStroke(tempStroke);
-                    g2d.draw(polyLine);
-                    g2d.setStroke(stroke);
-                }else{
-                    g2d.draw(polyLine);
-                }
-            }
-
-            for(PathNode node : nodeList){
-
-                    if(selectedNode != null && node.getId() == selectedNode.getId() && mConnectingNodes){
-                        GeneralPath polyLine = new GeneralPath(GeneralPath.WIND_EVEN_ODD, 2);
-                        polyLine.moveTo(node.getShape().getCenterX(), node.getShape().getCenterY());
-                        polyLine.lineTo(mouseX, mouseY);
-                        g2d.draw(polyLine);
-                    }
-
-                    if (selectedNode != null && node.getId() == selectedNode.getId()) {
-                        g2d.setColor(Color.magenta);
-                        g2d.fill(node.getShape());
-                        g2d.setColor(color);
-                    }else {
-                        g2d.fill(node.getShape());
-                    }
-
-
-                }
-
-
-
-        }
-
-
-
-
-		for(PathNode node : mNodeList){
-			final String nodeName = node.getName();
-			Rectangle2D r = fm.getStringBounds(nodeName, g2d);
-			int x = (int) (node.getShape().getCenterX() - ((int) r.getWidth() / 2) );
-			int y = (int) (node.getShape().getCenterY() - ((int) r.getHeight() / 2) + fm.getAscent());
-			g2d.setColor(Color.BLACK);
-			g.drawString(nodeName, x, y);
-			g2d.setColor(Color.RED);
-		}
-	}
-
-	@Override
-	public void paintComponent(Graphics g) {
-
-		super.paintComponent(g);
-		doDrawing(g);
-	}
-
-	public void resetActions() {
-		mConnectingNodes = false;
-
-		draggingNode = null;
-		selectedNode = null;
-		repaint();
-	}
-
-	@Override
-	public void mousePressed(final MouseEvent e) {
-        if(viewType.equals(HighwayControlUI.VIEW_ALL)) {
-            if (HighwayControlUI.ADD_EDIT_NODE_TOOL.equals(mCurrentTool)) {
-                if (selectNode(e.getX(), e.getY()) == null) {
-                    addNode(e.getX(), e.getY());
-                }
-            } else if (HighwayControlUI.MOVE_ELEMENT_TOOL.equals(mCurrentTool)) {
-                beginMoveNode(e.getX(), e.getY());
-            } else if (HighwayControlUI.CONNECT_NODE_TOOL.equals(mCurrentTool)) {
-                connectNodes(e.getX(), e.getY());
-            } else if (HighwayControlUI.EDIT_PATH_TOOL.equals(mCurrentTool)) {
-                if (!beginMoveNode(e.getX(), e.getY())) {
-                    addPathWaypoint(e.getX(), e.getY());
-                }
-            }
-        }else{
-            if (HighwayControlUI.ADD_EDIT_NODE_TOOL.equals(mCurrentTool)) {
-                if (selectNode(e.getX(), e.getY()) == null) {
-                    addNode(e.getX(), e.getY());
-                }
-            } else if (HighwayControlUI.MOVE_ELEMENT_TOOL.equals(mCurrentTool)) {
-                beginMoveNode(e.getX(), e.getY());
-            } else if (HighwayControlUI.CONNECT_NODE_TOOL.equals(mCurrentTool)) {
-                connectNodes(e.getX(), e.getY());
-            } else if (HighwayControlUI.EDIT_PATH_TOOL.equals(mCurrentTool)) {
-                if (!beginMoveNode(e.getX(), e.getY())) {
-                    addPathWaypoint(e.getX(), e.getY());
-                }
-            }
-        }
-	}
-	private void connectNodes(final int x, final int y) {
-
-		PathNode firstNode = null;
-
-        ArrayList<PathEdge> edgeList = mEdgeList;
-        ArrayList<PathNode> nodeList = mNodeList;
-
-        if(viewType.equals(HighwayControlUI.VIEW_BUS)){
-            edgeList = mBusEdgeList;
-            nodeList = mBusNodeList;
-        }else if(viewType.equals(HighwayControlUI.VIEW_UNDERGROUND)){
-            edgeList = mUndergroundEdgeList;
-            nodeList = mUndergroundNodeList;
-        }
-
-        for(PathNode node : nodeList){
-			if(selectedNode != null && node.getId() == selectedNode.getId()){
-				firstNode = node;
-				break;
-			}
-		}
-
-
-		if(firstNode == null) {
-			selectNode(x, y);
-			mConnectingNodes = true;
-
-		}else{
-
-			PathNode secondNode = null;
-			for (PathNode node : nodeList) {
-				if (node.getShape().contains(x, y)) {
-					secondNode = node;
-					break;
-				}
-			}
-
-			if(secondNode != null) {
-				edgeList.add(new PathEdge(firstNode, secondNode));
-				resetActions();
-			}
-		}
-	}
-	private boolean addPathWaypoint(final int x, final int y) {
-
-        ArrayList<PathEdge> edgeList = mEdgeList;
-        ArrayList<PathNode> nodeList = mNodeList;
-
-        if(viewType.equals(HighwayControlUI.VIEW_BUS)){
-            edgeList = mBusEdgeList;
-            nodeList = mBusNodeList;
-        }else if(viewType.equals(HighwayControlUI.VIEW_UNDERGROUND)){
-            edgeList = mUndergroundEdgeList;
-            nodeList = mUndergroundNodeList;
-        }
-
-		for(PathEdge edge : edgeList){
-
-			GeneralPath polyLine = edge.getPath();
-			if(stroke.createStrokedShape(polyLine).contains(mouseX, mouseY)){
-				PathNode waypoint = new PathNode(curHighId++, x,y, WAYPOINT_SIZE);
-                nodeList.add(waypoint);
-				edgeList.add(edge.split(waypoint));
-
-				draggingNode = waypoint;
-				return true;
-			}
-		}
-		return false;
-	}
-	@Override
-	public void mouseReleased(final MouseEvent e) {
-		if(draggingNode != null){
-			endMoveNode(e.getX(), e.getY());
-		}
-	}
-	@Override
-	public void mouseEntered(final MouseEvent e) {
-
-	}
-	@Override
-	public void mouseExited(final MouseEvent e) {
-
-	}
-	@Override
-	public void mouseClicked(final MouseEvent e) {
-
-	}
-	@Override
-	public void mouseDragged(final MouseEvent e) {
-		if (draggingNode != null) {
-			moveNode(e.getX(), e.getY());
-		}
-	}
-	@Override
-	public void mouseMoved(final MouseEvent e) {
-		mouseX = e.getX();
-		mouseY = e.getY();
-
-		if(HighwayControlUI.EDIT_PATH_TOOL.equals(mCurrentTool)){
-			repaint();
-		}
-
-		if(selectedNode != null){
-			repaint();
-		}
-	}
-
-	private void addNode(int x, int y){
-
-
-        if(viewType.equals(HighwayControlUI.VIEW_ALL)) {
-
-            final PathNode node = new PathNode(curHighId++, x, y, CIRC_SIZE);
-
-            mNodeList.add(node);
-            selectedNode = node;
-
-            if(mInterface != null) {
-                mInterface.onNodeSelected(node);
-            }
-
-        }else if(viewType.equals(HighwayControlUI.VIEW_BUS) || viewType.equals(HighwayControlUI.VIEW_UNDERGROUND)){
-
-            PathNode chosenNode = null;
-            for(PathNode node : mNodeList){
-                if(node.getShape().contains(x, y)){
-                    chosenNode = node;
-                    break;
-                }
-            }
-
-            if(chosenNode != null){
-
-                if(viewType.equals(HighwayControlUI.VIEW_BUS)){
-                    mBusNodeList.add(chosenNode);
-                }else if(viewType.equals(HighwayControlUI.VIEW_UNDERGROUND)){
-                    mUndergroundNodeList.add(chosenNode);
-                }
-            }
-
-        }
-
-
-
-		repaint();
-	}
-
-	private boolean beginMoveNode(final int x, final int y) {
-
-        ArrayList<PathNode> nodeList = mNodeList;
-
-        if(viewType.equals(HighwayControlUI.VIEW_BUS)){
-            nodeList = mBusNodeList;
-        }else if(viewType.equals(HighwayControlUI.VIEW_UNDERGROUND)){
-            nodeList = mUndergroundNodeList;
-        }
-
-		for(PathNode node : nodeList){
-			if(node.getShape().contains(x, y)){
-				draggingNode = node;
-				repaint();
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private void endMoveNode(final int x, final int y) {
-
-        ArrayList<PathNode> nodeList = mNodeList;
-
-        if(viewType.equals(HighwayControlUI.VIEW_BUS)){
-            nodeList = mBusNodeList;
-        }else if(viewType.equals(HighwayControlUI.VIEW_UNDERGROUND)){
-            nodeList = mUndergroundNodeList;
-        }
-
-        int correctedX = x;
-        int correctedY = y;
-
-        if(viewType.equals(HighwayControlUI.VIEW_BUS) || viewType.equals(HighwayControlUI.VIEW_UNDERGROUND)) {
-            for(PathNode node : mNodeList){
-                if(node.getShape().contains(x,y)){
-                    correctedX = (int) node.getShape().getCenterX();
-                    correctedY = (int) node.getShape().getCenterY();
-                    break;
-                }
-            }
-
-
-        }
-
-        if(viewType.equals(HighwayControlUI.VIEW_UNDERGROUND)){
-
-            for(PathNode node : mBusNodeList){
-                if(node.getShape().contains(x,y)){
-                    correctedX = (int) node.getShape().getCenterX();
-                    correctedY = (int) node.getShape().getCenterY();
-                    break;
-                }
-            }
-
-        }
-
-		for(PathNode node : nodeList){
-			if(node.getId() == draggingNode.getId()){
-				node.updatePosition(correctedX,correctedY);
-				draggingNode = null;
-				break;
-			}
-		}
-		repaint();
-	}
-
-	private void moveNode(final int x, final int y) {
-
-        ArrayList<PathEdge> edgeList = mEdgeList;
-        ArrayList<PathNode> nodeList = mNodeList;
-
-        if(viewType.equals(HighwayControlUI.VIEW_BUS)){
-            edgeList = mBusEdgeList;
-            nodeList = mBusNodeList;
-        }else if(viewType.equals(HighwayControlUI.VIEW_UNDERGROUND)){
-            edgeList = mUndergroundEdgeList;
-            nodeList = mUndergroundNodeList;
-        }
-
-		for(PathNode node : nodeList){
-			if(node.getId() == draggingNode.getId()){
-				node.updatePosition(x, y);
-
-				for(PathEdge edge : edgeList){
-					edge.notifyNodeMove(draggingNode.getId(), x, y);
-				}
-
-				break;
-			}
-		}
-		repaint();
-	}
-
-	private PathNode selectNode(final int x, final int y) {
-
-        ArrayList<PathNode> nodeList = mNodeList;
-
-        if(viewType.equals(HighwayControlUI.VIEW_BUS)){
-            nodeList = mBusNodeList;
-        }else if(viewType.equals(HighwayControlUI.VIEW_UNDERGROUND)){
-            nodeList = mUndergroundNodeList;
-        }
-
-        for (PathNode node : nodeList) {
-			if (node.getShape().contains(x, y)) {
-				selectedNode = node;
-
-				if(mInterface != null) {
-					mInterface.onNodeSelected(node);
-				}
-				repaint();
-				return node;
-			}
-		}
-
-		return null;
-
-	}
-	public void setCurrentTool(final String currentTool) {
-		mCurrentTool = currentTool;
-		resetActions();
-	}
-	public void setData(final MapData mapData) {
-		mNodeList = mapData.getPathNodeList();
-		mEdgeList = mapData.getPathEdgeList();
-        mBusNodeList = mapData.getmBusPathNodeList();
-        mBusEdgeList = mapData.getmBusPathEdgeList();
-        mUndergroundNodeList = mapData.getmUndergroundPathNodeList();
-        mUndergroundEdgeList = mapData.getmUndergroundPathEdgeList();
-		curHighId = mapData.getHighId();
-		resetActions();
-	}
-	public void deleteNode(PathNode node){
-
-
-
-		ArrayList<PathNode> dirtyNodeList = new ArrayList<PathNode>();
-
-
-        ArrayList<PathEdge> edgeList = mEdgeList;
-        ArrayList<PathNode> nodeList = mNodeList;
-
-        if(viewType.equals(HighwayControlUI.VIEW_BUS)){
-            edgeList = mBusEdgeList;
-            nodeList = mBusNodeList;
-        }else if(viewType.equals(HighwayControlUI.VIEW_UNDERGROUND)){
-            edgeList = mUndergroundEdgeList;
-            nodeList = mUndergroundNodeList;
-        }
-
-        nodeList.remove(node);
-
-
-		if(node.getRadius() == CIRC_SIZE){
-            for(PathEdge edge : edgeList){
-				if(edge.getPathNode1().getId() == node.getId() && edge.getPathNode1().getRadius() == WAYPOINT_SIZE){
-					dirtyNodeList.add(edge.getPathNode1());
-				}else if(edge.getPathNode2().getId() == node.getId() && edge.getPathNode2().getRadius() == WAYPOINT_SIZE){
-					dirtyNodeList.add(edge.getPathNode2());
-				}
-			}
-		}
-
-
-		ArrayList<PathNode> removedNodeList = new ArrayList<PathNode>();
-		removedNodeList.add(node);
-
-
-
-		while(dirtyNodeList.size() > 0)
-		{
-			ArrayList<PathNode> newDirtyNodeList = new ArrayList<PathNode>();
-
-			for(PathNode dirtyNode : dirtyNodeList){
-				for(PathEdge edge : edgeList){
-					if(edge.getPathNode1().getId() == dirtyNode.getId() && edge.getPathNode1().getRadius() == WAYPOINT_SIZE && !dirtyNodeList.contains(edge.getPathNode1())){
-						newDirtyNodeList.add(edge.getPathNode1());
-					}else if(edge.getPathNode2().getId() == dirtyNode.getId() && edge.getPathNode2().getRadius() == WAYPOINT_SIZE && !dirtyNodeList.contains(edge.getPathNode1())){
-						newDirtyNodeList.add(edge.getPathNode2());
-					}
-				}
-			}
-
-			dirtyNodeList = newDirtyNodeList;
-		}
-
-		ArrayList<PathNode> newNodeList = new ArrayList<PathNode>();
-		ArrayList<PathEdge> newEdgeList = new ArrayList<PathEdge>();
-
-		for (final PathEdge edge : edgeList) {
-			if(!(removedNodeList.contains(edge.getPathNode1()) || removedNodeList.contains(edge.getPathNode2()))){
-				newEdgeList.add(edge);
-			}
-		}
-
-		for(PathNode oldNode : nodeList){
-			if(!(removedNodeList.contains(oldNode) || removedNodeList.contains(oldNode))){
-				newNodeList.add(oldNode);
-			}
-		}
-
-        if(viewType.equals(HighwayControlUI.VIEW_ALL)) {
-            mNodeList = newNodeList;
-            mEdgeList = newEdgeList;
-        }else if(viewType.equals(HighwayControlUI.VIEW_BUS)){
-            mBusNodeList = newNodeList;
-            mBusEdgeList = newEdgeList;
-        }else if(viewType.equals(HighwayControlUI.VIEW_UNDERGROUND)){
-            mUndergroundNodeList = newNodeList;
-            mUndergroundEdgeList = newEdgeList;
-        }
-
-        selectedNode = null;
-
-		repaint();
-
-	}
+    }
 }

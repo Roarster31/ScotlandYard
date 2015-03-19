@@ -2,12 +2,9 @@ package solution.development;
 
 import com.google.gson.Gson;
 import com.sun.deploy.util.StringUtils;
+import solution.development.models.DataSave;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.nio.file.Files;
 
 /**
@@ -46,6 +43,22 @@ public class DataParser {
 
 	}
 
+    public DataSave loadV3Data(File file) throws IOException {
 
+        String input = StringUtils.join(Files.readAllLines(file.toPath()),"");
 
+        Gson gson = new Gson();
+
+        return gson.fromJson(input, DataSave.class);
+    }
+
+    public void saveV3Data(DataSave data, File file) throws FileNotFoundException, UnsupportedEncodingException {
+
+        Gson gson = new Gson();
+
+        PrintWriter writer = new PrintWriter(file, "UTF-8");
+        writer.write(gson.toJson(data));
+        writer.close();
+
+    }
 }

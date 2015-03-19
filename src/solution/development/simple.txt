@@ -1,0 +1,1 @@
+{"mPathNodeList":[{"id":0,"x":279,"y":398,"radius":10.0},{"id":1,"x":605,"y":399,"radius":10.0},{"id":3,"x":454,"y":237,"radius":10.0}],"mPathEdgeList":[{"mPathNode1":{"id":1,"x":605,"y":399,"radius":10.0},"mPathNode2":{"id":0,"x":279,"y":398,"radius":10.0}},{"mPathNode1":{"id":3,"x":454,"y":237,"radius":10.0},"mPathNode2":{"id":1,"x":605,"y":399,"radius":10.0}}],"mHighId":4}

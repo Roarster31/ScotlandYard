@@ -33,7 +33,7 @@ public class CompatibleData {
 
     private void addPathData(ArrayList<PathNode> pathNodeList, ArrayList<PathEdge> pathEdgeList) {
         for(PathNode pathNode : pathNodeList){
-            if(pathNode.getRadius() == MapCanvas.CIRC_SIZE) {
+            if(pathNode.getRadius() == MapCanvasLegacy.CIRC_SIZE) {
                 //only add the ones we care about
                 final int positionId = pathNode.getId();
                 positions.add(new MapPosition(Integer.parseInt(pathNode.getName()), pathNode.getX(), pathNode.getY()));
@@ -83,13 +83,13 @@ public class CompatibleData {
         ArrayList<int[]> pathPoints = new ArrayList<int[]>();
 
 
-        if(startNode.getRadius() == MapCanvas.CIRC_SIZE) {
+        if(startNode.getRadius() == MapCanvasLegacy.CIRC_SIZE) {
             pathPoints.add(new int[]{startNode.getX(), startNode.getY(), Integer.parseInt(startNode.getName())});
         }else{
             pathPoints.add(new int[]{startNode.getX(), startNode.getY(), startNode.getId()});
         }
 
-        if(secondNode.getRadius() != MapCanvas.CIRC_SIZE) {
+        if(secondNode.getRadius() != MapCanvasLegacy.CIRC_SIZE) {
             for (PathEdge edge : pathEdges) {
                 if (edge.getPathNode1().equals(secondNode) && !edge.getPathNode2().equals(startNode)) {
                     pathPoints.addAll(findPathFromNode(edge.getPathNode1(), edge.getPathNode2(), pathEdges));
