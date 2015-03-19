@@ -12,9 +12,14 @@ import java.nio.file.Files;
  */
 public class DataParser {
 
+    private final Gson gson;
+
+    public DataParser () {
+        gson = new Gson();
+    }
+
 	public void saveData(MapData mapData, File file) throws FileNotFoundException, UnsupportedEncodingException {
 
-		Gson gson = new Gson();
 
 		PrintWriter writer = new PrintWriter(file, "UTF-8");
 		writer.write(gson.toJson(mapData));
@@ -24,7 +29,6 @@ public class DataParser {
 
     public void saveCompatibleFile(MapData mapData, File file) throws FileNotFoundException, UnsupportedEncodingException {
 
-        Gson gson = new Gson();
 
         PrintWriter writer = new PrintWriter(file, "UTF-8");
         writer.write(gson.toJson(new CompatibleData(mapData)));
@@ -37,7 +41,6 @@ public class DataParser {
 
 		String input = StringUtils.join(Files.readAllLines(file.toPath()),"");
 
-		Gson gson = new Gson();
 
 		return gson.fromJson(input, MapData.class);
 
@@ -47,14 +50,10 @@ public class DataParser {
 
         String input = StringUtils.join(Files.readAllLines(file.toPath()),"");
 
-        Gson gson = new Gson();
-
         return gson.fromJson(input, DataSave.class);
     }
 
     public void saveV3Data(DataSave data, File file) throws FileNotFoundException, UnsupportedEncodingException {
-
-        Gson gson = new Gson();
 
         PrintWriter writer = new PrintWriter(file, "UTF-8");
         writer.write(gson.toJson(data));

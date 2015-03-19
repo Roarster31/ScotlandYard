@@ -19,7 +19,7 @@ public class DataPath {
     public int[] pathXCoords;
     public int[] pathYCoords;
 
-    private int movingCoordIndex = -1;
+    private transient int movingCoordIndex = -1;
 
     public DataPath(int id1, int id2) {
         this.id1 = id1;
