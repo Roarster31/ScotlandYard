@@ -57,8 +57,10 @@ public class SoundHelper {
     }
 
     public static void itemDeHover() {
-        mSelectClipRunning = false;
-        mSelectClip.stop();
+        if(mSelectClip != null) {
+            mSelectClipRunning = false;
+            mSelectClip.stop();
+        }
     }
     public static void itemClick(){
         if (mClickClip.isRunning())
