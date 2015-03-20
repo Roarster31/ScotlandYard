@@ -10,10 +10,7 @@ import solution.interfaces.adapters.GameUIAdapter;
 import solution.views.map.MapView;
 
 import javax.swing.*;
-import javax.swing.border.*;
 import java.awt.*;
-import java.io.File;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,14 +44,8 @@ public class GameLayout extends JPanel {
         JPanel mapViewContainer = new JPanel();
         mapViewContainer.setLayout(new BorderLayout());
         mapViewContainer.setOpaque(false);
-        mapViewContainer.setBorder(new EmptyBorder(20,20,20,20));
         // Load in the map view
         mapView = new MapView(controllerInterface, "pirate_map.png", new MapData("custom_data", MapData.DataFormat.CUSTOM));
-        mapView.setBorder(new EmptyBorder(20,20,20,20));
-
-        // I DONT WANT TO DO THIS BUT I HAVE TOO
-        mapView.setPreferredSize(new Dimension(800,600));
-        mapView.setMinimumSize(new Dimension(800,600));
 
 
         // Load in the map

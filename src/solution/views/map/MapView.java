@@ -41,6 +41,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     private List<MoveTicket> secondMoves;
     private AffineTransform transform;
     private AffineTransform inverseTransform;
+    private Dimension mInnerImageSize;
     private Dimension mImageSize;
     private TransportSprite transportSprite;
     private AnimationWorker animationWorker;
@@ -58,7 +59,12 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         setupGraphImage(graphImageMapPath);
         mMapPopup = new MapNodePopup(this);
 
-        createBgPathImage();
+        setPreferredSize(mImageSize);
+        setMinimumSize(mImageSize);
+
+        setTransform(mImageSize);
+
+                createBgPathImage();
         createBgPositionImage();
 
         addComponentListener(new ComponentAdapter() {
@@ -67,16 +73,22 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             public void componentResized(ComponentEvent e) {
                 Dimension size = getSize();
 
-                transform.setToScale(size.getWidth() / mImageSize.getWidth(), size.getHeight() / mImageSize.getHeight());
-                try {
-                    inverseTransform = transform.createInverse();
-                } catch (NoninvertibleTransformException e1) {
-                    e1.printStackTrace();
-                }
+                setTransform(size);
                 repaint();
             }
 
         });
+    }
+
+    private void setTransform(Dimension windowSize) {
+        transform = new AffineTransform();
+        transform.translate((mImageSize.getWidth() - mInnerImageSize.getWidth()) / 2f, (mImageSize.getHeight() - mInnerImageSize.getHeight()) / 2f);
+        transform.scale(mInnerImageSize.getWidth() / windowSize.getWidth(), mInnerImageSize.getHeight() / windowSize.getHeight());
+        try {
+            inverseTransform = transform.createInverse();
+        } catch (NoninvertibleTransformException e1) {
+            e1.printStackTrace();
+        }
     }
 
 
@@ -86,7 +98,8 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             mGraphImage = ImageIO.read(new File(resource.toURI()));
             resource = getClass().getClassLoader().getResource("ui" + File.separator + "mapbg.png");
             mMapImage = ImageIO.read(new File(resource.toURI()));
-            mImageSize = new Dimension(mGraphImage.getWidth(), mGraphImage.getHeight());
+            mImageSize = new Dimension(mMapImage.getWidth(), mMapImage.getHeight());
+            mInnerImageSize = new Dimension((int) (mImageSize.width * 0.86f), (int) (mImageSize.height * 0.8f));
         } catch (IOException ex) {
             //todo handle exception...
         } catch (URISyntaxException e) {
@@ -99,7 +112,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
-//        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 //        hints.put(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE);
 //        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
 //        hints.put(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
@@ -108,8 +121,14 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
 
         long startTime = System.currentTimeMillis();
 
+        g2d.setColor(Color.RED);
+
+        g2d.drawImage(mMapImage, null, 0, 0);
         g2d.setTransform(transform);
-        g2d.drawImage(mGraphImage, null, 0, 0);
+//        g2d.drawImage(mGraphImage, null, 0, 0);
+
+        g2d.fillRect(0,0,mImageSize.width,mImageSize.height);
+
 
         g2d.drawImage(mBgPathImage, null, 0, 0);
 
