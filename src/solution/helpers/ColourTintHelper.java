@@ -19,6 +19,14 @@ public class ColourTintHelper {
 
         return result;
     }
+    public static BufferedImage setTint(BufferedImage source, Color c) {
+        RGBAdjustFilter rgb = new RGBAdjustFilter(c.getRed(), c.getGreen(), c.getBlue());
+        BufferedImage destination = rgb.createCompatibleDestImage(source, null);
+
+        BufferedImage result = rgb.filter(source, destination);
+
+        return result;
+    }
     public static BufferedImage setBlack(BufferedImage source) {
         GrayscaleFilter gray = new GrayscaleFilter();
         BufferedImage destination = gray.createCompatibleDestImage(source, null);

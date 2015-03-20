@@ -132,14 +132,16 @@ public class SideBarView extends JPanel {
 
         // Draw the current players paper
         // Grab the colour and tint the image
+        BufferedImage effectedImage;
         Color c = ColourHelper.toColor(mControllerInterface.getCurrentPlayer());
         if(mControllerInterface.getCurrentPlayer() == Constants.MR_X_COLOUR) {
-            colourImg = ColourTintHelper.setBlack(colourImg);
+            effectedImage = ColourTintHelper.setBlack(colourImg);
         } else {
-            colourImg = ColourTintHelper.setRGB(colourImg, c);
+            effectedImage = ColourTintHelper.setRGB(colourImg, c);
         }
+
         g2d.drawImage(
-                colourImg,
+                effectedImage,
                 (SIDEBAR_WIDTH / 2) + 20,
                 tOffset- 90,
                 90,
