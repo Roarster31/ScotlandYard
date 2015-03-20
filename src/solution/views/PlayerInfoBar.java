@@ -38,8 +38,8 @@ public class PlayerInfoBar extends JPanel {
     private PlayerInfoImg[] playerColumns = new PlayerInfoImg[Constants.MAX_PLAYERS];
 
     public PlayerInfoBar(GameControllerInterface controllerInterface) {
-        setMinimumSize(new Dimension(800, 200));
-        setPreferredSize(new Dimension(800, 200));
+        setMinimumSize(new Dimension(800, 170));
+        setPreferredSize(new Dimension(800, 170));
         setOpaque(false);
         mGameControllerInterface = controllerInterface;
         controllerInterface.addUpdateListener(new GameAdapter());

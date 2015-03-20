@@ -14,22 +14,25 @@ import solution.interfaces.adapters.ScrollAdapter;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
  * Created by benallen on 17/03/15.
  */
-public class SideBarView extends JPanel {
+@Deprecated
+public class SideBarViewCopy extends JPanel {
     private BufferedImage colourImg;
     private GameControllerInterface mControllerInterface;
     private BufferedImage mRoundHolderImg;
@@ -41,13 +44,11 @@ public class SideBarView extends JPanel {
     private final int SIDEBAR_WIDTH = 216;
     private final int SIDEBAR_HEIGHT = 800;
     HashMap<Ticket, BufferedImage> ticketToImg;
+    private int yPosTicket = 10;
+    private int scrollQuantity = 0;
     private int mAlternator = 0;
-    private int tempYPosTicket = 0;
-    private final int mLimitYForTicketStack = 95;
-    private final int mTicketStackIncrement = 4;
-    private final int mTicketStackIncrLimit = 150;
 
-    SideBarView(GameControllerInterface controllerInterface){
+    SideBarViewCopy(GameControllerInterface controllerInterface){
         transform = new AffineTransform();
         mControllerInterface = controllerInterface;
 
@@ -152,21 +153,78 @@ public class SideBarView extends JPanel {
                 90,
                 this);
 
-        List<MoveTicket> mrXHistory = mControllerInterface.getMrXHistory();
+        // Temporary
+        //List<MoveTicket> mrXHistory = mControllerInterface.getMrXHistory();
+        List<MoveTicket> mrXHistory = new ArrayList<MoveTicket>();
 
-        // Draw ticket flicker
-        // TODO: sort bug for bottom stack full and multiple scrolls down
-        TicketFlicker ticketFlicker = new TicketFlicker();
-        ticketFlicker.draw(
-                mrXHistory,
-                mAlternator,
-                ticketToImg,
-                SIDEBAR_WIDTH,
-                tempYPosTicket,
-                g2d);
+        MoveTicket m = new MoveTicket(Colour.Black, 10, Ticket.DoubleMove);
+        mrXHistory.add(m);
+        m = new MoveTicket(Colour.Black, 10, Ticket.SecretMove);
+        mrXHistory.add(m);
+        m = new MoveTicket(Colour.Black, 10, Ticket.DoubleMove);
+        mrXHistory.add(m);
+        m = new MoveTicket(Colour.Black, 10, Ticket.SecretMove);
+        mrXHistory.add(m);
+        m = new MoveTicket(Colour.Black, 10, Ticket.DoubleMove);
+        mrXHistory.add(m);
+
+        // Ticket Flicker
+        int yOffset = 270;
+        int yTopOffset = 0;
+        int midDifference = 95;
+        int firstStack = (int) Math.ceil(mrXHistory.size() / 2) + mAlternator;
+        int secondStack = mrXHistory.size() - firstStack - 1;
+        TicketImageHolder[] tickets;
+        if(secondStack > 0) {
+            tickets = new TicketImageHolder[secondStack];
+        } else {
+            tickets = new TicketImageHolder[0];
+        }
+        int ticketsIterator = 0;
+        for (int i = 0; i < mrXHistory.size(); i++){
+            int ticketOffset = 0;
+            MoveTicket t = mrXHistory.get(i);
+            BufferedImage thisImg = ticketToImg.get(t.ticket);
+            if(i < firstStack){
+                // Add image onto the first stack
+                ticketOffset = yOffset + yTopOffset;
+                yTopOffset += 2;
+                g2d.drawImage(thisImg,null, (SIDEBAR_WIDTH / 2) - (thisImg.getWidth() / 2), ticketOffset);
+            } else if(i == firstStack) {
+                // Add middle stack
+                ticketOffset = yOffset + midDifference;
+                yTopOffset = 0;
+                g2d.drawImage(thisImg,null, (SIDEBAR_WIDTH / 2) - (thisImg.getWidth() / 2), ticketOffset);
+            } else {
+                ticketOffset = yOffset + midDifference * 2 + yTopOffset;
+                yTopOffset += 2;
+                tickets[ticketsIterator] = new TicketImageHolder();
+                tickets[ticketsIterator].setImg(thisImg);
+                tickets[ticketsIterator].setxPos((SIDEBAR_WIDTH / 2) - (thisImg.getWidth() / 2));
+                tickets[ticketsIterator].setyPos(ticketOffset);
+                ticketsIterator++;
+            }
 
 
+        }
+        for(int i = 0; i < tickets.length; i++){
+            g2d.drawImage(
+                    tickets[tickets.length - i - 1].getImg(),
+                    null,
+                    tickets[tickets.length - i - 1].getxPos(),
+                    tickets[tickets.length - i - 1].getyPos()
+            );
+        }
     }
+    public void drawReverse(int remaining, Graphics2D g2d, BufferedImage thisImg, int ticketOffset){
+        if (remaining == 0){
+            g2d.drawImage(thisImg,null, (SIDEBAR_WIDTH / 2) - (thisImg.getWidth() / 2), ticketOffset);
+        } else {
+            drawReverse(remaining - 1, g2d, thisImg, ticketOffset);
+            g2d.drawImage(thisImg,null, (SIDEBAR_WIDTH / 2) - (thisImg.getWidth() / 2), ticketOffset);
+        }
+    }
+
     public void update() {
         repaint();
     }
@@ -186,33 +244,20 @@ public class SideBarView extends JPanel {
         @Override
         public void mouseWheelMoved(MouseWheelEvent e) {
             super.mouseWheelMoved(e);
-            System.out.println(tempYPosTicket);
             if(e.getPreciseWheelRotation() > 0) {
-                if(tempYPosTicket >= mTicketStackIncrLimit){
-                    // Limit the temp y pos to this
-                    tempYPosTicket = mLimitYForTicketStack;
-                } else if(tempYPosTicket < mLimitYForTicketStack){
-                    tempYPosTicket = tempYPosTicket + mTicketStackIncrement;
-                    repaint();
-                } else if (tempYPosTicket >= mLimitYForTicketStack) {
-                    tempYPosTicket = 0;
+                scrollQuantity++;
+                if(scrollQuantity % 10 == 0){
                     mAlternator++;
                     repaint();
                 }
-
             } else {
-                if(tempYPosTicket <= -mTicketStackIncrLimit) {
-                    // limit the y pos
-                    tempYPosTicket = -mLimitYForTicketStack;
-                } else if(tempYPosTicket >= -mLimitYForTicketStack){
-                    tempYPosTicket = tempYPosTicket - mTicketStackIncrement;
-                    repaint();
-                } else if(tempYPosTicket < -mLimitYForTicketStack) {
-                    tempYPosTicket = 0;
+                if(scrollQuantity % 10 == 0){
                     mAlternator--;
                     repaint();
                 }
+                scrollQuantity--;
             }
+            System.out.println(scrollQuantity);
         }
     }
 }
