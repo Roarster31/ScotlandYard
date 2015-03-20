@@ -124,7 +124,7 @@ public class SideBarView extends JPanel {
 
         // Temporary
         //List<MoveTicket> mrXHistory = mControllerInterface.getMrXHistory();
-        List<MoveTicket> mrXHistory = mControllerInterface.getMrXHistory();
+        List<MoveTicket> mrXHistory = new ArrayList<MoveTicket>();
 
         MoveTicket m = new MoveTicket(Colour.Black, 10, Ticket.DoubleMove);
         mrXHistory.add(m);
@@ -138,7 +138,7 @@ public class SideBarView extends JPanel {
         int yOffset = 270;
         int yTopOffset = 0;
         int midDifference = 95;
-        //BenSucksDick
+
         int firstStack = (int) Math.ceil(mrXHistory.size() / 2);
         int secondStack = mrXHistory.size() - firstStack - 1;
         for (int i = 0; i < mrXHistory.size(); i++){
