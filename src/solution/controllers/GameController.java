@@ -164,6 +164,18 @@ public class GameController implements GameControllerInterface {
         //come after setupModel
         listeners.get(0).showGameInterface();
 
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //SUPERHAAAACK
+                try {
+                    Thread.sleep(4000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                notifyModelUpdated();
+            }
+        }).start();
         notifyModelUpdated();
     }
 
