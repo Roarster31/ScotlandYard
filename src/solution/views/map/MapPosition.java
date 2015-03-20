@@ -55,36 +55,39 @@ public class MapPosition {
 
 
 
-        if(playerColor != null){
-            g2d.setColor(playerColor);
+        if(available){
+            g2d.setColor(new Color(0, 0, 0, 187));
+        }else if (hasPlayerColor()){
+            g2d.setColor(new Color(playerColor.getRed(),playerColor.getGreen(),playerColor.getBlue()));
+        }else{
+            g2d.setColor(new Color(0, 0, 0, 107));
+        }
 
-            int outerRadius = (int) (radius*1.3f);
-            g2d.fillOval(x - outerRadius / 2, y - outerRadius / 2, outerRadius, outerRadius);
 
-            System.out.println("playerRingRadius = " + playerRingRadius);
-            System.out.println("playerRingAlpha = " + playerRingAlpha);
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, playerRingAlpha));
+        int outerRadius = (int) (radius*1.3f);
+        g2d.fillOval(x - outerRadius / 2, y - outerRadius / 2, outerRadius, outerRadius);
+
+        if(hasPlayerColor()){
+
+            g2d.setColor(new Color(playerColor.getRed(),playerColor.getGreen(),playerColor.getBlue(),(int)(playerRingAlpha*255)));
+
             g2d.drawOval(x - playerRingRadius / 2, y - playerRingRadius / 2, playerRingRadius, playerRingRadius);
-        }else {
-            g2d.setColor(Color.DARK_GRAY);
-
-            int outerRadius = (int) (radius*1.3f);
-            g2d.fillOval(x - outerRadius / 2, y - outerRadius / 2, outerRadius, outerRadius);
 
         }
 
-        if(!available && !highlighted){
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
-        }else{
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+        float brightness = 1f;
+        if(!available && !hasPlayerColor()){
+            brightness = 0.7f;
         }
 
         for (int i = 0; i < tickets.size(); i++) {
-            g2d.setColor(ColourHelper.ticketColour(tickets.get(i)));
+            Color color = ColourHelper.ticketColour(tickets.get(i));
+
+            float[] hsb = Color.RGBtoHSB(color.getRed(),color.getGreen(),color.getBlue(),null);
+
+            g2d.setColor(Color.getHSBColor(hsb[0],hsb[1], brightness));
             g2d.fillArc(x - radius / 2, y - radius / 2, radius, radius, segmentStartAngles[i], segmentAngleSize);
         }
-
-        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
 
 
     }

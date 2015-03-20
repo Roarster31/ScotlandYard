@@ -9,7 +9,6 @@ import solution.Models.MapData;
 import solution.Models.ScotlandYardModel;
 import solution.development.models.ViewRoute;
 import solution.helpers.ColourHelper;
-import solution.helpers.ImageHelper;
 import solution.helpers.PathInterpolator;
 import solution.helpers.RouteHelper;
 import solution.interfaces.GameControllerInterface;
@@ -152,7 +151,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
 
     private void createBgPathImage(){
 
-        mBgPathImage = ImageHelper.optimizeImage(new BufferedImage(mImageSize.width, mImageSize.height, BufferedImage.TYPE_INT_ARGB));
+        mBgPathImage = new BufferedImage(mImageSize.width, mImageSize.height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = mBgPathImage.createGraphics();
 
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -176,7 +175,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     private void createBgPositionImage(){
 
 
-        mBgPositionImage = ImageHelper.optimizeImage(new BufferedImage(mImageSize.width, mImageSize.height, BufferedImage.TYPE_INT_ARGB));
+        mBgPositionImage = new BufferedImage(mImageSize.width, mImageSize.height, BufferedImage.TYPE_INT_ARGB);
 
         Graphics2D g2d = mBgPositionImage.createGraphics();
 
@@ -450,6 +449,9 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
                 MapPosition currentPlayerPosition = null;
                 for (Colour colour : model.getPlayers()) {
                     int location = model.getPlayerLocation(colour);
+                    if(colour == Constants.MR_X_COLOUR && mControllerInterface.getCurrentPlayer() == Constants.MR_X_COLOUR){
+                        location = currentPlayerLocation;
+                    }
                     System.out.println(ColourHelper.toString(colour) + " @ " + location);
                     for(MapPosition mapPosition : mMapData.getPositionList()){
 
@@ -468,32 +470,34 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
                 }
                 if(currentPlayerPosition != null) {
                     final MapPosition finalCurrentPlayerPosition = currentPlayerPosition;
-//                    animationWorker.addWork(new AnimationWorker.AnimationInterface() {
-//                        public int tick;
-//
-//                        @Override
-//                        public boolean onTick() {
-//
-//
-//                            finalCurrentPlayerPosition.setPlayerRingAlpha(1f - 0.1f*tick);
-//                            finalCurrentPlayerPosition.setPlayerRingRadius((int) (MapPosition.CIRC_RADIUS * (tick*4/10f)));
-//
-//                            tick++;
-//                            if(tick > 10){
-//                                tick = 0;
-//                            }
-//
-//                            repaint();
-//
-//                            return ColourHelper.toColor(mControllerInterface.getCurrentPlayer()).equals(finalCurrentPlayerPosition.getPlayerColor());
-//                        }
-//
-//                        @Override
-//                        public void onFinished() {
-//                            finalCurrentPlayerPosition.setPlayerRingAlpha(1f);
-//                            finalCurrentPlayerPosition.setPlayerRingRadius(MapPosition.CIRC_RADIUS);
-//                        }
-//                    });
+                    animationWorker.addWork(new AnimationWorker.AnimationInterface() {
+
+                        private float TICK_LIMIT = 50;
+                        private int tick;
+
+                        @Override
+                        public boolean onTick() {
+
+
+                            finalCurrentPlayerPosition.setPlayerRingAlpha(1f - tick/ TICK_LIMIT);
+                            finalCurrentPlayerPosition.setPlayerRingRadius((int) (MapPosition.CIRC_RADIUS * (tick*4/ TICK_LIMIT)));
+
+                            tick++;
+                            if(tick > TICK_LIMIT){
+                                tick = 0;
+                            }
+
+                            repaint();
+
+                            return !ColourHelper.toColor(mControllerInterface.getCurrentPlayer()).equals(finalCurrentPlayerPosition.getPlayerColor());
+                        }
+
+                        @Override
+                        public void onFinished() {
+                            finalCurrentPlayerPosition.setPlayerRingAlpha(1f);
+                            finalCurrentPlayerPosition.setPlayerRingRadius(MapPosition.CIRC_RADIUS);
+                        }
+                    });
                 }
                 final Colour currentPlayer = model.getCurrentPlayer();
                 List<MoveTicket> firstMoves = mControllerInterface.getValidSingleMovesAtLocation(currentPlayer, model.getRealPlayerLocation(currentPlayer));
