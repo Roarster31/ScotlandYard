@@ -5,6 +5,7 @@ import scotlandyard.Graph;
 import scotlandyard.Route;
 import scotlandyard.Ticket;
 import solution.development.models.*;
+import solution.helpers.ColourHelper;
 
 import javax.swing.*;
 import java.awt.*;
@@ -74,7 +75,18 @@ public class MapCanvas extends JPanel implements MouseListener, MouseMotionListe
             g2d.setColor(Color.DARK_GRAY);
 
             for (ViewPosition viewPosition : mViewPositionList) {
-                g2d.fillOval(viewPosition.x - POS_CIRC_SIZE / 2, viewPosition.y - POS_CIRC_SIZE / 2, POS_CIRC_SIZE, POS_CIRC_SIZE);
+
+                g2d.setColor(Color.DARK_GRAY);
+
+                int outerRadius = (int) (POS_CIRC_SIZE*1.3f);
+                g2d.fillOval(viewPosition.x - outerRadius / 2, viewPosition.y - outerRadius / 2, outerRadius, outerRadius);
+
+                int segmentAngleSize = (int) (360 / (float) (viewPosition.types.size()));
+                for (int i = 0; i < viewPosition.types.size(); i++) {
+                    g2d.setColor(ColourHelper.ticketColour(viewPosition.types.get(i)));
+                    g2d.fillArc(viewPosition.x - POS_CIRC_SIZE / 2, viewPosition.y - POS_CIRC_SIZE / 2, POS_CIRC_SIZE, POS_CIRC_SIZE, i* segmentAngleSize, segmentAngleSize);
+                }
+
             }
 
             for (ViewPosition viewPosition : mViewPositionList) {
@@ -82,7 +94,7 @@ public class MapCanvas extends JPanel implements MouseListener, MouseMotionListe
                 Rectangle2D r = fm.getStringBounds(nodeName, g2d);
                 int x = viewPosition.x - ((int) r.getWidth() / 2);
                 int y = viewPosition.y - ((int) r.getHeight() / 2) + fm.getAscent();
-                g2d.setColor(Color.WHITE);
+                g2d.setColor(Color.BLUE);
                 g.drawString(nodeName, x, y);
             }
 

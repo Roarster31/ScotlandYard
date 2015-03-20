@@ -1,6 +1,5 @@
 package solution.views.map;
 
-import scotlandyard.MoveTicket;
 import scotlandyard.Ticket;
 import solution.development.models.ViewPath;
 
@@ -28,21 +27,29 @@ public class MapPath {
         this.tickets = new HashSet<Ticket>(viewPath.types);
     }
 
+    public void drawBackground(Graphics2D g2d){
+        if(!available) {
+            g2d.setStroke(new BasicStroke(Stacked2DPath.LINE_WIDTH * (1 + tickets.size())));
+            g2d.setColor(Color.WHITE);
+        }else{
+            g2d.setStroke(new BasicStroke(Stacked2DPath.LINE_WIDTH * (2+tickets.size())));
+            g2d.setColor(Color.darkGray);
+        }
+
+        g2d.draw(path.getPath());
+
+    }
 
     public void draw(Graphics2D g2d) {
-        path.draw(g2d);
+
+//        if(!available) {
+//            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+//        }
+            path.draw(g2d);
+//        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+
     }
 
-
-    public boolean setAvailable(int startNode, MoveTicket move) {
-
-        boolean available = (nodeId1 == move.target && startNode == nodeId2) || (nodeId1 == startNode && move.target == nodeId2);
-
-        if (available) {
-            this.available = available;
-        }
-        return available;
-    }
 
     public void resetAvailability() {
         available = false;
@@ -66,6 +73,10 @@ public class MapPath {
 
     public int getStartingNode() {
         return nodeId1;
+    }
+
+    public int getEndingNode() {
+        return nodeId2;
     }
 
     @Override
@@ -93,4 +104,7 @@ public class MapPath {
     }
 
 
+    public void setAvailable(boolean available) {
+        this.available = available;
+    }
 }

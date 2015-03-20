@@ -22,10 +22,10 @@ public class MapNodePopup {
     private static final int BUTTON_CORNER_RADIUS = 15;
 
     private final PopupInterface mInterface;
-    private final Image boatImage;
-    private final Image taxiImage;
-    private final Image trainImage;
-    private final Image busImage;
+    private Image boatImage;
+    private Image taxiImage;
+    private Image trainImage;
+    private Image busImage;
 
     final ArrayList<Ticket> fullTicketList = new ArrayList<Ticket>() {{
         add(Ticket.Bus);
@@ -47,16 +47,23 @@ public class MapNodePopup {
     private Ticket mSelectedTicket;
     private boolean isShowing;
 
-    public MapNodePopup(PopupInterface popupInterface) throws URISyntaxException, IOException {
+    public MapNodePopup(PopupInterface popupInterface) {
 
         mInterface = popupInterface;
 
         final ClassLoader classLoader = getClass().getClassLoader();
 
-        busImage = loadImage(new File(classLoader.getResource("imgs/actual_bus.png").toURI()));
-        taxiImage = loadImage(new File(classLoader.getResource("imgs/actual_taxi.png").toURI()));
-        trainImage = loadImage(new File(classLoader.getResource("imgs/actual_train.png").toURI()));
-        boatImage = loadImage(new File(classLoader.getResource("imgs/actual_boat.png").toURI()));
+        try {
+            busImage = loadImage(new File(classLoader.getResource("imgs/actual_bus.png").toURI()));
+            taxiImage = loadImage(new File(classLoader.getResource("imgs/actual_taxi.png").toURI()));
+            trainImage = loadImage(new File(classLoader.getResource("imgs/actual_train.png").toURI()));
+            boatImage = loadImage(new File(classLoader.getResource("imgs/actual_boat.png").toURI()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public void reset() {
@@ -326,6 +333,10 @@ public class MapNodePopup {
         } else {
             return false;
         }
+    }
+
+    public boolean isShowing() {
+        return isShowing;
     }
 
 

@@ -1,15 +1,12 @@
 package solution.views.map;
 
-import scotlandyard.Colour;
 import scotlandyard.Ticket;
 import solution.development.models.ViewPosition;
 import solution.helpers.ColourHelper;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.ArrayList;
 
 
 /**
@@ -26,37 +23,69 @@ public class MapPosition {
     private final int x;
     private final int y;
     private final Rectangle2D.Double rect;
-    private final Set<Ticket> tickets;
+    private final ArrayList<Ticket> tickets;
+    private final int[] segmentStartAngles;
+    private final int segmentAngleSize;
     private boolean hovered;
     private boolean available;
     private boolean highlighted;
+    private Color playerColor;
+
+    private int playerRingRadius = CIRC_RADIUS;
+    private float playerRingAlpha = 1f;
 
     public MapPosition(ViewPosition viewPosition) {
         this.positionId = viewPosition.id;
         this.x = viewPosition.x;
         this.y = viewPosition.y;
-        this.tickets = new HashSet<Ticket>(viewPosition.types);
+        this.tickets = viewPosition.types;
         this.rect = new Rectangle2D.Double(x - CIRC_RADIUS/2,y - CIRC_RADIUS/2,CIRC_RADIUS,CIRC_RADIUS);
+
+        segmentStartAngles = new int[tickets.size()];
+        segmentAngleSize = (int) (360/(float)(segmentStartAngles.length));
+        for (int i = 0; i < segmentStartAngles.length; i++) {
+            segmentStartAngles[i] = i* segmentAngleSize;
+        }
 
     }
 
-    public void draw(final Graphics2D g2d, Map<Integer, Colour> playerLocations){
+    public void draw(final Graphics2D g2d){
 
-        int radius = hovered && isAvailable() ? (int) (CIRC_RADIUS * 1.5f) : CIRC_RADIUS;
+        int radius = hovered && available ? (int) (CIRC_RADIUS * 1.5f) : CIRC_RADIUS;
 
-        if(playerLocations.containsKey(positionId)) {
-            g2d.setColor(ColourHelper.toColor(playerLocations.get(positionId)));
-            g2d.fillOval(x-radius/2, y-radius/2, radius, radius);
-        }else if(highlighted){
-            g2d.setColor(HIGHLIGHT_COLOUR);
-            g2d.fillOval(x - radius / 2, y - radius / 2, radius, radius);
-        }else if(isAvailable()){
-            g2d.setColor(AVAILABLE_COLOUR);
-            g2d.fillOval(x - radius / 2, y - radius / 2, radius, radius);
-        }else{
-            g2d.setColor(STANDARD_COLOUR);
-            g2d.fillOval(x-radius/2, y-radius/2, radius, radius);
+
+
+        if(playerColor != null){
+            g2d.setColor(playerColor);
+
+            int outerRadius = (int) (radius*1.3f);
+            g2d.fillOval(x - outerRadius / 2, y - outerRadius / 2, outerRadius, outerRadius);
+
+            System.out.println("playerRingRadius = " + playerRingRadius);
+            System.out.println("playerRingAlpha = " + playerRingAlpha);
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, playerRingAlpha));
+            g2d.drawOval(x - playerRingRadius / 2, y - playerRingRadius / 2, playerRingRadius, playerRingRadius);
+        }else {
+            g2d.setColor(Color.DARK_GRAY);
+
+            int outerRadius = (int) (radius*1.3f);
+            g2d.fillOval(x - outerRadius / 2, y - outerRadius / 2, outerRadius, outerRadius);
+
         }
+
+        if(!available && !highlighted){
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
+        }else{
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+        }
+
+        for (int i = 0; i < tickets.size(); i++) {
+            g2d.setColor(ColourHelper.ticketColour(tickets.get(i)));
+            g2d.fillArc(x - radius / 2, y - radius / 2, radius, radius, segmentStartAngles[i], segmentAngleSize);
+        }
+
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+
 
     }
 
@@ -66,7 +95,7 @@ public class MapPosition {
     }
 
     public boolean notifyMouseClick(int x, int y) {
-        return rect.contains(x,y) && isAvailable();
+        return rect.contains(x,y) && available;
     }
 
     @Override
@@ -93,7 +122,7 @@ public class MapPosition {
         return positionId;
     }
 
-    public Set<Ticket> getTickets() {
+    public ArrayList<Ticket> getTickets() {
         return tickets;
     }
 
@@ -115,5 +144,41 @@ public class MapPosition {
 
     public void setHighlighted(boolean highlighted) {
         this.highlighted = highlighted;
+    }
+
+    public boolean isHovered() {
+        return hovered;
+    }
+
+    public void setPlayerColor(Color color){
+        playerColor = color;
+    }
+
+    public boolean hasPlayerColor(){
+        return playerColor != null;
+    }
+
+    public boolean isHighlighted() {
+        return highlighted;
+    }
+
+    public int getPlayerRingRadius() {
+        return playerRingRadius;
+    }
+
+    public void setPlayerRingRadius(int playerRingRadius) {
+        this.playerRingRadius = playerRingRadius;
+    }
+
+    public float getPlayerRingAlpha() {
+        return playerRingAlpha;
+    }
+
+    public void setPlayerRingAlpha(float playerRingAlpha) {
+        this.playerRingAlpha = playerRingAlpha;
+    }
+
+    public Color getPlayerColor() {
+        return playerColor;
     }
 }
