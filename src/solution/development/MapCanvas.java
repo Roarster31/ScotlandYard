@@ -94,11 +94,11 @@ public class MapCanvas extends JPanel implements MouseListener, MouseMotionListe
             Random randomColour = new Random();
             for (ViewRoute viewRoute : mViewRouteList) {
                 //we don't care about single path routes
-                if (viewRoute.positionList.size() > 2) {
+//                if (viewRoute.positionList.size() > 2) {
                     g2d.setColor(new Color(randomColour.nextFloat(), randomColour.nextFloat(), randomColour.nextFloat()));
 
                     g2d.draw(viewRoute.path);
-                }
+//                }
             }
 
             for (ViewRoute viewRoute : mViewRouteList) {
@@ -493,10 +493,6 @@ public class MapCanvas extends JPanel implements MouseListener, MouseMotionListe
                     if (viewRoute.positionList.get(i).id == dataPath.id1 && viewRoute.positionList.get(i + 1).id == dataPath.id2
                             || viewRoute.positionList.get(i).id == dataPath.id2 && viewRoute.positionList.get(i + 1).id == dataPath.id1) {
                         ticketTypes.add(viewRoute.type);
-                        if (viewPath.id1 == 50 && viewPath.id2 == 67
-                                || viewPath.id2 == 50 && viewPath.id1 == 67) {
-                            System.err.println("viewRoute passing through from " + viewRoute.id1 + " to " + viewRoute.id2);
-                        }
                     }
 
                 }

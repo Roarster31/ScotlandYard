@@ -1,77 +1,51 @@
 package solution.views.map;
 
 import scotlandyard.MoveTicket;
-import scotlandyard.Route;
 import scotlandyard.Ticket;
+import solution.development.models.ViewPath;
 
 import java.awt.*;
 import java.awt.geom.Path2D;
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by rory on 14/03/15.
  */
 public class MapPath {
 
-    private final int length;
-    private Path2D path;
-    private int nodeId1;
-    private int nodeId2;
-    private boolean pathAvailable;
+    private final Stacked2DPath path;
+    private final int nodeId1;
+    private final int nodeId2;
+    private final Set<Ticket> tickets;
+    private boolean available;
     private boolean hovered;
-    private ArrayList<Ticket> tickets;
 
-    public MapPath(Path2D path2D, int length, int nodeId1, int nodeId2) {
-        this.path = path2D;
-        this.nodeId1 = nodeId1;
-        this.nodeId2 = nodeId2;
-        this.length = length;
-
-        tickets = new ArrayList<Ticket>();
-
+    public MapPath(ViewPath viewPath) {
+        this.path = viewPath.path;
+        this.nodeId1 = viewPath.id1;
+        this.nodeId2 = viewPath.id2;
+        this.tickets = new HashSet<Ticket>(viewPath.types);
     }
 
 
     public void draw(Graphics2D g2d) {
-
-//        if(tickets.contains(Ticket.Underground)){
-//            g2d.setStroke(new BasicStroke(8f));
-//            g2d.setColor(Color.RED);
-//            g2d.draw(path);
-//        }
-//
-//        if(tickets.contains(Ticket.Bus)){
-//            g2d.setStroke(new BasicStroke(6f));
-//            g2d.setColor(Color.GREEN);
-//            g2d.draw(path);
-//        }
-//
-//        if(tickets.contains(Ticket.Taxi)){
-//            g2d.setStroke(new BasicStroke(4f));
-//            g2d.setColor(Color.ORANGE);
-//            g2d.draw(path);
-//        }
-
-        g2d.draw(path);
-
+        path.draw(g2d);
     }
 
 
     public boolean setAvailable(int startNode, MoveTicket move) {
-        if (startNode == nodeId1 || startNode == nodeId2) {
-            System.out.println();
-        }
+
         boolean available = (nodeId1 == move.target && startNode == nodeId2) || (nodeId1 == startNode && move.target == nodeId2);
 
         if (available) {
-            pathAvailable = available;
+            this.available = available;
         }
         return available;
     }
 
     public void resetAvailability() {
-
-        pathAvailable = false;
+        available = false;
     }
 
     public void notifyPositionHovered(MapPosition position) {
@@ -79,15 +53,15 @@ public class MapPath {
     }
 
     public boolean isAvailable() {
-        return pathAvailable;
+        return available;
     }
 
     public boolean hasNode(int nodeId) {
         return nodeId == nodeId1 || nodeId == nodeId2;
     }
 
-    public Path2D getPath2D() {
-        return path;
+    public Path2D getPath() {
+        return path.getPath();
     }
 
     public int getStartingNode() {
@@ -118,11 +92,5 @@ public class MapPath {
         return isAvailable() && hovered;
     }
 
-    public void addRoute(Route route) {
-        tickets.add(Ticket.fromRoute(route));
-    }
 
-    public int getLength() {
-        return length;
-    }
 }

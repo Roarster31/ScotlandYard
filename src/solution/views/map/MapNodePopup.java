@@ -74,9 +74,9 @@ public class MapNodePopup {
         mSelectedTicket = null;
     }
 
-    public void create(MapPosition mapPosition, final Dimension canvasSize, boolean doubleMove) {
+    public void create(MapPosition mapPosition, final Dimension canvasSize, boolean doubleMove, ArrayList<Ticket> availableTickets) {
         this.mapPosition = mapPosition;
-        ticketList = mapPosition.getTickets();
+        ticketList = new HashSet<Ticket>(availableTickets);
         mDoubleMove = doubleMove;
         isShowing = true;
         init(mapPosition.getX(), mapPosition.getY(), canvasSize);

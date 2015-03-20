@@ -4,6 +4,7 @@ import solution.Models.CoordinateData;
 
 import java.awt.geom.GeneralPath;
 
+@Deprecated
 public class PathData {
     private GeneralPath generalPath;
     private CoordinateData source;

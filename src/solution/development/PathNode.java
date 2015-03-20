@@ -6,6 +6,7 @@ import java.awt.geom.RectangularShape;
 /**
  * Created by rory on 05/03/15.
  */
+@Deprecated
 public class PathNode {
 	private int id;
 	private int x;

@@ -444,7 +444,7 @@ public class Stacked2DPath {
         }
     }
 
-    public Path2D getmPath() {
+    public Path2D getPath() {
         return mPath;
     }
 }

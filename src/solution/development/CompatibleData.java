@@ -9,6 +9,7 @@ import java.util.*;
 /**
  * Created by rory on 09/03/15.
  */
+@Deprecated
 public class CompatibleData {
     private ArrayList<MapPosition> positions;
     private ArrayList<int[]> pathXCoords;
@@ -31,12 +32,13 @@ public class CompatibleData {
 
     }
 
+    @Deprecated
     private void addPathData(ArrayList<PathNode> pathNodeList, ArrayList<PathEdge> pathEdgeList) {
         for(PathNode pathNode : pathNodeList){
             if(pathNode.getRadius() == MapCanvasLegacy.CIRC_SIZE) {
                 //only add the ones we care about
                 final int positionId = pathNode.getId();
-                positions.add(new MapPosition(Integer.parseInt(pathNode.getName()), pathNode.getX(), pathNode.getY()));
+//                positions.add(new MapPosition(Integer.parseInt(pathNode.getName()), pathNode.getX(), pathNode.getY()));
 
                 final ArrayList<ArrayList<int[]>> positionsList = getConnectedPaths(positionId, pathEdgeList);
 
@@ -104,6 +106,7 @@ public class CompatibleData {
         return pathPoints;
     }
 
+    @Deprecated
     public Set<MapPath> getPaths() {
         Set<MapPath> paths = new HashSet<MapPath>();
 
@@ -122,7 +125,7 @@ public class CompatibleData {
                 }
             }
 
-            paths.add(new MapPath(path, xArray.length, idArray[0], idArray[idArray.length-1]));
+//            paths.add(new MapPath(path, xArray.length, idArray[0], idArray[idArray.length-1]));
 
         }
 

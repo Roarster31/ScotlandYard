@@ -5,6 +5,7 @@ import java.awt.geom.GeneralPath;
 /**
  * Created by rory on 05/03/15.
  */
+@Deprecated
 public class PathEdge {
 	private PathNode mPathNode1;
 	private PathNode mPathNode2;

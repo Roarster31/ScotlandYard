@@ -5,6 +5,7 @@ import java.util.ArrayList;
 /**
  * Created by rory on 05/03/15.
  */
+@Deprecated
 public class MapData {
 	private ArrayList<PathNode> mPathNodeList;
 	private ArrayList<PathEdge> mPathEdgeList;

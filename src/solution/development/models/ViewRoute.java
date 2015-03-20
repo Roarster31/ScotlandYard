@@ -38,14 +38,89 @@ public class ViewRoute {
 
         positionList = new ArrayList<DataPosition>(pathSet);
 
+        ArrayList<DataPath> pathList = new ArrayList<DataPath>();
+
+
+
+        int lastDataId = -1;
+        for(DataPosition dataPosition : positionList){
+            if(lastDataId != -1) {
+                for(DataPath dataPath : dataPaths){
+                    if((dataPath.id1 == lastDataId && dataPath.id2 == dataPosition.id)
+                            || (dataPath.id2 == lastDataId && dataPath.id1 == dataPosition.id)){
+                        pathList.add(dataPath);
+                        break;
+                    }
+                }
+            }
+            lastDataId = dataPosition.id;
+        }
+
+
+        ArrayList<Integer> xs = new ArrayList<Integer>();
+        ArrayList<Integer> ys = new ArrayList<Integer>();
+
+        int searchId = id1;
+        while (pathList.size() > 0){
+            DataPath chosenPath = null;
+            for(DataPath dataPath : pathList){
+                    int[] pathXCoords = dataPath.pathXCoords;
+                    int[] pathYCoords = dataPath.pathYCoords;
+                if(dataPath.id1 == searchId){
+
+                    for (int i = 0; i < pathXCoords.length; i++) {
+                        int x = pathXCoords[i];
+                        int y = pathYCoords[i];
+
+                        xs.add(x);
+                        ys.add(y);
+
+                    }
+                    chosenPath = dataPath;
+                    searchId = chosenPath.id2;
+                    break;
+                }else if(dataPath.id2 == searchId){
+
+                    for (int i = pathXCoords.length-1; i >= 0; i--) {
+                        int x = pathXCoords[i];
+                        int y = pathYCoords[i];
+
+                        xs.add(x);
+                        ys.add(y);
+
+                    }
+                    chosenPath = dataPath;
+                    searchId = chosenPath.id1;
+                    break;
+                }
+            }
+            pathList.remove(chosenPath);
+        }
+
         this.path = new Path2D.Double(Path2D.WIND_EVEN_ODD, positionList.size());
 
-        for (int i = 0; i < positionList.size(); i++) {
-            if(i == 0){
-                path.moveTo(positionList.get(i).x, positionList.get(i).y);
-            }else{
-                path.lineTo(positionList.get(i).x, positionList.get(i).y);
+        int prevX = 0;
+        int prevY = 0;
+
+        int pathCount = 0;
+        for (int i = 0; i < xs.size(); i++) {
+            int x = xs.get(i);
+            int y = ys.get(i);
+
+            if(prevX != x || prevY != y){
+                prevX = x;
+                prevY = y;
+                if(pathCount == 0){
+                   path.moveTo(x,y);
+                }else{
+                    path.lineTo(x,y);
+                }
+                pathCount++;
             }
+
+
         }
+
+
     }
 }

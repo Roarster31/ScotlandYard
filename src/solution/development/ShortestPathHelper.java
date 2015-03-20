@@ -86,7 +86,6 @@ public class ShortestPathHelper {
                 positionsList.add(targetHolder.dataPosition);
                 targetHolder = targetHolder.previousSearchHolder;
             }
-            System.out.println("path = " + positionsList);
         }
 
         if(positionsList == null){

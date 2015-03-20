@@ -7,12 +7,6 @@ import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 
-/**
- * This is the model representation of a path between two DataPositions
- * both ids represent associated DataPosition ids, unordered
- * path is the collection of coordinates that form the path
- */
-
 public class DataPath {
     public int id1;
     public int id2;

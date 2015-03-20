@@ -2,7 +2,7 @@ package solution.views;
 
 import com.sun.deploy.util.StringUtils;
 import scotlandyard.Colour;
-import solution.Models.GraphData;
+import solution.Models.MapData;
 import solution.Models.ScotlandYardModel;
 import solution.helpers.ColourHelper;
 import solution.interfaces.GameControllerInterface;
@@ -27,7 +27,7 @@ public class GameLayout extends JPanel {
     public GameLayout(GameControllerInterface controllerInterface) {
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        mapView = new MapView(controllerInterface, "map.jpg", new GraphData("out.txt", GraphData.DataFormat.CUSTOM));
+        mapView = new MapView(controllerInterface, "pirate_map.png", new MapData("custom_data", MapData.DataFormat.CUSTOM));
 
 
         playerInfoBar = new PlayerInfoBar(controllerInterface);
