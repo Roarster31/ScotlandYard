@@ -11,6 +11,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.net.URL;
 
 /**
  * Created by rory on 09/03/15.
@@ -19,46 +20,54 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private static final String COMMAND_LOAD = "load";
     private static final String COMMAND_SAVE = "save";
-    private PlayerCountLayout playerCountLayout;
-    private final GameControllerInterface mControllerInterface;
-    private GameLayout mGameLayout;
-
+    ScreenView mainScreen;
+    private GridBagConstraints mGridLayout = null;
 
     public MainFrame(final GameControllerInterface controllerInterface) {
-
-        mControllerInterface = controllerInterface;
-        controllerInterface.addUpdateListener(new GameAdapter());
-
-        JPanel mainFrame = (JPanel)getGlassPane();
-
-        // Add in some end game views
-        GameOverView endOfGame = new GameOverView(mControllerInterface);
-        endOfGame.setPreferredSize(new Dimension(1000,800));
-        endOfGame.setOpaque(false);
-        endOfGame.setVisible(false);
-        mainFrame.add(endOfGame);
-
-        // Show the frame
-        mainFrame.setVisible(true);
-
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        playerCountLayout = new PlayerCountLayout(Constants.MIN_PLAYERS, Constants.MAX_PLAYERS);
-        playerCountLayout.setListener(new PlayerCountLayout.PlayerCountListener() {
-            @Override
-            public void onPlayerCountDecided(int count) {
-                controllerInterface.notifyAllPlayersAdded(count);
-            }
-        });
-        getContentPane().add(playerCountLayout);
+        mainScreen = new ScreenView(controllerInterface);
 
-        createMenu();
-
-        pack();
-        setVisible(true);
+        // Setup screen
+        setupScreen();
+        add(mainScreen, mGridLayout);
+        endSetupScreen();
 
     }
 
+    private void setupScreen(){
+        // Set layout
+        setLayout(new GridBagLayout());
+        GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        int width = gd.getDisplayMode().getWidth();
+        int height = gd.getDisplayMode().getHeight();
+
+        setPreferredSize(new Dimension(width, height));
+
+        // Form the layout
+        GridBagConstraints gbc = new GridBagConstraints();
+
+        // Setup the grid
+        gbc.gridy = gbc.gridx = 0;
+        gbc.gridwidth = gbc.gridheight = 1;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.weighty = gbc.weightx = 100;
+        mGridLayout = gbc;
+    }
+    private void endSetupScreen(){
+        // Set up background
+        JLabel background = new JLabel();
+        URL resource = getClass().getClassLoader().getResource("ui" + File.separator + "woodenbg.jpg");
+        ImageIcon bgIcon = new ImageIcon(resource);
+        background.setIcon(bgIcon);
+        add(background,mGridLayout);
+        setVisible(false);
+        pack();
+        repaint();
+        setVisible(true);
+
+    }
     private void createMenu() {
         //Where the GUI is created:
         JMenuBar menuBar;
@@ -116,7 +125,7 @@ public class MainFrame extends JFrame implements ActionListener {
                         options,
                         options[0]);
 
-                mControllerInterface.loadGame(file, response == JOptionPane.YES_OPTION);
+                //mControllerInterface.loadGame(file, response == JOptionPane.YES_OPTION);
 
             } else {
                 System.out.println("Open command cancelled by user.");
@@ -128,40 +137,13 @@ public class MainFrame extends JFrame implements ActionListener {
                 File file = fc.getSelectedFile();
                 //This is where a real application would open the file.
                 System.out.println("Saving: " + file.getName() + ".");
-
-                mControllerInterface.saveGame(file);
+                //mControllerInterface.saveGame(file);
             } else {
                 System.out.println("Save command cancelled by user.");
             }
         }
     }
 
-    class GameAdapter extends GameUIAdapter {
-        @Override
-        public void showGameInterface() {
-            if(mGameLayout != null){
-                remove(mGameLayout);
-                mGameLayout = null;
-            }else{
-                setSize(new Dimension(1000, 800));
-            }
-            if(playerCountLayout != null){
-                // Remove the player counter
-                remove(playerCountLayout);
-                playerCountLayout = null;
-            }
 
-
-
-            mGameLayout = new GameLayout(mControllerInterface);
-
-            // Add the new the game in
-            add(mGameLayout);
-
-
-
-
-        }
-    }
 
 }

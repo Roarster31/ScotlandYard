@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 /**
  * Created by rory on 10/03/15.
  */
+@Deprecated
 public class PlayerCountLayout extends JPanel {
 
     PlayerCountListener mListener;

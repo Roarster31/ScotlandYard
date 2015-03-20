@@ -10,8 +10,10 @@ import solution.interfaces.adapters.GameUIAdapter;
 import solution.views.map.MapView;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
+import javax.swing.border.*;
 import java.awt.*;
+import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,87 +21,96 @@ import java.util.List;
  * Created by rory on 10/03/15.
  */
 public class GameLayout extends JPanel {
-
-    private JLabel statusLabel;
     private MapView mapView;
-    private PlayerInfoBar playerInfoBar;
-
-    public GameLayout(GameControllerInterface controllerInterface) {
-
+    public GameLayout(GameControllerInterface controllerInterface, PlayerInfoBar.PlayerInfoBarListener listener) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+<<<<<<< HEAD
         mapView = new MapView(controllerInterface, "pirate_map.png", new MapData("custom_data", MapData.DataFormat.CUSTOM));
 
 
         playerInfoBar = new PlayerInfoBar(controllerInterface);
 
         statusLabel = new JLabel("");
+=======
+        setOpaque(false);
+        controllerInterface.addUpdateListener(new GameAdapter());
+>>>>>>> New UI Design
 
+        PlayerInfoBar playerInfoBar = new PlayerInfoBar(controllerInterface);
+        playerInfoBar.setListener(listener);
+        // Set to a percentage layout
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         GridBagConstraints gbcInside = new GridBagConstraints();
 
+        // Setup the grid
         gbc.gridy = 0;
+        gbc.gridx = 0;
         gbc.gridwidth = gbc.gridheight = 1;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.weighty = 80;
 
-        gbcInside.gridy = 0;
-        gbcInside.gridwidth = gbcInside.gridheight = 1;
-        gbcInside.fill = GridBagConstraints.BOTH;
-        gbcInside.anchor = GridBagConstraints.NORTHWEST;
-        gbcInside.weighty = 80;
+        // Set up map Panel
+        JPanel mapViewContainer = new JPanel();
+        mapViewContainer.setLayout(new BorderLayout());
+        mapViewContainer.setOpaque(false);
+        mapViewContainer.setBorder(new EmptyBorder(20,20,20,20));
+        // Load in the map view
+        mapView = new MapView(controllerInterface, "custom_map.png", new GraphData("custom.txt", GraphData.DataFormat.CUSTOM));
+        mapView.setBorder(new EmptyBorder(20,20,20,20));
 
-        controllerInterface.addUpdateListener(new GameAdapter());
+        // I DONT WANT TO DO THIS BUT I HAVE TOO
+        mapView.setPreferredSize(new Dimension(800,600));
+        mapView.setMinimumSize(new Dimension(800,600));
+
+
+        // Load in the map
+        mapViewContainer.add(mapView);
+
+        // Setup top view container
         JPanel subLayout = new JPanel();
         subLayout.setLayout(new GridBagLayout());
+        subLayout.setOpaque(false);
 
+        // Set up mr xs history panel
         MrXFrame mrXHistoryPanel = new MrXFrame(controllerInterface);
         mrXHistoryPanel.setLayout(new BoxLayout(mrXHistoryPanel, BoxLayout.Y_AXIS));
 
-        JScrollPane scrollPane = new JScrollPane(mrXHistoryPanel);
-        scrollPane.setBorder(new EmptyBorder(0,0,0,0));
+        SideBarView sbView = new SideBarView(controllerInterface);
 
 
-        playerInfoBar = new PlayerInfoBar(controllerInterface);
-
-        statusLabel = new JLabel("");
-
+        gbcInside.gridy = gbcInside.gridx = 0;
+        gbcInside.weightx = 70;
         gbcInside.weighty = 100;
-        gbcInside.gridy = 0;
-
-        gbcInside.gridx = 0;
-        gbcInside.weightx = 80;
-        subLayout.add(mapView, gbcInside);
+        subLayout.add(mapViewContainer, gbcInside);
 
         gbcInside.gridx = 1;
-        gbcInside.weightx = 20;
-        subLayout.add(scrollPane, gbcInside);
+        gbcInside.weightx = 30;
+        subLayout.add(sbView, gbcInside);
 
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.weightx = 100;
-        gbc.weighty = 80;
+        gbc.weighty = 90;
+
         add(subLayout, gbc);
         gbc.gridy = 1;
-        gbc.weighty = 20;
+        gbc.weighty = 10;
         add(playerInfoBar, gbc);
-
-
-
     }
 
     class GameAdapter extends GameUIAdapter {
         @Override
         public void onGameModelUpdated(ScotlandYardModel model) {
+            System.out.println("Change has been made");
             if(!model.isGameOver()) {
-                statusLabel.setText("It is " + ColourHelper.toString(model.getCurrentPlayer()) + "'s turn");
+                System.out.println("It is " + ColourHelper.toString(model.getCurrentPlayer()) + "'s turn");
             }else{
                 List<String> winningPlayers = new ArrayList<String>();
                 for(Colour winningColour : model.getWinningPlayers()){
                     winningPlayers.add(ColourHelper.toString(winningColour));
                 }
-                statusLabel.setText(("Gameover! " + StringUtils.join(winningPlayers, ", ")+" won!"));
+                System.out.println("Gameover! " + StringUtils.join(winningPlayers, ", ")+" won!");
             }
         }
     }

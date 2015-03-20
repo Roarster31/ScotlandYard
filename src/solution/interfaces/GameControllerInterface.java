@@ -26,6 +26,8 @@ public interface GameControllerInterface {
     public Set<Colour> getWinningPlayers();
 
     public void loadGame(File fileLocation, boolean replay);
+    public boolean isGameOver();
+    public void manageScreenProgression(int screenKey);
 
     List<Edge<Integer, Route>> getGraphRoutes();
 }

@@ -1,6 +1,7 @@
 package solution;
 
 import solution.controllers.GameController;
+import solution.helpers.SoundHelper;
 import solution.views.MainFrame;
 
 /**
@@ -16,7 +17,8 @@ public class EntryPoint {
         //we setup the ui here
 		MainFrame mainFrame = new MainFrame(gameController);
 
-
+        //Set up sound
+        SoundHelper.loadClips();
         //now we're good to go!
 
 

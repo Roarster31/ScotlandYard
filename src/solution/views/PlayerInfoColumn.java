@@ -6,70 +6,99 @@ import solution.Constants;
 import solution.helpers.ColourHelper;
 import solution.helpers.TicketHelper;
 import solution.interfaces.GameControllerInterface;
+import sun.invoke.empty.Empty;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
 
 /**
  * Created by benallen on 10/03/15.
  */
+@Deprecated
 public class PlayerInfoColumn extends JPanel {
     private int maxTicketNumber = 0;
     private Colour currentPlayer;
     private GameControllerInterface mController;
-    public PlayerInfoColumn(Colour currentPlayer, GameControllerInterface controllerInterface){
+    public PlayerInfoColumn(Colour currentPlayer, GameControllerInterface controllerInterface, int playerNumber){
 
         mController = controllerInterface;
         this.currentPlayer = currentPlayer;
         // Check to see whether the passed player equals the current player
-        setupCols(currentPlayer, controllerInterface.getPlayerTickets(currentPlayer));
+        setupCols(currentPlayer, controllerInterface.getPlayerTickets(currentPlayer), playerNumber);
     }
 
-    private void setupCols(Colour currentPlayer, Map<Ticket, Integer> playerTickets) {
+    private void setupCols(Colour currentPlayer, Map<Ticket, Integer> playerTickets, int playerNumber) {
         setLayout(new GridBagLayout());
+        setPreferredSize(new Dimension(170,106));
+        setMaximumSize(new Dimension(170, 106));
+        setMinimumSize(new Dimension(170,106));
+        setSize(new Dimension(170, 106));
+
         Box vertView = Box.createVerticalBox();
         JPanel tickets = new JPanel();
+
         tickets.setOpaque(false);
-        JPanel colour = new JPanel();
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.fill = GridBagConstraints.NORTH;
+        gbc.anchor = GridBagConstraints.NORTH;
         gbc.gridy = 0;
+
+        JPanel textOverlay = new JPanel();
+        textOverlay.setOpaque(false);
+        textOverlay.setLayout(new BoxLayout(textOverlay, BoxLayout.X_AXIS));
+
+        // Load in the font
+        InputStream is = getClass().getClassLoader().getResourceAsStream("ui" + File.separator + "snellroundhand.ttf");
+        Font font = null;
+        try {
+            font = Font.createFont(Font.TRUETYPE_FONT, is);
+        } catch (FontFormatException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Font playerNameFont = font.deriveFont(22f);
+
+        // Player name
+        int playerNumberVisible = playerNumber + 1;
+        JLabel playerName = new JLabel("Player " + playerNumberVisible);
+        playerName.setFont(playerNameFont);
+        if(playerNumber % 2 == 0) {
+            playerName.setBorder(new EmptyBorder(12, 10, 0, 0));
+        } else {
+            playerName.setBorder(new EmptyBorder(12, 5, 0, 0));
+        }
+        textOverlay.add(playerName);
+        textOverlay.setBorder(new EtchedBorder());
+
+        JLabel background = new JLabel();
+        URL resource;
+        if(playerNumber % 2 == 0) {
+             resource = getClass().getClassLoader().getResource("ui" + File.separator + "playerholderA.png");
+        } else {
+             resource = getClass().getClassLoader().getResource("ui" + File.separator + "playerholderB.png");
+        }
+
+
         gbc.gridwidth = 100;
         gbc.weightx = 100;
         gbc.weighty = 10;
-        if(mController.getCurrentPlayer() == currentPlayer){
-            //gbc.weighty = 50;
-            //gbc.gridheight = 500;
-            colour.setMinimumSize(new Dimension(100,50));
-            colour.setSize(new Dimension(100,50));
-            colour.setPreferredSize(new Dimension(100,50));
-            colour.setMaximumSize(new Dimension(100,50));
-        } else {
-            //gbc.weighty = 10;
-            //gbc.gridheight = 100;
-            colour.setMaximumSize(new Dimension(100, 23));
-            colour.setPreferredSize(new Dimension(100,23));
-            colour.setMinimumSize(new Dimension(100,23));
-            colour.setSize(new Dimension(100,23));
-        }
-        colour.setBackground(ColourHelper.toColor(currentPlayer));
-        colour.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.DARK_GRAY));
-        colour.setOpaque(true);
-        //colour.setMinimumSize(new Dimension(100, 50));
 
-        add(colour, gbc);
 
         // Max limit of tickets
         if(currentPlayer == Constants.MR_X_COLOUR){
-            maxTicketNumber = 5;
+            maxTicketNumber = 3;
         } else {
             maxTicketNumber = 3;
         }
@@ -88,73 +117,37 @@ public class PlayerInfoColumn extends JPanel {
 
                 // Add the number of tickets
                 JLabel ticketNumbersReaming = new JLabel(numOfTickets, SwingConstants.CENTER);
-                ticketNumbersReaming.setForeground(Color.LIGHT_GRAY);
-                ticketNumbersReaming.setFont(ticketNumbersReaming.getFont().deriveFont(16.0f));
-                ticketNums.add(ticketNumbersReaming, BorderLayout.CENTER);
-                ticketNums.setBorder(new EmptyBorder(15, 0, 0, 0));
-                horzView.add(ticketNums);
+                ticketNumbersReaming.setForeground(Color.BLACK);
+                ticketNumbersReaming.setFont(font.deriveFont(32.0f));
+                if(ticketTypes[i] == Ticket.Bus){
+                    ticketNumbersReaming.setBorder(new EmptyBorder(0,0,0,0));
+                    textOverlay.add(ticketNumbersReaming);
+                } else {
 
-                // Add the ticket type
-                JLabel ticketName = new JLabel("", SwingConstants.CENTER);
-                ticketName.setIcon(TicketHelper.ticketToImg(ticketTypes[i]));
+                }
+//                ticketNums.add(ticketNumbersReaming, BorderLayout.CENTER);
+//                ticketNums.setBorder(new EmptyBorder(15, 0, 0, 0));
+//                horzView.add(ticketNums);
 
-                // Add padding
-                ticketName.setBorder(new EmptyBorder(5, 5, 5, 5));
-                horzView.add(ticketName, BorderLayout.CENTER);
 
-                vertView.add(horzView, BorderLayout.CENTER);
+//                vertView.add(horzView, BorderLayout.CENTER);
             }
         }
         gbc.weighty = 95;
-        gbc.gridy = 1;
+        gbc.gridy = 0;
         tickets.add(vertView, BorderLayout.CENTER);
-        add(tickets, gbc);
+        //textOverlay.add(tickets, gbc);
+
+
+        add(textOverlay, gbc);
+
+
+        ImageIcon bgIcon = new ImageIcon(resource);
+        background.setIcon(bgIcon);
+        background.setOpaque(false);
+        add(background, gbc);
+
+
+        setOpaque(false);
     }
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2 = (Graphics2D) g;
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
-
-        // Retains the previous state
-        Paint oldPaint = g2.getPaint();
-
-        // Fills the circle with solid blue color
-        g2.setColor(new Color(0x2c2c2c));
-        g2.fillRect(0, 0, getWidth(), getHeight());
-
-        // Adds shadows at the top
-        Paint p;
-        p = new GradientPaint(0, 0, new Color(0.0f, 0.0f, 0.0f, 0.4f),
-                0, getHeight(), new Color(0.0f, 0.0f, 0.0f, 0.0f));
-        g2.setPaint(p);
-        g2.fillRect(0, 0, getWidth(), getHeight());
-
-        // Adds highlights at the bottom 
-        p = new GradientPaint(0, 0, new Color(1.0f, 1.0f, 1.0f, 0.0f),
-                0, getHeight(), new Color(1.0f, 1.0f, 1.0f, 0.4f));
-        g2.setPaint(p);
-        g2.fillRect(0, 0, getWidth(), getHeight());
-
-        // Adds oval inner highlight at the bottom
-        p = new RadialGradientPaint(new Point2D.Double(getWidth() / 2.0,
-                getHeight() * 1.5), getWidth() / 2.3f,
-                new Point2D.Double(getWidth() / 2.0, getHeight() * 1.75 + 6),
-                new float[] { 0.0f, 0.8f },
-                new Color[] { new Color(81, 81, 81, 255),
-                        new Color(40, 40, 40, 0) },
-                RadialGradientPaint.CycleMethod.NO_CYCLE,
-                RadialGradientPaint.ColorSpaceType.SRGB,
-                AffineTransform.getScaleInstance(1.0, 0.5));
-        g2.setPaint(p);
-        g2.fillRect(0, 0, getWidth(), getHeight());
-
-        // Restores the previous state
-        g2.setPaint(oldPaint);
-    }
-
-
-
-
 }

@@ -30,6 +30,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     private final GameControllerInterface mControllerInterface;
     private final MapData mMapData;
     private BufferedImage mGraphImage;
+    private BufferedImage mMapImage;
     private Map<Integer, Colour> mPlayerLocations;
     private MapNodePopup mMapPopup;
     private MoveTicket firstMove;
@@ -83,8 +84,10 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
 
     private void setupGraphImage(final String graphImageMapPath) {
         try {
-            final URL resource = getClass().getClassLoader().getResource(graphImageMapPath);
+            URL resource = getClass().getClassLoader().getResource(graphImageMapPath);
             mGraphImage = ImageIO.read(new File(resource.toURI()));
+            resource = getClass().getClassLoader().getResource("ui" + File.separator + "mapbg.png");
+            mMapImage  = ImageIO.read(new File(resource.toURI()));
             mImageSize = new Dimension(mGraphImage.getWidth(), mGraphImage.getHeight());
         } catch (IOException ex) {
             //todo handle exception...
@@ -99,7 +102,6 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         Graphics2D g2d = (Graphics2D) g;
 
         g2d.setTransform(transform);
-
         g2d.drawImage(mGraphImage, null, 0, 0);
 
         g2d.setStroke(new BasicStroke(5f));

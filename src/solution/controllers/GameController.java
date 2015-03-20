@@ -26,11 +26,17 @@ public class GameController implements GameControllerInterface {
     private MrXHistoryTracker mrXHistoryTracker;
     private UIPlayer uiPlayer;
     private final GameRecordTracker gameRecordTracker;
+    private int screenToDisplay = 0; // 0 = intro, 1 = add players, 2 = gameplay, 3 = gameover
 
     public List<MoveTicket> getMrXHistory() {
         return mrXHistoryTracker.getMoveHistory();
     }
 
+    @Override
+    public void manageScreenProgression(int screenKey){
+        screenToDisplay = screenKey;
+
+    }
     @Override
     public void saveGame(File fileLocation) {
         try {
@@ -41,10 +47,13 @@ public class GameController implements GameControllerInterface {
             e.printStackTrace();
         }
     }
-
+    @Override
+    public boolean isGameOver(){
+        return model.isGameOver();
+    }
     @Override
     public Set<Colour> getWinningPlayers() {
-        return null;
+        return model.getWinningPlayers();
     }
 
     @Override
@@ -163,6 +172,11 @@ public class GameController implements GameControllerInterface {
         uiPlayer.setPendingMove(move);
         model.turn();
         notifyModelUpdated();
+
+        // Is the game over?
+        if(isGameOver()){
+            System.out.printf("The game is over ):");
+        }
     }
 
     public List<Colour> getPlayers(){
