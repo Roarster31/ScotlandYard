@@ -129,7 +129,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         g2d.drawImage(mBgPositionImage, null, 0, 0);
 
         for (MapPosition position : mMapData.getPositionList()) {
-            if(position.isHovered() || position.isAvailable() || position.isHighlighted() || position.hasPlayerColor()) {
+            if(position.isAvailable() || position.isHighlighted() || position.hasPlayerColor()) {
                 position.draw(g2d);
             }
         }
@@ -144,7 +144,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             mMapPopup.draw(g2d);
         }
 
-        System.out.println("millis: "+(System.currentTimeMillis() - startTime));
+//        System.out.println("millis: "+(System.currentTimeMillis() - startTime));
 
 
     }
