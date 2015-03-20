@@ -24,17 +24,10 @@ public class GameLayout extends JPanel {
     private MapView mapView;
     public GameLayout(GameControllerInterface controllerInterface, PlayerInfoBar.PlayerInfoBarListener listener) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-<<<<<<< HEAD
-        mapView = new MapView(controllerInterface, "pirate_map.png", new MapData("custom_data", MapData.DataFormat.CUSTOM));
 
 
-        playerInfoBar = new PlayerInfoBar(controllerInterface);
-
-        statusLabel = new JLabel("");
-=======
         setOpaque(false);
         controllerInterface.addUpdateListener(new GameAdapter());
->>>>>>> New UI Design
 
         PlayerInfoBar playerInfoBar = new PlayerInfoBar(controllerInterface);
         playerInfoBar.setListener(listener);
@@ -56,7 +49,7 @@ public class GameLayout extends JPanel {
         mapViewContainer.setOpaque(false);
         mapViewContainer.setBorder(new EmptyBorder(20,20,20,20));
         // Load in the map view
-        mapView = new MapView(controllerInterface, "custom_map.png", new GraphData("custom.txt", GraphData.DataFormat.CUSTOM));
+        mapView = new MapView(controllerInterface, "pirate_map.png", new MapData("custom_data", MapData.DataFormat.CUSTOM));
         mapView.setBorder(new EmptyBorder(20,20,20,20));
 
         // I DONT WANT TO DO THIS BUT I HAVE TOO
@@ -110,7 +103,7 @@ public class GameLayout extends JPanel {
                 for(Colour winningColour : model.getWinningPlayers()){
                     winningPlayers.add(ColourHelper.toString(winningColour));
                 }
-                System.out.println("Gameover! " + StringUtils.join(winningPlayers, ", ")+" won!");
+                System.out.println("Gameover! " + StringUtils.join(winningPlayers, ", ") + " won!");
             }
         }
     }
