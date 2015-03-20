@@ -16,9 +16,7 @@ public class SoundHelper {
     private static boolean mSelectClipRunning = false;
 
     private static Clip mClickClip = null;
-    private static boolean mClickClipRunning = false;
     private static Clip mNoClickClip = null;
-    private static boolean mNoClickClipRunning = false;
 
     public static void loadClips(){
         // Open an audio input stream.
@@ -67,13 +65,11 @@ public class SoundHelper {
             mClickClip.stop();   // Stop the player if it is still running
         mClickClip.setFramePosition(0); // rewind to the beginning
         mClickClip.start();     // Start playing
-        mClickClipRunning = true;
     }
     public static void itemNoClick(){
         if (mNoClickClip.isRunning())
             mNoClickClip.stop();   // Stop the player if it is still running
         mNoClickClip.setFramePosition(0); // rewind to the beginning
         mNoClickClip.start();     // Start playing
-        mNoClickClipRunning = true;
     }
 }

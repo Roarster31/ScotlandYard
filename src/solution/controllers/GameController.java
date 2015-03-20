@@ -167,7 +167,7 @@ public class GameController implements GameControllerInterface {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                //SUPERHAAAACK
+                //SUPERHAAAACK  --- so lazy
                 try {
                     Thread.sleep(4000);
                 } catch (InterruptedException e) {

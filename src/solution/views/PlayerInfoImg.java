@@ -1,6 +1,5 @@
 package solution.views;
 
-import com.jhlabs.image.RGBAdjustFilter;
 import scotlandyard.Colour;
 import scotlandyard.Ticket;
 import solution.Constants;
@@ -14,11 +13,9 @@ import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.NoninvertibleTransformException;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
-import java.awt.image.ConvolveOp;
-import java.awt.image.Kernel;
+import java.awt.image.ImageObserver;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,8 +26,7 @@ import java.util.Map;
 /**
  * Created by benallen on 16/03/15.
  */
-@Deprecated
-public class PlayerInfoStats extends JPanel{
+public class PlayerInfoImg {
     private GameControllerInterface mControllerInterface;
     private BufferedImage bgImg;
     private BufferedImage colourImg;
@@ -39,15 +35,13 @@ public class PlayerInfoStats extends JPanel{
     private Colour mCurrentPlayer;
     private int mPlayerNumber;
     private Font mFont;
-    private float xScale = 1.5f;
-    private float yScale = 1.5f;
-    public PlayerInfoStats(Colour currentPlayer, GameControllerInterface controllerInterface, int playerNumber){
+    private float xScale = 1.1f;
+    private float yScale = 1.1f;
+    public PlayerInfoImg(Colour currentPlayer, GameControllerInterface controllerInterface, int playerNumber){
         transform = new AffineTransform();
         mControllerInterface = controllerInterface;
         mPlayerNumber = playerNumber;
         mCurrentPlayer = currentPlayer;
-
-        xScale = 1.5f;
 
         URL resource;
         if (currentPlayer == Constants.MR_X_COLOUR) {
@@ -69,10 +63,7 @@ public class PlayerInfoStats extends JPanel{
 
         mImgSize = new Dimension((int)((bgImg.getWidth() / 2) * xScale),(int) ((bgImg.getHeight() / 2)* yScale));
 
-        setPreferredSize(mImgSize);
-        setMaximumSize(mImgSize);
-        setMinimumSize(mImgSize);
-        setSize(mImgSize);
+
 
         InputStream is = getClass().getClassLoader().getResourceAsStream("ui" + File.separator + "snellroundhand.ttf");
         Font font = null;
@@ -85,26 +76,20 @@ public class PlayerInfoStats extends JPanel{
         }
         mFont = font;
 
-        addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                Dimension size = getSize();
-                transform.setToScale(size.getWidth() / mImgSize.getWidth(), size.getHeight() / mImgSize.getHeight());
-                repaint();
-            }
-
-        });
     }
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
+    public void draw(Graphics g, int xAcross) {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(
                 RenderingHints.KEY_TEXT_ANTIALIASING,
                 RenderingHints.VALUE_TEXT_ANTIALIAS_GASP);
-        g2d.scale(xScale,yScale);
-        //g2d.drawImage(ColourTintHelper.colourImage(bgImg, 125,125,125), 0, 0, (int) mImgSize.getWidth(), (int) mImgSize.getHeight(), this);
-        g2d.drawImage(bgImg, 0, 0,  (bgImg.getWidth() / 2), (bgImg.getHeight() / 2), this);
+        // g2d.scale(xScale,yScale); will scale everything
+        g2d.drawImage(bgImg, xAcross, 0, (bgImg.getWidth() / 2), (bgImg.getHeight() / 2), new ImageObserver() {
+            @Override
+            public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
+                return false;
+            }
+        });
+
         g2d.setFont(mFont.deriveFont(22f));
         g2d.setColor(Color.BLACK);
         String playerName;
@@ -134,7 +119,7 @@ public class PlayerInfoStats extends JPanel{
             g2d.rotate(0, lOffset + (w / 2), tOffset + (h / 2));
         }
 
-        g2d.drawString(playerName, lOffset, tOffset);
+        g2d.drawString(playerName, xAcross + lOffset, tOffset);
 
         Map<Ticket, Integer> playerTickets = mControllerInterface.getPlayerTickets(mCurrentPlayer);
         if(mCurrentPlayer == Constants.MR_X_COLOUR){
@@ -161,7 +146,7 @@ public class PlayerInfoStats extends JPanel{
             g2d.rotate(0, lOffset + (w / 2), tOffset + (h / 2));
         }
 
-        g2d.drawString(currentDrawText,lOffset, tOffset);
+        g2d.drawString(currentDrawText,xAcross + lOffset, tOffset);
 
         // Add in the taxi number
         currentDrawText = String.valueOf(playerTickets.get(Ticket.Taxi));
@@ -178,7 +163,7 @@ public class PlayerInfoStats extends JPanel{
             tOffset = 53;
         }
 
-        g2d.drawString(currentDrawText,lOffset, tOffset);
+        g2d.drawString(currentDrawText,xAcross + lOffset, tOffset);
 
         // Add in the underground number
         currentDrawText = String.valueOf(playerTickets.get(Ticket.Underground));
@@ -195,28 +180,34 @@ public class PlayerInfoStats extends JPanel{
             tOffset = 82;
         }
 
-        g2d.drawString(currentDrawText,lOffset, tOffset);
+        g2d.drawString(currentDrawText,xAcross + lOffset, tOffset);
 
         // Mr X Extras
         if(mCurrentPlayer == Constants.MR_X_COLOUR) {
             currentDrawText = String.valueOf(playerTickets.get(Ticket.SecretMove));
             lOffset = 86;
             tOffset = 75;
-            g2d.drawString(currentDrawText,lOffset, tOffset);
+            g2d.drawString(currentDrawText,xAcross + lOffset, tOffset);
             currentDrawText = String.valueOf(playerTickets.get(Ticket.DoubleMove));
             lOffset = 70;
             tOffset = 85;
-            g2d.drawString(currentDrawText,lOffset, tOffset);
+            g2d.drawString(currentDrawText,xAcross + lOffset, tOffset);
         } else {
+            // Grab the colour and tint the image
             Color c = ColourHelper.toColor(mCurrentPlayer);
             colourImg = ColourTintHelper.setRGB(colourImg, c);
             g2d.drawImage(
                     colourImg,
-                    70,
+                    xAcross + 70,
                     50,
                     70,
                     70,
-                    this);
+                    new ImageObserver() {
+                        @Override
+                        public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
+                            return false;
+                        }
+                    });
 
 
         }

@@ -1,6 +1,7 @@
 package solution.views;
 
 import scotlandyard.Colour;
+import solution.Constants;
 import solution.Models.ScotlandYardModel;
 import solution.helpers.ColourHelper;
 import solution.helpers.SoundHelper;
@@ -29,37 +30,43 @@ import java.util.List;
 public class PlayerInfoBar extends JPanel {
     private GameControllerInterface mGameControllerInterface;
     private BufferedImage menuOptionsImg;
-    private BufferedImage mPlayerHolderAImg;
-    private BufferedImage mPlayerHolderBImg;
-    private BufferedImage mPlayerColourImg;
     private Rectangle mSaveBtn;
     private Rectangle mMenuBtn;
     private boolean mSaveBtnOverlay = false;
     private boolean mMenuBtnOverlay = false;
     private PlayerInfoBarListener mListener;
+    private PlayerInfoImg[] playerColumns = new PlayerInfoImg[Constants.MAX_PLAYERS];
 
     public PlayerInfoBar(GameControllerInterface controllerInterface) {
+        setMinimumSize(new Dimension(800, 200));
+        setPreferredSize(new Dimension(800, 200));
+        setOpaque(false);
         mGameControllerInterface = controllerInterface;
         controllerInterface.addUpdateListener(new GameAdapter());
 
         URL resource = getClass().getClassLoader().getResource("ui" + File.separator + "options.png");
         try {
             menuOptionsImg = ImageIO.read(new File(resource.toURI()));
-            resource = getClass().getClassLoader().getResource("ui" + File.separator + "playerholderA.png");
-            mPlayerHolderAImg = ImageIO.read(new File(resource.toURI()));
-            resource = getClass().getClassLoader().getResource("ui" + File.separator + "playerholderB.png");
-            mPlayerHolderBImg = ImageIO.read(new File(resource.toURI()));
 
         } catch (IOException e) {
             e.printStackTrace();
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
-        createBar();
+
+        updatePlayerInfoImgs();
         addMouseListener(new LocalMouseAdapter());
         addMouseMotionListener(new LocalMouseAdapter());
 
 
+    }
+    public void updatePlayerInfoImgs(){
+        // get players info
+        List<Colour> allPlayers = mGameControllerInterface.getPlayerList();
+        for(int i = 0; i < allPlayers.size(); i++){
+            Colour currentPlayer = ColourHelper.getColour(i);
+            playerColumns[i] = new PlayerInfoImg(currentPlayer, mGameControllerInterface, i);
+        }
     }
     public interface PlayerInfoBarListener {
         public void onMenuBtnPress();
@@ -68,23 +75,7 @@ public class PlayerInfoBar extends JPanel {
     public void setListener(PlayerInfoBarListener listener){
         mListener = listener;
     }
-    private void createBar() {
-        List<Colour> allPlayers = mGameControllerInterface.getPlayerList();
-        setMinimumSize(new Dimension(800, 200));
-        setPreferredSize(new Dimension(800, 200));
-        Box horzView = Box.createHorizontalBox();
 
-        PlayerInfoStats[] playerColumns = new PlayerInfoStats[allPlayers.size()];
-
-        for(int i = 0; i < allPlayers.size(); i++){
-            Colour currentPlayer = ColourHelper.getColour(i);
-            playerColumns[i] = new PlayerInfoStats(currentPlayer, mGameControllerInterface, i);
-            playerColumns[i].setOpaque(false);
-            horzView.add(playerColumns[i]);
-        }
-        add(horzView);
-        setOpaque(false);
-    }
     class LocalMouseAdapter extends MouseAdapter {
         @Override
         public void mouseClicked(MouseEvent e) {
@@ -128,7 +119,8 @@ public class PlayerInfoBar extends JPanel {
         @Override
         public void onGameModelUpdated(ScotlandYardModel model) {
             removeAll();
-            createBar();
+            updatePlayerInfoImgs();
+            repaint();
         }
     }
 
@@ -158,6 +150,8 @@ public class PlayerInfoBar extends JPanel {
                 menuOptionsImg.getHeight() / 2
         );
 
+
+
         // Button Hover
         Color color = new Color(0, 0, 0, 0.1f);
         g2d.setPaint(color);
@@ -167,5 +161,12 @@ public class PlayerInfoBar extends JPanel {
         if(mMenuBtnOverlay){
             g2d.fill(mMenuBtn);
         }
+
+
+        g2d.scale(1.2f,1.2f);
+        for(int i = 0; i < mGameControllerInterface.getPlayerList().size(); i++) {
+            playerColumns[i].draw(g2d, i * 160 + 130);
+        }
+        g2d.scale(0.8f,0.8f);
     }
 }

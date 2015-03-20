@@ -1,5 +1,6 @@
 package solution.helpers;
 
+import com.jhlabs.image.GrayscaleFilter;
 import com.jhlabs.image.HSBAdjustFilter;
 import com.jhlabs.image.RGBAdjustFilter;
 
@@ -15,6 +16,14 @@ public class ColourTintHelper {
         BufferedImage destination = rgb.createCompatibleDestImage(source, null);
 
         BufferedImage result = rgb.filter(source, destination);
+
+        return result;
+    }
+    public static BufferedImage setBlack(BufferedImage source) {
+        GrayscaleFilter gray = new GrayscaleFilter();
+        BufferedImage destination = gray.createCompatibleDestImage(source, null);
+
+        BufferedImage result = gray.filter(source, destination);
 
         return result;
     }

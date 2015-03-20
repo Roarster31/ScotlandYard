@@ -22,6 +22,7 @@ import java.util.List;
  */
 public class GameLayout extends JPanel {
     private MapView mapView;
+    private SideBarView sbView;
     public GameLayout(GameControllerInterface controllerInterface, PlayerInfoBar.PlayerInfoBarListener listener) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
@@ -69,7 +70,7 @@ public class GameLayout extends JPanel {
         MrXFrame mrXHistoryPanel = new MrXFrame(controllerInterface);
         mrXHistoryPanel.setLayout(new BoxLayout(mrXHistoryPanel, BoxLayout.Y_AXIS));
 
-        SideBarView sbView = new SideBarView(controllerInterface);
+        sbView = new SideBarView(controllerInterface);
 
 
         gbcInside.gridy = gbcInside.gridx = 0;
@@ -91,11 +92,11 @@ public class GameLayout extends JPanel {
         gbc.weighty = 10;
         add(playerInfoBar, gbc);
     }
-
     class GameAdapter extends GameUIAdapter {
         @Override
         public void onGameModelUpdated(ScotlandYardModel model) {
-            System.out.println("Change has been made");
+            System.out.println("Change has been made\n\n\n");
+            sbView.update();
             if(!model.isGameOver()) {
                 System.out.println("It is " + ColourHelper.toString(model.getCurrentPlayer()) + "'s turn");
             }else{
