@@ -25,7 +25,6 @@ public class HighwayControlUI extends JFrame implements MapCanvas.CanvasInterfac
 	private static final String MENU_LOAD = "menu_load";
     private static final String MENU_LOAD_GRAPH = "menu_load_graph";
     private static final String MENU_SAVE_RAW = "menu_save";
-    private static final String MENU_SAVE_PARSABLE= "menu_save_2";
     public static final String PREVIEW = "preview";
     public static final String EDIT_NODES = "edit_nodes";
     public static final String VIEW_UNDERGROUND = null;
@@ -60,7 +59,7 @@ public class HighwayControlUI extends JFrame implements MapCanvas.CanvasInterfac
 				} else {
 					System.out.println("Load command cancelled by user.");
 				}
-			}else if(MENU_SAVE_RAW.equals(e.getActionCommand()) || MENU_SAVE_PARSABLE.equals(e.getActionCommand())){
+			}else if(MENU_SAVE_RAW.equals(e.getActionCommand())){
 				int returnVal = fileChooser.showSaveDialog(HighwayControlUI.this);
 
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -68,8 +67,6 @@ public class HighwayControlUI extends JFrame implements MapCanvas.CanvasInterfac
 					try {
                         if(MENU_SAVE_RAW.equals(e.getActionCommand())) {
                             mDataParser.saveV3Data(mCanvas.getData(), file);
-                        }else if(MENU_SAVE_PARSABLE.equals(e.getActionCommand())) {
-                            mDataParser.saveCompatibleFile(null, file);
                         }
 					} catch (FileNotFoundException e1) {
 						e1.printStackTrace();
@@ -306,16 +303,6 @@ public class HighwayControlUI extends JFrame implements MapCanvas.CanvasInterfac
 		menuItem.setActionCommand(MENU_SAVE_RAW);
 		menuItem.addActionListener(mMenuListener);
 		menu.add(menuItem);
-
-        menuItem = new JMenuItem("Save Parsable Map Data",
-                KeyEvent.VK_S);
-        menuItem.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_S, InputEvent.CTRL_MASK));
-        menuItem.getAccessibleContext().setAccessibleDescription(
-                "Save parsable map data");
-        menuItem.setActionCommand(MENU_SAVE_PARSABLE);
-        menuItem.addActionListener(mMenuListener);
-        menu.add(menuItem);
 
 		setJMenuBar(menuBar);
 	}

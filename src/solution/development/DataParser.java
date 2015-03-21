@@ -18,33 +18,6 @@ public class DataParser {
         gson = new Gson();
     }
 
-	public void saveData(MapData mapData, File file) throws FileNotFoundException, UnsupportedEncodingException {
-
-
-		PrintWriter writer = new PrintWriter(file, "UTF-8");
-		writer.write(gson.toJson(mapData));
-		writer.close();
-
-	}
-
-    public void saveCompatibleFile(MapData mapData, File file) throws FileNotFoundException, UnsupportedEncodingException {
-
-
-        PrintWriter writer = new PrintWriter(file, "UTF-8");
-        writer.write(gson.toJson(new CompatibleData(mapData)));
-        writer.close();
-
-    }
-
-	public MapData loadData(File file) throws IOException {
-
-
-		String input = StringUtils.join(Files.readAllLines(file.toPath()),"");
-
-
-		return gson.fromJson(input, MapData.class);
-
-	}
 
     public DataSave loadV3Data(File file) throws IOException {
 
