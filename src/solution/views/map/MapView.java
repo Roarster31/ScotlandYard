@@ -1,9 +1,6 @@
 package solution.views.map;
 
-import scotlandyard.Colour;
-import scotlandyard.MoveDouble;
-import scotlandyard.MoveTicket;
-import scotlandyard.Ticket;
+import scotlandyard.*;
 import solution.Constants;
 import solution.Models.MapData;
 import solution.Models.ScotlandYardModel;
@@ -44,6 +41,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     private Dimension mImageSize;
     private TransportSprite transportSprite;
     private AnimationWorker animationWorker;
+    private List<MoveTicket> mCurrentMoveList;
 
 
     public MapView(final GameControllerInterface gameController, final String graphImageMapPath, final MapData mapData) {
@@ -312,7 +310,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         final Colour currentPlayer = mControllerInterface.getCurrentPlayer();
         final MoveTicket moveTicket = new MoveTicket(currentPlayer, nodeId, ticket);
 
-        secondMoves = mControllerInterface.getValidSingleMovesAtLocation(currentPlayer, nodeId);
+        secondMoves = mControllerInterface.getValidSecondMovesAtLocation(currentPlayer, nodeId, ticket);
         firstMove = moveTicket;
 
         showValidMoves(secondMoves, nodeId);
@@ -324,6 +322,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
 
     private void showValidMoves(List<MoveTicket> moves, int currentPosition) {
 
+        mCurrentMoveList = moves;
         for (MapPosition mapPosition : mMapData.getPositionList()) {
             mapPosition.setAvailable(false);
             mapPosition.setHighlighted(mapPosition.getId() == currentPosition);
@@ -380,15 +379,9 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
                         final boolean canDoubleMove = isMrX && hasEnoughDoubleMoves && secondMoves == null;
 
                         ArrayList<Ticket> availableTickets = new ArrayList<Ticket>();
-                        for (ViewRoute viewRoute : mMapData.getRouteList()) {
-                            if (firstMove != null) {
-                                if (RouteHelper.routeContains(viewRoute, firstMove.target, position.getId())) {
-                                    availableTickets.add(viewRoute.type);
-                                }
-                            } else {
-                                if (RouteHelper.routeContains(viewRoute, mControllerInterface.getCurrentPlayerRealPosition(), position.getId())) {
-                                    availableTickets.add(viewRoute.type);
-                                }
+                        for(MoveTicket moveTicket : mCurrentMoveList){
+                            if(moveTicket.target == position.getId()){
+                                availableTickets.add(moveTicket.ticket);
                             }
                         }
 

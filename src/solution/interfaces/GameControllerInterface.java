@@ -17,6 +17,7 @@ public interface GameControllerInterface {
     public Map<Ticket,Integer> getPlayerTickets(Colour currentPlayer);
     public List<Colour> getPlayerList();
     List<MoveTicket> getValidSingleMovesAtLocation(Colour currentPlayer, int location);
+    List<MoveTicket> getValidSecondMovesAtLocation(Colour currentPlayer, int location, Ticket firstTicket);
     public int getCurrentPlayerRealPosition();
 
     public void notifyAllPlayersAdded(final int count);

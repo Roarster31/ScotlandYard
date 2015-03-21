@@ -152,6 +152,13 @@ public class GameController implements GameControllerInterface {
     }
 
     @Override
+    public List<MoveTicket> getValidSecondMovesAtLocation(Colour currentPlayer, int location, Ticket firstTicket) {
+        Map<Ticket, Integer> playerTickets = new HashMap<Ticket, Integer>(model.getAllPlayerTickets(currentPlayer));
+        playerTickets.put(firstTicket, playerTickets.get(firstTicket)-1);
+        return model.getAvailableSingleMoves(model.getGraph(), currentPlayer, location, playerTickets);
+    }
+
+    @Override
     public int getCurrentPlayerRealPosition() {
         return model.getRealPlayerLocation(model.getCurrentPlayer());
     }
