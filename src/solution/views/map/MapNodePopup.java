@@ -15,11 +15,17 @@ import java.util.Set;
 
 public class MapNodePopup {
 
+    public enum DoubleMoveState {ALLOWED_NOT_STARTED, ALLOWED_STARTED, NOT_ALLOWED}
     private static final int SHALLOW_BUTTON_SIZE = 25;
     private static final int BUTTON_SIZE = 50;
     private static final int TRIANGLE_SIZE = 10;
     private static final int BUTTON_PADDING = 10;
     private static final int BUTTON_CORNER_RADIUS = 15;
+
+    private static final Color unavailableButtonColor = new Color(134, 134, 134);
+    private static final Color availableButtonColor = Color.WHITE;
+    private static final Color buttonHighlightColor = new Color(182, 182, 182, 205);
+    private static final Color buttonSelectColor = new Color(14, 220, 0, 205);
 
     private final PopupInterface mInterface;
     private Image boatImage;
@@ -36,10 +42,10 @@ public class MapNodePopup {
 
     Set<Ticket> ticketList = new HashSet<Ticket>();
     private MapPosition mapPosition;
-    private boolean mDoubleMove;
+    private DoubleMoveState mDoubleMove;
     private Rectangle2D.Double mainRect;
-    private Rectangle2D.Double confirmOkRect;
-    private Rectangle2D.Double confirmDoubleRect;
+    private Rectangle2D.Double confirmPositiveRect;
+    private Rectangle2D.Double confirmNeutralRect;
     private ArrayList<Rectangle2D> mTicketRectList;
     private Polygon mTrianglePolygon;
     private Rectangle2D mSelectedRect;
@@ -70,10 +76,10 @@ public class MapNodePopup {
         isShowing = false;
         mapPosition = null;
         ticketList = null;
-        mDoubleMove = false;
+        mDoubleMove = DoubleMoveState.NOT_ALLOWED;
         mainRect = null;
-        confirmOkRect = null;
-        confirmDoubleRect = null;
+        confirmPositiveRect = null;
+        confirmNeutralRect = null;
         mTicketRectList = null;
         mTrianglePolygon = null;
         mSelectedRect = null;
@@ -81,7 +87,7 @@ public class MapNodePopup {
         mSelectedTicket = null;
     }
 
-    public void create(MapPosition mapPosition, final Dimension canvasSize, boolean doubleMove, ArrayList<Ticket> availableTickets) {
+    public void create(MapPosition mapPosition, final Dimension canvasSize, DoubleMoveState doubleMove, ArrayList<Ticket> availableTickets) {
         this.mapPosition = mapPosition;
         ticketList = new HashSet<Ticket>(availableTickets);
         mDoubleMove = doubleMove;
@@ -153,13 +159,13 @@ public class MapNodePopup {
         }
 
         final int confirmButtonsY = yPosition + BUTTON_PADDING * 2 + BUTTON_SIZE;
-        if (mDoubleMove) {
+        if (mDoubleMove.equals(DoubleMoveState.ALLOWED_NOT_STARTED) || mDoubleMove.equals(DoubleMoveState.ALLOWED_STARTED)) {
             final int smallButtonWidth = width / 2 - 2 * BUTTON_PADDING;
-            confirmDoubleRect = new Rectangle2D.Double(xPosition + BUTTON_PADDING, confirmButtonsY, smallButtonWidth, SHALLOW_BUTTON_SIZE);
-            confirmOkRect = new Rectangle2D.Double(xPosition + width / 2 + BUTTON_PADDING, confirmButtonsY, smallButtonWidth, SHALLOW_BUTTON_SIZE);
-        } else {
+            confirmNeutralRect = new Rectangle2D.Double(xPosition + BUTTON_PADDING, confirmButtonsY, smallButtonWidth, SHALLOW_BUTTON_SIZE);
+            confirmPositiveRect = new Rectangle2D.Double(xPosition + width / 2 + BUTTON_PADDING, confirmButtonsY, smallButtonWidth, SHALLOW_BUTTON_SIZE);
+        }  else {
             final int largeButtonWidth = width - 2 * BUTTON_PADDING;
-            confirmOkRect = new Rectangle2D.Double(xPosition + BUTTON_PADDING, confirmButtonsY, largeButtonWidth, SHALLOW_BUTTON_SIZE);
+            confirmPositiveRect = new Rectangle2D.Double(xPosition + BUTTON_PADDING, confirmButtonsY, largeButtonWidth, SHALLOW_BUTTON_SIZE);
         }
 
         mTrianglePolygon = new Polygon(new int[]{x, triangleX1, triangleX2}, new int[]{y, triangleY1, triangleY2}, 3);
@@ -188,9 +194,9 @@ public class MapNodePopup {
             g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
 
             if (!ticketList.contains(ticket)) {
-                g2d.setColor(new Color(134, 134, 134));
+                g2d.setColor(unavailableButtonColor);
             } else {
-                g2d.setColor(Color.WHITE);
+                g2d.setColor(availableButtonColor);
             }
 
             g2d.fillRoundRect((int) mTicketRectList.get(i).getX(), (int) mTicketRectList.get(i).getY(), (int) mTicketRectList.get(i).getWidth(), (int) mTicketRectList.get(i).getHeight(), BUTTON_CORNER_RADIUS, BUTTON_CORNER_RADIUS);
@@ -226,31 +232,45 @@ public class MapNodePopup {
         g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
 
         if (mSelectedRect != null) {
-            g2d.setColor(Color.WHITE);
+            g2d.setColor(availableButtonColor);
         } else {
-            g2d.setColor(new Color(134, 134, 134));
+            g2d.setColor(unavailableButtonColor);
         }
 
         //confirmation buttons
-        if (mDoubleMove) {
+        if (mDoubleMove.equals(DoubleMoveState.ALLOWED_NOT_STARTED) || mDoubleMove.equals(DoubleMoveState.ALLOWED_STARTED)) {
 
-            g2d.fillRoundRect((int) confirmOkRect.getX(), (int) confirmOkRect.getY(), (int) confirmOkRect.getWidth(), (int) confirmOkRect.getHeight(), BUTTON_CORNER_RADIUS, BUTTON_CORNER_RADIUS);
+            g2d.fillRoundRect((int) confirmPositiveRect.getX(), (int) confirmPositiveRect.getY(), (int) confirmPositiveRect.getWidth(), (int) confirmPositiveRect.getHeight(), BUTTON_CORNER_RADIUS, BUTTON_CORNER_RADIUS);
 
-            g2d.fillRoundRect((int) confirmDoubleRect.getX(), (int) confirmDoubleRect.getY(), (int) confirmDoubleRect.getWidth(), (int) confirmDoubleRect.getHeight(), BUTTON_CORNER_RADIUS, BUTTON_CORNER_RADIUS);
+            if(mDoubleMove.equals(DoubleMoveState.ALLOWED_NOT_STARTED)) {
+                g2d.fillRoundRect((int) confirmNeutralRect.getX(), (int) confirmNeutralRect.getY(), (int) confirmNeutralRect.getWidth(), (int) confirmNeutralRect.getHeight(), BUTTON_CORNER_RADIUS, BUTTON_CORNER_RADIUS);
+            }else{
+                g2d.setColor(availableButtonColor);
+                g2d.fillRoundRect((int) confirmNeutralRect.getX(), (int) confirmNeutralRect.getY(), (int) confirmNeutralRect.getWidth(), (int) confirmNeutralRect.getHeight(), BUTTON_CORNER_RADIUS, BUTTON_CORNER_RADIUS);
+                g2d.setColor(unavailableButtonColor);
+            }
 
-            Rectangle2D r = fm.getStringBounds("Double Move", g2d);
-            int textX = (int) (confirmDoubleRect.getCenterX() - ((int) r.getWidth() / 2));
-            int textY = (int) (confirmDoubleRect.getCenterY() - ((int) r.getHeight() / 2) + fm.getAscent());
+            String neutralRectString;
+
+            if(mDoubleMove.equals(DoubleMoveState.ALLOWED_NOT_STARTED)){
+                neutralRectString = "Double Move";
+            }else{
+                neutralRectString = "Cancel";
+            }
+
+            Rectangle2D r = fm.getStringBounds(neutralRectString, g2d);
+            int textX = (int) (confirmNeutralRect.getCenterX() - ((int) r.getWidth() / 2));
+            int textY = (int) (confirmNeutralRect.getCenterY() - ((int) r.getHeight() / 2) + fm.getAscent());
             g2d.setColor(Color.BLACK);
-            g2d.drawString("Double Move", textX, textY);
+            g2d.drawString(neutralRectString, textX, textY);
 
         } else {
-            g2d.fillRoundRect((int) confirmOkRect.getX(), (int) confirmOkRect.getY(), (int) confirmOkRect.getWidth(), (int) confirmOkRect.getHeight(), BUTTON_CORNER_RADIUS, BUTTON_CORNER_RADIUS);
+            g2d.fillRoundRect((int) confirmPositiveRect.getX(), (int) confirmPositiveRect.getY(), (int) confirmPositiveRect.getWidth(), (int) confirmPositiveRect.getHeight(), BUTTON_CORNER_RADIUS, BUTTON_CORNER_RADIUS);
         }
 
         Rectangle2D r = fm.getStringBounds("Ok", g2d);
-        int textX = (int) (confirmOkRect.getCenterX() - ((int) r.getWidth() / 2));
-        int textY = (int) (confirmOkRect.getCenterY() - ((int) r.getHeight() / 2) + fm.getAscent());
+        int textX = (int) (confirmPositiveRect.getCenterX() - ((int) r.getWidth() / 2));
+        int textY = (int) (confirmPositiveRect.getCenterY() - ((int) r.getHeight() / 2) + fm.getAscent());
         g2d.setColor(Color.BLACK);
         g2d.drawString("Ok", textX, textY);
 
@@ -260,7 +280,7 @@ public class MapNodePopup {
 
         //highlight any button being hovered
         if (mHoveredRect != null) {
-            g2d.setColor(new Color(182, 182, 182, 205));
+            g2d.setColor(buttonHighlightColor);
             g2d.drawRoundRect((int) mHoveredRect.getX(), (int) mHoveredRect.getY(), (int) mHoveredRect.getWidth(), (int) mHoveredRect.getHeight(), BUTTON_CORNER_RADIUS, BUTTON_CORNER_RADIUS);
         }
 
@@ -268,7 +288,7 @@ public class MapNodePopup {
 
         //highlight and button currently clicked
         if (mSelectedRect != null) {
-            g2d.setColor(new Color(14, 220, 0, 205));
+            g2d.setColor(buttonSelectColor);
             g2d.drawRoundRect((int) mSelectedRect.getX(), (int) mSelectedRect.getY(), (int) mSelectedRect.getWidth(), (int) mSelectedRect.getHeight(), BUTTON_CORNER_RADIUS, BUTTON_CORNER_RADIUS);
         }
 
@@ -286,10 +306,16 @@ public class MapNodePopup {
         }
 
         if (mainRect.contains(x, y)) {
-            if (confirmOkRect.contains(x, y)) {
+            if (confirmPositiveRect.contains(x, y)) {
                 mInterface.onTicketSelected(mSelectedTicket, mapPosition.getId());
-            } else if (confirmDoubleRect != null && confirmDoubleRect.contains(x, y)) {
-                mInterface.onDoubleMoveSelected(mSelectedTicket, mapPosition.getId());
+            } else if (confirmNeutralRect != null && confirmNeutralRect.contains(x, y)) {
+
+                if(mDoubleMove.equals(DoubleMoveState.ALLOWED_NOT_STARTED)) {
+                    mInterface.onDoubleMoveSelected(mSelectedTicket, mapPosition.getId());
+                }else if(mDoubleMove.equals(DoubleMoveState.ALLOWED_STARTED)){
+                    mInterface.onDoubleMoveCancelled(mSelectedTicket, mapPosition.getId());
+                }
+
             } else {
                 for (int i = 0; i < mTicketRectList.size(); i++) {
                     Rectangle2D rect = mTicketRectList.get(i);
@@ -315,11 +341,13 @@ public class MapNodePopup {
 
         if (mainRect.contains(x, y)) {
             mHoveredRect = null;
-            if (mSelectedRect != null && confirmOkRect != null && confirmOkRect.contains(x, y)) {
-                mHoveredRect = confirmOkRect;
-            } else if (mSelectedRect != null && confirmDoubleRect != null && confirmDoubleRect.contains(x, y)) {
-                mHoveredRect = confirmDoubleRect;
-            } else {
+            if (mSelectedRect != null && confirmPositiveRect != null && confirmPositiveRect.contains(x, y)) {
+                mHoveredRect = confirmPositiveRect;
+            } else if (mSelectedRect != null && confirmNeutralRect != null && confirmNeutralRect.contains(x, y)) {
+                mHoveredRect = confirmNeutralRect;
+            } else if (mSelectedRect == null && mDoubleMove.equals(DoubleMoveState.ALLOWED_STARTED) && confirmNeutralRect != null && confirmNeutralRect.contains(x, y)) {
+                mHoveredRect = confirmNeutralRect;
+            }else {
                 for (int i = 0; i < mTicketRectList.size(); i++) {
                     Rectangle2D rect = mTicketRectList.get(i);
                     Ticket ticket = fullTicketList.get(i);
@@ -344,6 +372,8 @@ public class MapNodePopup {
         public void onTicketSelected(final Ticket ticket, final int nodeId);
 
         public void onDoubleMoveSelected(final Ticket ticket, final int nodeId);
+
+        public void onDoubleMoveCancelled(Ticket mSelectedTicket, int id);
     }
 
 }

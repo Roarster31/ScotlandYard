@@ -320,6 +320,20 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
 
     }
 
+    @Override
+    public void onDoubleMoveCancelled(Ticket mSelectedTicket, int id) {
+
+        secondMoves = null;
+        firstMove = null;
+        mMapPopup.reset();
+        Colour currentPlayer = mControllerInterface.getCurrentPlayer();
+        int currentPlayerLocation = mControllerInterface.getCurrentPlayerRealPosition();
+        showValidMoves(mControllerInterface.getValidSingleMovesAtLocation(currentPlayer, currentPlayerLocation), currentPlayerLocation);
+
+        repaint();
+
+    }
+
     private void showValidMoves(List<MoveTicket> moves, int currentPosition) {
 
         mCurrentMoveList = moves;
@@ -376,7 +390,16 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
                     if (position.notifyMouseClick((int) transformedPoint.getX(), (int) transformedPoint.getY())) {
                         final boolean isMrX = mControllerInterface.getCurrentPlayer() == Constants.MR_X_COLOUR;
                         final boolean hasEnoughDoubleMoves = mControllerInterface.getPlayerTickets(Constants.MR_X_COLOUR).get(Ticket.DoubleMove) > 0;
-                        final boolean canDoubleMove = isMrX && hasEnoughDoubleMoves && secondMoves == null;
+
+                        MapNodePopup.DoubleMoveState doubleMoveState;
+
+                        if(isMrX && hasEnoughDoubleMoves && secondMoves == null){
+                            doubleMoveState = MapNodePopup.DoubleMoveState.ALLOWED_NOT_STARTED;
+                        }else if(isMrX && secondMoves != null){
+                            doubleMoveState = MapNodePopup.DoubleMoveState.ALLOWED_STARTED;
+                        }else{
+                            doubleMoveState = MapNodePopup.DoubleMoveState.NOT_ALLOWED;
+                        }
 
                         ArrayList<Ticket> availableTickets = new ArrayList<Ticket>();
                         for(MoveTicket moveTicket : mCurrentMoveList){
@@ -385,7 +408,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
                             }
                         }
 
-                        mMapPopup.create(position, getSize(), canDoubleMove, availableTickets);
+                        mMapPopup.create(position, getSize(), doubleMoveState, availableTickets);
                     }
                 }
             }
@@ -497,9 +520,8 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
                     });
                 }
                 final Colour currentPlayer = model.getCurrentPlayer();
-                List<MoveTicket> firstMoves = mControllerInterface.getValidSingleMovesAtLocation(currentPlayer, model.getRealPlayerLocation(currentPlayer));
 
-                showValidMoves(firstMoves, model.getRealPlayerLocation(currentPlayer));
+                showValidMoves(mControllerInterface.getValidSingleMovesAtLocation(currentPlayer, currentPlayerLocation), currentPlayerLocation);
             }
 
             repaint();
