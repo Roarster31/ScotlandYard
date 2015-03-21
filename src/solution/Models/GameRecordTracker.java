@@ -156,6 +156,7 @@ public class GameRecordTracker implements Spectator {
         if(move instanceof MoveTicket){
             tickets.put(((MoveTicket) move).ticket, 1);
         }else if(move instanceof MoveDouble){
+            tickets.put(Ticket.DoubleMove, 1);
             for(Move innerMove : ((MoveDouble)move).moves){
                 Iterator it = getMoveTickets(innerMove).entrySet().iterator();
                 while (it.hasNext()) {

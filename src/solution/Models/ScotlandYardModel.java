@@ -14,7 +14,7 @@ public class ScotlandYardModel extends ScotlandYard {
 
     private final List<Boolean> mRounds;
     private final Graph<Integer, Route> mGraph;
-    private final Map<Colour, PlayerHolder> mPlayerMap;
+    private final LinkedHashMap<Colour, PlayerHolder> mPlayerMap;
     private final List<Spectator> mSpectators;
     private final ArrayList<Colour> colourList;
     private final int mNumberOfDetectives;
@@ -31,7 +31,7 @@ public class ScotlandYardModel extends ScotlandYard {
         final String filename = URLDecoder.decode(resource.getFile(), "UTF-8");
         mGraph = new ScotlandYardGraphReader().readGraph(filename);
         mNumberOfDetectives = numberOfDetectives;
-        mPlayerMap = new HashMap<Colour, PlayerHolder>();
+        mPlayerMap = new LinkedHashMap<Colour, PlayerHolder>();
         mSpectators = new ArrayList<Spectator>();
         colourList = new ArrayList<Colour>();
     }
@@ -72,6 +72,9 @@ public class ScotlandYardModel extends ScotlandYard {
     @Override
     protected void play(MoveDouble move) {
         notifySpectators(move);
+
+        Map<Ticket, Integer> tickets = mPlayerMap.get(move.colour).getTickets();
+        tickets.put(Ticket.DoubleMove, tickets.get(Ticket.DoubleMove) - 1);
 
         for (Move innerMove : move.moves) {
             play(innerMove);

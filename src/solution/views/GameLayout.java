@@ -97,7 +97,6 @@ public class GameLayout extends JPanel {
         @Override
         public void onGameModelUpdated(GameControllerInterface controllerInterface) {
             System.out.println("Change has been made\n\n\n");
-            sbView.update();
             if(!controllerInterface.isGameOver()) {
                 System.out.println("It is " + ColourHelper.toString(controllerInterface.getCurrentPlayer()) + "'s turn");
             }else{

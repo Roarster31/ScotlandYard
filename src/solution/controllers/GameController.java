@@ -143,6 +143,10 @@ public class GameController implements GameControllerInterface {
         return model.getCurrentPlayer();
     }
     public Map<Ticket, Integer> getPlayerTickets(Colour currentPlayer){
+        if(currentPlayer == Constants.MR_X_COLOUR){
+            System.out.println();
+        }
+
         return model.getAllPlayerTickets(currentPlayer);
     }
 
@@ -228,10 +232,6 @@ public class GameController implements GameControllerInterface {
             if(move.colour == Constants.MR_X_COLOUR){
                 if(move instanceof MoveTicket){
                     moveHistory.add((MoveTicket) move);
-                }else if(move instanceof MoveDouble){
-                    for(Move subMove : ((MoveDouble) move).moves){
-                        notify(subMove);
-                    }
                 }
             }
         }

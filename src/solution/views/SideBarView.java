@@ -1,6 +1,5 @@
 package solution.views;
 
-import scotlandyard.Colour;
 import scotlandyard.MoveTicket;
 import scotlandyard.Ticket;
 import solution.Constants;
@@ -8,22 +7,23 @@ import solution.helpers.ColourHelper;
 import solution.helpers.ColourTintHelper;
 import solution.helpers.TicketHelper;
 import solution.interfaces.GameControllerInterface;
-import solution.interfaces.TicketImageHolder;
+import solution.interfaces.adapters.GameUIAdapter;
 import solution.interfaces.adapters.ScrollAdapter;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.*;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -51,8 +51,10 @@ public class SideBarView extends JPanel {
         transform = new AffineTransform();
         mControllerInterface = controllerInterface;
 
+        controllerInterface.addUpdateListener(new GameAdapter());
+
         // Set up sizing
-        setPreferredSize(new Dimension(SIDEBAR_WIDTH,SIDEBAR_HEIGHT));
+        setPreferredSize(new Dimension(SIDEBAR_WIDTH, SIDEBAR_HEIGHT));
         setMaximumSize(new Dimension(SIDEBAR_WIDTH,SIDEBAR_HEIGHT));
         setMinimumSize(new Dimension(SIDEBAR_WIDTH,SIDEBAR_HEIGHT));
         setSize(new Dimension(SIDEBAR_WIDTH,SIDEBAR_HEIGHT));
@@ -167,9 +169,6 @@ public class SideBarView extends JPanel {
 
 
     }
-    public void update() {
-        repaint();
-    }
 
     class LocalMouseAdapter extends MouseAdapter {
         @Override
@@ -182,7 +181,14 @@ public class SideBarView extends JPanel {
             super.mouseMoved(e);
         }
     }
-    class LocalScrollAdapter extends ScrollAdapter {
+
+    class GameAdapter extends GameUIAdapter {
+        @Override
+        public void onGameModelUpdated(GameControllerInterface controllerInterface) {
+            repaint();
+        }
+    }
+     class LocalScrollAdapter extends ScrollAdapter {
         @Override
         public void mouseWheelMoved(MouseWheelEvent e) {
             super.mouseWheelMoved(e);
