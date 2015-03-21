@@ -425,7 +425,11 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
 
         }
 
-
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            Cursor cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
+            setCursor(cursor);
+        }
     }
 
     class GameAdapter extends GameUIAdapter {
