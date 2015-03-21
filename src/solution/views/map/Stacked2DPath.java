@@ -17,7 +17,7 @@ public class Stacked2DPath {
     public static final float LINE_WIDTH = 4f;
     private final ArrayList<Path2D> paths;
     private final Path2D mPath;
-    private final ArrayList<Ticket> mTickets;
+    private ArrayList<Ticket> mTickets;
 
     public Stacked2DPath(Path2D path, ArrayList<Ticket> tickets){
         paths = new ArrayList<Path2D>();
@@ -29,6 +29,7 @@ public class Stacked2DPath {
 
     private void stackPath(Path2D path, int lineCount) {
 
+        paths.clear();
 
         PathInterpolator interpolator = new PathInterpolator(path);
 
@@ -205,5 +206,10 @@ public class Stacked2DPath {
 
     public Path2D getPath() {
         return mPath;
+    }
+
+    public void setTickets(ArrayList<Ticket> availableTickets) {
+        mTickets = availableTickets;
+        stackPath(mPath, mTickets.size());
     }
 }

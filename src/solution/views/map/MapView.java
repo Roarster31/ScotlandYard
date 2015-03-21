@@ -99,7 +99,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
-//        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 //        hints.put(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE);
 //        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
 //        hints.put(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
@@ -337,21 +337,21 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
 
         for (MapPath mapPath : mMapData.getPathList()) {
 
-            mapPath.setAvailable(false);
+            mapPath.resetAvailableTickets();
 
             for (ViewRoute viewRoute : mMapData.getRouteList()) {
-                boolean hasRoute = false;
+                Ticket availableTicket = null;
                 for(MoveTicket moveTicket : moves) {
                     if (RouteHelper.routeContains(viewRoute, currentPosition, moveTicket.target)){
-                        hasRoute = true;
+                        availableTicket = viewRoute.type;
                         break;
                     }
                 }
-                if(hasRoute) {
+                if(availableTicket != null) {
                     for (int i = 0; i < viewRoute.positionList.size() - 1; i++) {
                         if (viewRoute.positionList.get(i).id == mapPath.getStartingNode() && viewRoute.positionList.get(i + 1).id == mapPath.getEndingNode()
                                 || viewRoute.positionList.get(i).id == mapPath.getEndingNode() && viewRoute.positionList.get(i + 1).id == mapPath.getStartingNode()) {
-                            mapPath.setAvailable(true);
+                            mapPath.addAvailableTicket(availableTicket);
                             break;
                         }
 

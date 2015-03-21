@@ -5,6 +5,7 @@ import solution.development.models.ViewPath;
 
 import java.awt.*;
 import java.awt.geom.Path2D;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,24 +17,27 @@ public class MapPath {
     private final Stacked2DPath path;
     private final int nodeId1;
     private final int nodeId2;
-    private final Set<Ticket> tickets;
-    private boolean available;
+    private final ArrayList<Ticket> tickets;
+    private final Set<Ticket> availableTickets;
     private boolean hovered;
 
     public MapPath(ViewPath viewPath) {
         this.path = viewPath.path;
         this.nodeId1 = viewPath.id1;
         this.nodeId2 = viewPath.id2;
-        this.tickets = new HashSet<Ticket>(viewPath.types);
+        this.tickets = viewPath.types;
+
+        this.availableTickets = new HashSet<Ticket>();
     }
 
     public void drawBackground(Graphics2D g2d){
-        if(!available) {
+        if(isAvailable()) {
+            g2d.setStroke(new BasicStroke(Stacked2DPath.LINE_WIDTH * (2+availableTickets.size())));
+            g2d.setColor(Color.darkGray);
+        }else{
+
             g2d.setStroke(new BasicStroke(Stacked2DPath.LINE_WIDTH * (1 + tickets.size())));
             g2d.setColor(Color.WHITE);
-        }else{
-            g2d.setStroke(new BasicStroke(Stacked2DPath.LINE_WIDTH * (2+tickets.size())));
-            g2d.setColor(Color.darkGray);
         }
 
         g2d.draw(path.getPath());
@@ -51,16 +55,13 @@ public class MapPath {
     }
 
 
-    public void resetAvailability() {
-        available = false;
-    }
 
     public void notifyPositionHovered(MapPosition position) {
         hovered = position != null && hasNode(position.getId());
     }
 
     public boolean isAvailable() {
-        return available;
+        return availableTickets != null && availableTickets.size() > 0;
     }
 
     public boolean hasNode(int nodeId) {
@@ -104,7 +105,12 @@ public class MapPath {
     }
 
 
-    public void setAvailable(boolean available) {
-        this.available = available;
+    public void resetAvailableTickets() {
+        availableTickets.clear();
+    }
+
+    public void addAvailableTicket(Ticket availableTicket) {
+        availableTickets.add(availableTicket);
+        path.setTickets(new ArrayList<Ticket>(availableTickets));
     }
 }
