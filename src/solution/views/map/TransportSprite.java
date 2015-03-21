@@ -36,7 +36,7 @@ public class TransportSprite {
                     filePath = "imgs/actual_train.png";
                     break;
                 case SecretMove:
-                    filePath = "imgs/actual_boat.png";
+                    filePath = "imgs/actual_secret.png";
                     break;
             }
 

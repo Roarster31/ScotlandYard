@@ -35,14 +35,12 @@ public class SideBarView extends JPanel {
     private BufferedImage mRoundHolderImg;
     private BufferedImage mCurrentPlayerImg;
     private AffineTransform transform;
-    private Dimension mImgSize;
-    private int mPlayerNumber;
     private Font mFont;
     private final int SIDEBAR_WIDTH = 216;
     private final int SIDEBAR_HEIGHT = 800;
     HashMap<Ticket, BufferedImage> ticketToImg;
     private int mAlternator = 0;
-    private int tempYPosTicket = 0;
+    private int mTempYPosTicket = 0;
     private final int mLimitYForTicketStack = 95;
     private final int mTicketStackIncrement = 4;
     private final int mTicketStackIncrLimit = 150;
@@ -93,7 +91,11 @@ public class SideBarView extends JPanel {
             e.printStackTrace();
         }
         mFont = font;
+
+        // Styling
         setOpaque(false);
+
+        // Add the listeners
         addMouseListener(new LocalMouseAdapter());
         addMouseMotionListener(new LocalMouseAdapter());
         addMouseWheelListener(new LocalScrollAdapter());
@@ -102,7 +104,7 @@ public class SideBarView extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        // Initilize the graphics interface
+        // Init the graphics interface
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(
                 RenderingHints.KEY_TEXT_ANTIALIASING,
@@ -125,7 +127,7 @@ public class SideBarView extends JPanel {
         int tOffset = 160;
         g2d.drawString(roundText, (SIDEBAR_WIDTH / 2) - (w / 2) - 20, tOffset);
 
-        // Draw Current Player
+        // Draw Current Player iff it is black the change to mr x
         g2d.setFont(mFont.deriveFont(30f));
         String currentPlayerName = mControllerInterface.getCurrentPlayer().toString();
         if(currentPlayerName == "Black"){
@@ -158,13 +160,14 @@ public class SideBarView extends JPanel {
 
         // Draw ticket flicker
         // TODO: sort bug for bottom stack full and multiple scrolls down
+
         TicketFlicker ticketFlicker = new TicketFlicker();
         ticketFlicker.draw(
                 mrXHistory,
                 mAlternator,
                 ticketToImg,
                 SIDEBAR_WIDTH,
-                tempYPosTicket,
+                mTempYPosTicket,
                 g2d);
 
 
@@ -192,29 +195,31 @@ public class SideBarView extends JPanel {
         @Override
         public void mouseWheelMoved(MouseWheelEvent e) {
             super.mouseWheelMoved(e);
-            System.out.println(tempYPosTicket);
+            
+            // If the scroll is upwards then add onto the y value and repaint if inside the limits
             if(e.getPreciseWheelRotation() > 0) {
-                if(tempYPosTicket >= mTicketStackIncrLimit){
+                if(mTempYPosTicket >= mTicketStackIncrLimit){
                     // Limit the temp y pos to this
-                    tempYPosTicket = mLimitYForTicketStack;
-                } else if(tempYPosTicket < mLimitYForTicketStack){
-                    tempYPosTicket = tempYPosTicket + mTicketStackIncrement;
+                    mTempYPosTicket = mLimitYForTicketStack;
+                } else if(mTempYPosTicket < mLimitYForTicketStack){
+                    mTempYPosTicket = mTempYPosTicket + mTicketStackIncrement;
                     repaint();
-                } else if (tempYPosTicket >= mLimitYForTicketStack) {
-                    tempYPosTicket = 0;
+                } else if (mTempYPosTicket >= mLimitYForTicketStack) {
+                    mTempYPosTicket = 0;
                     mAlternator++;
                     repaint();
                 }
 
             } else {
-                if(tempYPosTicket <= -mTicketStackIncrLimit) {
+                // Decrease the yvalue and repaint if inside the limits
+                if(mTempYPosTicket <= -mTicketStackIncrLimit) {
                     // limit the y pos
-                    tempYPosTicket = -mLimitYForTicketStack;
-                } else if(tempYPosTicket >= -mLimitYForTicketStack){
-                    tempYPosTicket = tempYPosTicket - mTicketStackIncrement;
+                    mTempYPosTicket = -mLimitYForTicketStack;
+                } else if(mTempYPosTicket >= -mLimitYForTicketStack){
+                    mTempYPosTicket = mTempYPosTicket - mTicketStackIncrement;
                     repaint();
-                } else if(tempYPosTicket < -mLimitYForTicketStack) {
-                    tempYPosTicket = 0;
+                } else if(mTempYPosTicket < -mLimitYForTicketStack) {
+                    mTempYPosTicket = 0;
                     mAlternator--;
                     repaint();
                 }

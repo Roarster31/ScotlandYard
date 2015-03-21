@@ -25,7 +25,6 @@ public class TicketFlicker {
         int firstStack = mrXHistory.size() + mAlternator;
         int secondStack = mrXHistory.size() - firstStack - 1;
 
-
         // Init the stacks top, middle and bottom
         TicketImageHolder[] topStack;
         TicketImageHolder[] bottomStack;

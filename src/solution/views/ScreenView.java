@@ -19,7 +19,7 @@ public class ScreenView extends JPanel {
     private GameOverView endOfGame;
     private LoadingView loadingView;
 
-    enum Screen {INTRO, ADD_PLAYER, GAME_PLAY, GAME_OVER, LOADING}
+    enum Screen {INTRO, ADD_PLAYER, GAME_PLAY, LOADING}
     private final GameControllerInterface mControllerInterface;
 
     private GridBagConstraints mGridLayout = null;
@@ -57,9 +57,6 @@ public class ScreenView extends JPanel {
                 break;
             case GAME_PLAY:
                 showGameView();
-                break;
-            case GAME_OVER:
-                showGameOverView();
                 break;
             case LOADING:
                 showLoadingView();
@@ -134,18 +131,6 @@ public class ScreenView extends JPanel {
             }
         });
         add(playerAddView, mGridLayout);
-    }
-    public void showGameOverView(){
-        // Set up game over view
-        if(endOfGame != null){
-            remove(endOfGame);
-            endOfGame = null;
-        }
-        endOfGame = new GameOverView(mControllerInterface);
-        endOfGame.setPreferredSize(new Dimension(1000, 800));
-        endOfGame.setOpaque(false);
-        endOfGame.setVisible(false);
-        add(endOfGame, mGridLayout);
     }
     private void setupScreen(){
 
