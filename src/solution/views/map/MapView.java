@@ -45,9 +45,15 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     private Dimension mImageSize;
     private TransportSprite transportSprite;
     private AnimationWorker animationWorker;
-
+    static class BorderMargins {
+        public static int topMargin = 63;
+        public static int leftMargin = 75;
+        public static int bottomMargin = 71;
+        public static int rightMargin = 72;
+    }
 
     public MapView(final GameControllerInterface gameController, final String graphImageMapPath, final MapData mapData) {
+        setOpaque(false);
         mControllerInterface = gameController;
         mMapData = mapData;
         mControllerInterface.addUpdateListener(new GameAdapter());
@@ -121,16 +127,25 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
 
         long startTime = System.currentTimeMillis();
 
-        g2d.setColor(Color.RED);
+        double topMarginRatio = ((double)BorderMargins.topMargin) / 819.0f;
+        double bottomMarginRatio = ((double)(BorderMargins.bottomMargin + BorderMargins.topMargin)) / 819.0f;
+        double leftMarginRatio = ((double)BorderMargins.leftMargin) / 1158.0f;
+        double rightMarginRatio = ((double)(BorderMargins.rightMargin + BorderMargins.leftMargin)) / 1158.0f;
 
-        g2d.drawImage(mMapImage, null, 0, 0);
-        g2d.setTransform(transform);
-//        g2d.drawImage(mGraphImage, null, 0, 0);
+        g2d.drawImage(mMapImage, 0,0, getWidth(), getHeight(), this);
+        g2d.drawImage(mGraphImage, (int)(leftMarginRatio * getWidth()), (int)(topMarginRatio * getHeight()), (int)(getWidth() - (getWidth() * rightMarginRatio)), (int)(getHeight() - (getHeight() * bottomMarginRatio)), this);
+        try {
+            g2d.setTransform(transform.createInverse());
+        } catch (NoninvertibleTransformException e) {
+            e.printStackTrace();
+        }
 
-        g2d.fillRect(0,0,mImageSize.width,mImageSize.height);
+        //
+
+        //g2d.fillRect(0,0,mImageSize.width,mImageSize.height);
 
 
-        g2d.drawImage(mBgPathImage, null, 0, 0);
+        g2d.drawImage(mBgPathImage, (int)(leftMarginRatio * getWidth()), (int)(topMarginRatio * getHeight()), (int)(getWidth() - (getWidth() * rightMarginRatio)), (int)(getHeight() - (getHeight() * bottomMarginRatio)), this);
 
         for (MapPath mapPath : mMapData.getPathList()) {
             if(mapPath.isAvailable()) {
@@ -145,7 +160,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         }
 
 
-        g2d.drawImage(mBgPositionImage, null, 0, 0);
+        g2d.drawImage(mBgPositionImage, (int)(leftMarginRatio * getWidth()), (int)(topMarginRatio * getHeight()), (int)(getWidth() - (getWidth() * rightMarginRatio)), (int)(getHeight() - (getHeight() * bottomMarginRatio)), this);
 
         for (MapPosition position : mMapData.getPositionList()) {
             if(position.isHovered() || position.isAvailable() || position.isHighlighted() || position.hasPlayerColor()) {
@@ -163,7 +178,6 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             mMapPopup.draw(g2d);
         }
 
-        System.out.println("millis: "+(System.currentTimeMillis() - startTime));
 
 
     }
