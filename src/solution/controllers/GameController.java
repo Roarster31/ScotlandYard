@@ -24,7 +24,7 @@ public class GameController implements GameControllerInterface {
     private Set<GameUIInterface> listeners;
     private MrXHistoryTracker mrXHistoryTracker;
     private UIPlayer uiPlayer;
-    private final GameRecordTracker gameRecordTracker;
+    private GameRecordTracker gameRecordTracker;
     private boolean replayingGame;
 
     public List<MoveTicket> getMrXHistory() {
@@ -53,6 +53,7 @@ public class GameController implements GameControllerInterface {
     @Override
     public void loadGame(File fileLocation, boolean replay) {
         try {
+            resetGameData();
             model = gameRecordTracker.load(fileLocation, uiPlayer);
 
             model.spectate(mrXHistoryTracker);
@@ -72,6 +73,12 @@ public class GameController implements GameControllerInterface {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void resetGameData() {
+        mrXHistoryTracker = new MrXHistoryTracker();
+        gameRecordTracker = new GameRecordTracker();
+        uiPlayer = new UIPlayer();
     }
 
     @Override
@@ -104,6 +111,7 @@ public class GameController implements GameControllerInterface {
 
     private void setupModel(final int playerCount) {
         try {
+            resetGameData();
             model = new ScotlandYardModel(playerCount-1, getRounds(), "graph.txt");
 
             model.spectate(mrXHistoryTracker);
