@@ -63,7 +63,7 @@ public class MapNodePopup {
             busImage = loadImage(new File(classLoader.getResource("imgs/actual_bus.png").toURI()));
             taxiImage = loadImage(new File(classLoader.getResource("imgs/actual_taxi.png").toURI()));
             trainImage = loadImage(new File(classLoader.getResource("imgs/actual_train.png").toURI()));
-            boatImage = loadImage(new File(classLoader.getResource("imgs/actual_boat.png").toURI()));
+            boatImage = loadImage(new File(classLoader.getResource("imgs/actual_secret.png").toURI()));
         } catch (IOException e) {
             e.printStackTrace();
         } catch (URISyntaxException e) {

@@ -156,6 +156,7 @@ public class SideBarView extends JPanel {
 
         // Draw ticket flicker
         // TODO: sort bug for bottom stack full and multiple scrolls down
+
         TicketFlicker ticketFlicker = new TicketFlicker();
         ticketFlicker.draw(
                 mrXHistory,
