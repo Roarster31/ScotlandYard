@@ -9,6 +9,7 @@ import solution.helpers.PathInterpolator;
 import solution.helpers.RouteHelper;
 import solution.interfaces.GameControllerInterface;
 import solution.interfaces.adapters.GameUIAdapter;
+import solution.views.GameOverView;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -41,7 +42,8 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     private TransportSprite transportSprite;
     private AnimationWorker animationWorker;
     private List<MoveTicket> mCurrentMoveList;
-
+    private boolean mShowGameover = false;
+    private GameOverView mEndOfGame;
 
     public MapView(final GameControllerInterface controllerInterface, final String graphImageMapPath, final MapData mapData) {
         mControllerInterface = controllerInterface;
@@ -79,8 +81,6 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         gameAdapter.onGameModelUpdated(controllerInterface);
 
     }
-
-
     private void setupGraphImage(final String graphImageMapPath) {
         try {
             URL resource = getClass().getClassLoader().getResource(graphImageMapPath);
@@ -145,11 +145,21 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             mMapPopup.draw(g2d);
         }
 
-//        System.out.println("millis: "+(System.currentTimeMillis() - startTime));
+        if(mShowGameover){
+            mEndOfGame.draw(g2d);
+        }
 
 
     }
-
+    public void showGameOverView(){
+        // Set up game over view
+        int width = mGraphImage.getWidth();
+        int height = mGraphImage.getHeight();
+        mEndOfGame = new GameOverView(mControllerInterface, width, height);
+        System.out.println(width + " " + height);
+        mShowGameover = true;
+        repaint();
+    }
     private void createBgPathImage(){
 
         mBgPathImage = new BufferedImage(mImageSize.width, mImageSize.height, BufferedImage.TYPE_INT_ARGB);

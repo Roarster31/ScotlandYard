@@ -22,21 +22,14 @@ public class GameController implements GameControllerInterface {
 
     private ScotlandYardModel model;
     private List<GameUIInterface> listeners;
-    private int mSelectedNode;
     private MrXHistoryTracker mrXHistoryTracker;
     private UIPlayer uiPlayer;
     private final GameRecordTracker gameRecordTracker;
-    private int screenToDisplay = 0; // 0 = intro, 1 = add players, 2 = gameplay, 3 = gameover
 
     public List<MoveTicket> getMrXHistory() {
         return mrXHistoryTracker.getMoveHistory();
     }
 
-    @Override
-    public void manageScreenProgression(int screenKey){
-        screenToDisplay = screenKey;
-
-    }
     @Override
     public void saveGame(File fileLocation) {
         try {

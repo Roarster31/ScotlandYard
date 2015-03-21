@@ -20,9 +20,11 @@ import java.util.List;
 public class GameLayout extends JPanel {
     private MapView mapView;
     private SideBarView sbView;
+    private GameControllerInterface mControllerInterface;
+    GridBagConstraints gbc = new GridBagConstraints();
     public GameLayout(GameControllerInterface controllerInterface, PlayerInfoBar.PlayerInfoBarListener listener) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-
+        mControllerInterface = controllerInterface;
 
         setOpaque(false);
         GameAdapter gameAdapter = new GameAdapter();
@@ -32,7 +34,7 @@ public class GameLayout extends JPanel {
         playerInfoBar.setListener(listener);
         // Set to a percentage layout
         setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
+
         GridBagConstraints gbcInside = new GridBagConstraints();
 
         // Setup the grid
@@ -51,8 +53,8 @@ public class GameLayout extends JPanel {
         mapView = new MapView(controllerInterface, "pirate_map.png", new MapData("custom_data", MapData.DataFormat.CUSTOM));
         mapView.setBorder(new EmptyBorder(20,20,20,20));
 
-        // I DONT WANT TO DO THIS BUT I HAVE TOO
-        mapView.setPreferredSize(new Dimension(800,600));
+        // Set Dimensions
+        mapView.setPreferredSize(new Dimension(800, 600));
         mapView.setMinimumSize(new Dimension(800,600));
 
 
@@ -93,10 +95,10 @@ public class GameLayout extends JPanel {
         gameAdapter.onGameModelUpdated(controllerInterface);
 
     }
+
     class GameAdapter extends GameUIAdapter {
         @Override
         public void onGameModelUpdated(GameControllerInterface controllerInterface) {
-            System.out.println("Change has been made\n\n\n");
             sbView.update();
             if(!controllerInterface.isGameOver()) {
                 System.out.println("It is " + ColourHelper.toString(controllerInterface.getCurrentPlayer()) + "'s turn");
@@ -106,6 +108,8 @@ public class GameLayout extends JPanel {
                     winningPlayers.add(ColourHelper.toString(winningColour));
                 }
                 System.out.println("Gameover! " + StringUtils.join(winningPlayers, ", ") + " won!");
+                mapView.showGameOverView();
+
             }
         }
     }
