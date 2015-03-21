@@ -7,12 +7,13 @@ import solution.interfaces.adapters.GameUIAdapter;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.net.URL;
 
 /**
  * Created by benallen on 18/03/15.
  */
 public class ScreenView extends JPanel {
+
+    enum Screen {INTRO, ADD_PLAYER, GAME_PLAY, GAME_OVER, LOADING}
     private final GameControllerInterface mControllerInterface;
 
     private GridBagConstraints mGridLayout = null;
@@ -20,41 +21,41 @@ public class ScreenView extends JPanel {
     class GameAdapter extends GameUIAdapter {
         @Override
         public void showGameInterface() {
-            callScreen(2);
+            callScreen(Screen.GAME_PLAY);
         }
     }
     public ScreenView(final GameControllerInterface controllerInterface) {
         setOpaque(false);
         mControllerInterface = controllerInterface;
         controllerInterface.addUpdateListener(new GameAdapter());
-        callScreen(0);
+        callScreen(Screen.INTRO);
 
     }
-    public void callScreen(final int screenToDisplay){
-        manageScreens(4);
+    public void callScreen(final Screen screenToDisplay){
+        manageScreens(Screen.LOADING);
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 manageScreens(screenToDisplay);
             }
         });
     }
-    private void manageScreens(int screenToDisplay){
+    private void manageScreens(Screen screenToDisplay){
         clearScreen();
         setupScreen();
-        switch (screenToDisplay){  // 0 = intro, 1 = add players, 2 = gameplay, 3 = gameover
-            case 0:
+        switch (screenToDisplay){
+            case INTRO:
                 showIntroView();
                 break;
-            case 1:
+            case ADD_PLAYER:
                 showPlayerAddView();
                 break;
-            case 2:
+            case GAME_PLAY:
                 showGameView();
                 break;
-            case 3:
+            case GAME_OVER:
                 showGameOverView();
                 break;
-            case 4:
+            case LOADING:
                 showLoadingView();
                 break;
         }
@@ -66,7 +67,7 @@ public class ScreenView extends JPanel {
         GameLayout gameLayout = new GameLayout(mControllerInterface, new PlayerInfoBar.PlayerInfoBarListener(){
             @Override
             public void onMenuBtnPress() {
-                callScreen(0);
+                callScreen(Screen.INTRO);
             }
             @Override
             public void onSaveBtnPress() {
@@ -86,7 +87,7 @@ public class ScreenView extends JPanel {
         introView.setListener(new IntroView.IntroViewListener(){
             @Override
             public void onPlayBtnPress() {
-                callScreen(1);
+                callScreen(Screen.ADD_PLAYER);
             }
             @Override
             public void onLoadBtnPress() { showLoadOptions(); }
@@ -186,7 +187,7 @@ public class ScreenView extends JPanel {
                     null,
                     options,
                     options[0]);
-            callScreen(2);
+            callScreen(Screen.GAME_PLAY);
             mControllerInterface.loadGame(file, response == JOptionPane.YES_OPTION);
 
         } else {
