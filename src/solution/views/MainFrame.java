@@ -1,8 +1,6 @@
 package solution.views;
 
-import solution.Constants;
 import solution.interfaces.GameControllerInterface;
-import solution.interfaces.adapters.GameUIAdapter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,12 +18,14 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private static final String COMMAND_LOAD = "load";
     private static final String COMMAND_SAVE = "save";
+    private final GameControllerInterface mControllerInterface;
     ScreenView mainScreen;
     private GridBagConstraints mGridLayout = null;
 
     public MainFrame(final GameControllerInterface controllerInterface) {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
+        mControllerInterface = controllerInterface;
         mainScreen = new ScreenView(controllerInterface);
 
         // Setup screen
@@ -125,7 +125,7 @@ public class MainFrame extends JFrame implements ActionListener {
                         options,
                         options[0]);
 
-                //mControllerInterface.loadGame(file, response == JOptionPane.YES_OPTION);
+                mControllerInterface.loadGame(file, response == JOptionPane.YES_OPTION);
 
             } else {
                 System.out.println("Open command cancelled by user.");
@@ -137,7 +137,7 @@ public class MainFrame extends JFrame implements ActionListener {
                 File file = fc.getSelectedFile();
                 //This is where a real application would open the file.
                 System.out.println("Saving: " + file.getName() + ".");
-                //mControllerInterface.saveGame(file);
+                mControllerInterface.saveGame(file);
             } else {
                 System.out.println("Save command cancelled by user.");
             }

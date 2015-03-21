@@ -13,6 +13,12 @@ import java.io.File;
  */
 public class ScreenView extends JPanel {
 
+    private GameLayout gameLayout;
+    private IntroView introView;
+    private PlayerAddView playerAddView;
+    private GameOverView endOfGame;
+    private LoadingView loadingView;
+
     enum Screen {INTRO, ADD_PLAYER, GAME_PLAY, GAME_OVER, LOADING}
     private final GameControllerInterface mControllerInterface;
 
@@ -64,7 +70,11 @@ public class ScreenView extends JPanel {
 
     private void showGameView() {
         System.out.println("Showing Game View");
-        GameLayout gameLayout = new GameLayout(mControllerInterface, new PlayerInfoBar.PlayerInfoBarListener(){
+        if(gameLayout != null){
+            remove(gameLayout);
+            gameLayout = null;
+        }
+        gameLayout = new GameLayout(mControllerInterface, new PlayerInfoBar.PlayerInfoBarListener(){
             @Override
             public void onMenuBtnPress() {
                 callScreen(Screen.INTRO);
@@ -83,7 +93,11 @@ public class ScreenView extends JPanel {
     }
     public void showIntroView(){
         System.out.println("Showing Intro Screen");
-        IntroView introView = new IntroView();
+        if(introView != null){
+            remove(introView);
+            introView = null;
+        }
+        introView = new IntroView();
         introView.setListener(new IntroView.IntroViewListener(){
             @Override
             public void onPlayBtnPress() {
@@ -97,13 +111,21 @@ public class ScreenView extends JPanel {
     }
     public void showLoadingView(){
         System.out.println("Showing Loading View");
-        LoadingView loadingView = new LoadingView();
+        if(loadingView != null){
+            remove(loadingView);
+            loadingView = null;
+        }
+        loadingView = new LoadingView();
         add(loadingView, mGridLayout);
     }
     public void showPlayerAddView(){
         System.out.println("Showing Add Player View");
         // Set up player add view
-        PlayerAddView playerAddView = new PlayerAddView(Constants.MIN_PLAYERS, Constants.MAX_PLAYERS);
+        if(playerAddView != null){
+            remove(playerAddView);
+            playerAddView = null;
+        }
+        playerAddView = new PlayerAddView(Constants.MIN_PLAYERS, Constants.MAX_PLAYERS);
 
         playerAddView.setListener(new PlayerAddView.PlayerCountListener() {
             @Override
@@ -115,7 +137,11 @@ public class ScreenView extends JPanel {
     }
     public void showGameOverView(){
         // Set up game over view
-        GameOverView endOfGame = new GameOverView(mControllerInterface);
+        if(endOfGame != null){
+            remove(endOfGame);
+            endOfGame = null;
+        }
+        endOfGame = new GameOverView(mControllerInterface);
         endOfGame.setPreferredSize(new Dimension(1000, 800));
         endOfGame.setOpaque(false);
         endOfGame.setVisible(false);
@@ -158,7 +184,7 @@ public class ScreenView extends JPanel {
             File file = fc.getSelectedFile();
             //This is where a real application would open the file.
             System.out.println("Saving: " + file.getName() + ".");
-            //mControllerInterface.saveGame(file);
+            mControllerInterface.saveGame(file);
         } else {
             System.out.println("Save command cancelled by user.");
         }
@@ -187,7 +213,6 @@ public class ScreenView extends JPanel {
                     null,
                     options,
                     options[0]);
-            callScreen(Screen.GAME_PLAY);
             mControllerInterface.loadGame(file, response == JOptionPane.YES_OPTION);
 
         } else {

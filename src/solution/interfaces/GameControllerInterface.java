@@ -12,6 +12,7 @@ import java.util.Set;
  */
 public interface GameControllerInterface {
     public void addUpdateListener(GameUIInterface listener);
+    public void removeUpdateListener(GameUIInterface mListener);
 
     public Colour getCurrentPlayer();
     public Map<Ticket,Integer> getPlayerTickets(Colour currentPlayer);
@@ -19,8 +20,10 @@ public interface GameControllerInterface {
     List<MoveTicket> getValidSingleMovesAtLocation(Colour currentPlayer, int location);
     List<MoveTicket> getValidSecondMovesAtLocation(Colour currentPlayer, int location, Ticket firstTicket);
     public int getCurrentPlayerRealPosition();
-
     public void notifyAllPlayersAdded(final int count);
+
+    public void notifyMapLoaded();
+    public void notifyMoveAnimationFinished();
     public void notifyMoveSelected(final Move move);
     public List<MoveTicket> getMrXHistory();
     public void saveGame(File fileLocation);
@@ -33,4 +36,5 @@ public interface GameControllerInterface {
     List<Edge<Integer, Route>> getGraphRoutes();
 
     public int getPlayerFacadePosition(Colour colour);
+
 }

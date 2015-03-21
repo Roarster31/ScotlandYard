@@ -41,13 +41,14 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     private TransportSprite transportSprite;
     private AnimationWorker animationWorker;
     private List<MoveTicket> mCurrentMoveList;
+    private boolean hasPainted;
+    private GameAdapter mListener;
 
 
     public MapView(final GameControllerInterface controllerInterface, final String graphImageMapPath, final MapData mapData) {
         mControllerInterface = controllerInterface;
         mMapData = mapData;
-        GameAdapter gameAdapter = new GameAdapter();
-        mControllerInterface.addUpdateListener(gameAdapter);
+
         transform = new AffineTransform();
         inverseTransform = new AffineTransform();
         animationWorker = new AnimationWorker(this);
@@ -76,10 +77,26 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
 
         });
 
-        gameAdapter.onGameModelUpdated(controllerInterface);
 
     }
 
+    public void removeNotify() {
+        super.removeNotify();
+
+        mControllerInterface.removeUpdateListener(mListener);
+        // Remove internal "registered things"
+    }
+
+    @Override
+    public void addNotify() {
+        super.addNotify();
+
+        mListener = new GameAdapter();
+        mControllerInterface.addUpdateListener(mListener);
+        mListener.onGameModelUpdated(mControllerInterface);
+
+
+    }
 
     private void setupGraphImage(final String graphImageMapPath) {
         try {
@@ -145,9 +162,19 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             mMapPopup.draw(g2d);
         }
 
+        onPaintComplete();
+
 //        System.out.println("millis: "+(System.currentTimeMillis() - startTime));
 
 
+    }
+
+    private void onPaintComplete() {
+        if(!hasPainted){
+            System.out.println("onPaintComplete");
+            hasPainted = true;
+            mControllerInterface.notifyMapLoaded();
+        }
     }
 
     private void createBgPathImage(){
@@ -201,11 +228,11 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         final MoveTicket singleMove = new MoveTicket(currentPlayer, nodeId, ticket);
 
         if (secondMoves != null && firstMove != null) {
-            animateMove(firstMove, singleMove);
+            mControllerInterface.notifyMoveSelected(new MoveDouble(mControllerInterface.getCurrentPlayer(), firstMove, singleMove));
             firstMove = null;
             secondMoves = null;
         } else {
-            animateMove(singleMove, null);
+            mControllerInterface.notifyMoveSelected(singleMove);
         }
 
         mMapPopup.reset();
@@ -292,13 +319,13 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
                                 transportSprite = null;
                                 secondMoves = null;
                                 MapView.this.firstMove = null;
-                                mControllerInterface.notifyMoveSelected(new MoveDouble(mControllerInterface.getCurrentPlayer(), firstMove, secondMove));
+                                mControllerInterface.notifyMoveAnimationFinished();
                             }
                         });
 
                     } else {
                         transportSprite = null;
-                        mControllerInterface.notifyMoveSelected(firstMove);
+                        mControllerInterface.notifyMoveAnimationFinished();
                     }
 
                 }
@@ -386,6 +413,11 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         @Override
         public void mouseClicked(MouseEvent e) {
             Point2D transformedPoint = inverseTransform.transform(new Point2D.Double(e.getX(), e.getY()), null);
+
+            if(transportSprite != null){
+                //return, because we're animating
+                return;
+            }
 
             final boolean popupClicked = mMapPopup != null && mMapPopup.onClick((int) transformedPoint.getX(), (int) transformedPoint.getY());
             if (!popupClicked) {
@@ -528,6 +560,11 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             }
 
             repaint();
+        }
+
+        @Override
+        public void animateMove(MoveTicket firstMove, MoveTicket secondMove) {
+            MapView.this.animateMove(firstMove, secondMove);
         }
     }
 

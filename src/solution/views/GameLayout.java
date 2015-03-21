@@ -105,6 +105,7 @@ public class GameLayout extends JPanel {
                     winningPlayers.add(ColourHelper.toString(winningColour));
                 }
                 System.out.println("Gameover! " + StringUtils.join(winningPlayers, ", ") + " won!");
+                controllerInterface.isGameOver();
             }
         }
     }

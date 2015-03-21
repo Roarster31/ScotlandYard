@@ -1,5 +1,6 @@
 package solution.interfaces.adapters;
 
+import scotlandyard.MoveTicket;
 import solution.interfaces.GameControllerInterface;
 import solution.interfaces.GameUIInterface;
 
@@ -14,6 +15,11 @@ public class GameUIAdapter implements GameUIInterface {
 
     @Override
     public void onGameModelUpdated(GameControllerInterface controllerInterface) {
+
+    }
+
+    @Override
+    public void animateMove(MoveTicket firstMove, MoveTicket secondMove) {
 
     }
 }

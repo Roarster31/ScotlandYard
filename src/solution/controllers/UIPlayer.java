@@ -15,14 +15,16 @@ public class UIPlayer implements Player {
         this.mPendingMove = pendingMove;
     }
 
+
     @Override
     public Move notify(int location, List<Move> list) {
-        for(Move move : list){
-            if(move.equals(mPendingMove)){
-                return move;
+
+            for (Move move : list) {
+                if (move.equals(mPendingMove)) {
+                    return move;
+                }
             }
-        }
-        System.err.println("Something's gone wrong (with null move)");
-        return null;
+            System.err.println("Something's gone wrong (with null move)");
+            return null;
     }
 }

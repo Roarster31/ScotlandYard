@@ -68,7 +68,7 @@ public class GameRecordTracker implements Spectator {
 
     }
 
-    public ScotlandYardModel load(File fileLocation, Player uiPlayer, boolean replay) throws IOException {
+    public ScotlandYardModel load(File fileLocation, Player uiPlayer) throws IOException {
 
         String input = StringUtils.join(Files.readAllLines(fileLocation.toPath()), "");
 
@@ -96,19 +96,13 @@ public class GameRecordTracker implements Spectator {
         }
 
 
-        final PlayerSpoofer playerSpoofer = new PlayerSpoofer(uiPlayer, loadData.getMovesList());
-
         for(Colour colour : loadData.getColourList()){
-            model.join(playerSpoofer, colour, loadData.getStartPositions().get(colour), startingTickets.get(colour));
+            model.join(uiPlayer, colour, loadData.getStartPositions().get(colour), startingTickets.get(colour));
         }
 
         track(model);
 
-        if(!replay) {
-            while(hasNextMove()){
-                playNextMove();
-            }
-        }
+
 
         return model;
 
@@ -179,47 +173,19 @@ public class GameRecordTracker implements Spectator {
     }
 
 
-    public void playNextMove(){
-        if(hasNextMove()) {
-            mModel.turn();
-            mCurrentPosInQueue++;
-        }
-    }
+    public Move getCurrentMove(){
 
-    public boolean hasNextMove(){
-        return mCurrentPosInQueue < mQueuedMoves.length;
-    }
-
-    class PlayerSpoofer implements Player {
-
-        private final ArrayList<Move> playerMoveList;
-        private final Player mRealPlayer;
-        private int count = 0;
-
-        public PlayerSpoofer(Player realPlayer, Move[] movesList) {
-            mRealPlayer = realPlayer;
-            playerMoveList = new ArrayList<Move>();
-            for(Move move : movesList){
-                playerMoveList.add(move);
-            }
-        }
-
-        @Override
-        public Move notify(int location, List<Move> list) {
-            if(count < playerMoveList.size()) {
-                Move move = playerMoveList.get(count);
-                if(move != null) {
-                    count++;
-                    System.out.println("mCurrentPosInQueue: "+mCurrentPosInQueue+" move: "+move);
-                    return move;
-                }
-            }
-            final Move move = mRealPlayer.notify(location, list);
-            System.out.println("fallback mCurrentPosInQueue: "+mCurrentPosInQueue+" move: "+move);
+        if(mQueuedMoves != null && mCurrentPosInQueue < mQueuedMoves.length){
+            Move move = mQueuedMoves[mCurrentPosInQueue];
             return move;
         }
-
+        return null;
     }
+
+    public void nextMove(){
+        mCurrentPosInQueue++;
+    }
+
 
     @Override
     public void notify(Move move) {

@@ -21,12 +21,13 @@ import java.util.*;
 public class GameController implements GameControllerInterface {
 
     private ScotlandYardModel model;
-    private List<GameUIInterface> listeners;
+    private Set<GameUIInterface> listeners;
     private int mSelectedNode;
     private MrXHistoryTracker mrXHistoryTracker;
     private UIPlayer uiPlayer;
     private final GameRecordTracker gameRecordTracker;
     private int screenToDisplay = 0; // 0 = intro, 1 = add players, 2 = gameplay, 3 = gameover
+    private boolean replayingGame;
 
     public List<MoveTicket> getMrXHistory() {
         return mrXHistoryTracker.getMoveHistory();
@@ -59,36 +60,22 @@ public class GameController implements GameControllerInterface {
     @Override
     public void loadGame(File fileLocation, boolean replay) {
         try {
-            model = gameRecordTracker.load(fileLocation, uiPlayer, replay);
+            model = gameRecordTracker.load(fileLocation, uiPlayer);
 
             model.spectate(mrXHistoryTracker);
 
-            if(replay){
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        while(gameRecordTracker.hasNextMove()){
+            replayingGame = replay;
 
-                            try {
-                                Thread.sleep(2000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
+            notifyModelUpdated();
 
-                            gameRecordTracker.playNextMove();
-
-                            notifyModelUpdated();
-
-
-                        }
-                    }
-                }).start();
+            if(!replay) {
+                tryNextTrackerMove();
             }
 
-            //parts of the ui rely on the model being created so this has to
-            //come after setupModel
-            listeners.get(0).showGameInterface();
-            notifyModelUpdated();
+            for(GameUIInterface uiInterface : listeners){
+                uiInterface.showGameInterface();
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -105,14 +92,22 @@ public class GameController implements GameControllerInterface {
     }
 
     public GameController(){
-        listeners = new ArrayList<GameUIInterface>();
+        listeners = new HashSet<GameUIInterface>();
         mrXHistoryTracker = new MrXHistoryTracker();
-        uiPlayer = new UIPlayer();
         gameRecordTracker = new GameRecordTracker();
+        uiPlayer = new UIPlayer();
     }
     public void addUpdateListener(GameUIInterface listener){
         listeners.add(listener);
     }
+
+    public void removeUpdateListener(GameUIInterface listener){
+        listeners.remove(listener);
+    }
+
+
+
+
 
     private void setupModel(final int playerCount) {
         try {
@@ -186,14 +181,69 @@ public class GameController implements GameControllerInterface {
     }
 
     @Override
+    public void notifyMapLoaded() {
+        if(gameRecordTracker.getCurrentMove() != null && replayingGame) {
+            tryNextTrackerMove();
+        }
+    }
+
+    private void tryNextTrackerMove() {
+        Move currentMove = gameRecordTracker.getCurrentMove();
+        if(currentMove != null){
+                if(replayingGame){
+                    notifyMoveSelected(currentMove);
+                }else{
+                    uiPlayer.setPendingMove(currentMove);
+                    model.turn();
+                    gameRecordTracker.nextMove();
+                    tryNextTrackerMove();
+                }
+        }else{
+            replayingGame = false;
+        }
+    }
+
+    @Override
     public void notifyMoveSelected(Move move) {
         uiPlayer.setPendingMove(move);
-        model.turn();
-        notifyModelUpdated();
 
-        // Is the game over?
-        if(isGameOver()){
-            System.out.printf("The game is over ):");
+        notifyAnimateMove(move);
+
+
+    }
+
+    private void notifyAnimateMove(Move move) {
+        MoveTicket firstMove = null;
+        MoveTicket secondMove = null;
+
+        if(move instanceof MoveTicket){
+            firstMove = (MoveTicket) move;
+        }else if(move instanceof MoveDouble){
+            firstMove = (MoveTicket) ((MoveDouble)move).moves.get(0);
+            secondMove = (MoveTicket) ((MoveDouble)move).moves.get(1);
+        }
+
+        for(GameUIInterface gameUIInterface : listeners){
+            gameUIInterface.animateMove(firstMove, secondMove);
+        }
+    }
+
+    @Override
+    public void notifyMoveAnimationFinished() {
+
+        model.turn();
+
+
+            notifyModelUpdated();
+
+            // Is the game over?
+            if(isGameOver()){
+                System.out.printf("The game is over ):");
+            }
+
+        if(gameRecordTracker.getCurrentMove() != null && replayingGame){
+            gameRecordTracker.nextMove();
+            tryNextTrackerMove();
         }
     }
 
