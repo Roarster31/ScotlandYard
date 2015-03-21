@@ -2,7 +2,6 @@ package solution.Models;
 
 import scotlandyard.*;
 import solution.Constants;
-import solution.PlayerHolder;
 import solution.helpers.GraphHelper;
 
 import java.io.IOException;

@@ -1,1 +1,0 @@
-{"mPathNodeList":[{"id":1,"x":636,"y":368,"radius":10.0},{"id":2,"x":670,"y":521,"radius":10.0}],"mPathEdgeList":[{"mPathNode1":{"id":1,"x":636,"y":368,"radius":10.0},"mPathNode2":{"id":2,"x":670,"y":521,"radius":10.0}}]}
