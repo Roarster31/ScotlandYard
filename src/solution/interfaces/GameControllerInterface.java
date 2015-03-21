@@ -31,4 +31,6 @@ public interface GameControllerInterface {
     public void manageScreenProgression(int screenKey);
 
     List<Edge<Integer, Route>> getGraphRoutes();
+
+    public int getPlayerFacadePosition(Colour colour);
 }

@@ -99,6 +99,11 @@ public class GameController implements GameControllerInterface {
         return model.getGraph().getEdges();
     }
 
+    @Override
+    public int getPlayerFacadePosition(Colour colour) {
+        return model.getPlayerLocation(colour);
+    }
+
     public GameController(){
         listeners = new ArrayList<GameUIInterface>();
         mrXHistoryTracker = new MrXHistoryTracker();
@@ -130,7 +135,7 @@ public class GameController implements GameControllerInterface {
 
     private void notifyModelUpdated() {
         for(GameUIInterface gameInterface : listeners) {
-            gameInterface.onGameModelUpdated(model);
+            gameInterface.onGameModelUpdated(this);
         }
     }
 
@@ -169,21 +174,11 @@ public class GameController implements GameControllerInterface {
 
         //parts of the ui rely on the model being created so this has to
         //come after setupModel
-        listeners.get(0).showGameInterface();
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                //SUPERHAAAACK  --- so lazy
-                try {
-                    Thread.sleep(4000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                notifyModelUpdated();
-            }
-        }).start();
-        notifyModelUpdated();
+        for(GameUIInterface uiInterface : listeners){
+            uiInterface.showGameInterface();
+        }
+
     }
 
     @Override

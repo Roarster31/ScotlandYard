@@ -3,7 +3,6 @@ package solution.views;
 import com.sun.deploy.util.StringUtils;
 import scotlandyard.Colour;
 import solution.Models.MapData;
-import solution.Models.ScotlandYardModel;
 import solution.helpers.ColourHelper;
 import solution.interfaces.GameControllerInterface;
 import solution.interfaces.adapters.GameUIAdapter;
@@ -12,8 +11,6 @@ import solution.views.map.MapView;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
-import java.io.File;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +25,8 @@ public class GameLayout extends JPanel {
 
 
         setOpaque(false);
-        controllerInterface.addUpdateListener(new GameAdapter());
+        GameAdapter gameAdapter = new GameAdapter();
+        controllerInterface.addUpdateListener(gameAdapter);
 
         PlayerInfoBar playerInfoBar = new PlayerInfoBar(controllerInterface);
         playerInfoBar.setListener(listener);
@@ -91,17 +89,20 @@ public class GameLayout extends JPanel {
         gbc.gridy = 1;
         gbc.weighty = 10;
         add(playerInfoBar, gbc);
+
+        gameAdapter.onGameModelUpdated(controllerInterface);
+
     }
     class GameAdapter extends GameUIAdapter {
         @Override
-        public void onGameModelUpdated(ScotlandYardModel model) {
+        public void onGameModelUpdated(GameControllerInterface controllerInterface) {
             System.out.println("Change has been made\n\n\n");
             sbView.update();
-            if(!model.isGameOver()) {
-                System.out.println("It is " + ColourHelper.toString(model.getCurrentPlayer()) + "'s turn");
+            if(!controllerInterface.isGameOver()) {
+                System.out.println("It is " + ColourHelper.toString(controllerInterface.getCurrentPlayer()) + "'s turn");
             }else{
                 List<String> winningPlayers = new ArrayList<String>();
-                for(Colour winningColour : model.getWinningPlayers()){
+                for(Colour winningColour : controllerInterface.getWinningPlayers()){
                     winningPlayers.add(ColourHelper.toString(winningColour));
                 }
                 System.out.println("Gameover! " + StringUtils.join(winningPlayers, ", ") + " won!");

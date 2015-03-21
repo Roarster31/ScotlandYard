@@ -3,7 +3,6 @@ package solution.views.map;
 import scotlandyard.*;
 import solution.Constants;
 import solution.Models.MapData;
-import solution.Models.ScotlandYardModel;
 import solution.development.models.ViewRoute;
 import solution.helpers.ColourHelper;
 import solution.helpers.PathInterpolator;
@@ -44,10 +43,11 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     private List<MoveTicket> mCurrentMoveList;
 
 
-    public MapView(final GameControllerInterface gameController, final String graphImageMapPath, final MapData mapData) {
-        mControllerInterface = gameController;
+    public MapView(final GameControllerInterface controllerInterface, final String graphImageMapPath, final MapData mapData) {
+        mControllerInterface = controllerInterface;
         mMapData = mapData;
-        mControllerInterface.addUpdateListener(new GameAdapter());
+        GameAdapter gameAdapter = new GameAdapter();
+        mControllerInterface.addUpdateListener(gameAdapter);
         transform = new AffineTransform();
         inverseTransform = new AffineTransform();
         animationWorker = new AnimationWorker(this);
@@ -75,6 +75,9 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             }
 
         });
+
+        gameAdapter.onGameModelUpdated(controllerInterface);
+
     }
 
 
@@ -457,18 +460,18 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
 
     class GameAdapter extends GameUIAdapter {
         @Override
-        public void onGameModelUpdated(ScotlandYardModel model) {
+        public void onGameModelUpdated(GameControllerInterface controllerInterface) {
 
 
-            if (!model.isGameOver()) {
+            if (!mControllerInterface.isGameOver()) {
 
                 for(MapPosition mapPosition : mMapData.getPositionList()){
                     mapPosition.setPlayerColor(null);
                 }
                 int currentPlayerLocation = mControllerInterface.getCurrentPlayerRealPosition();
                 MapPosition currentPlayerPosition = null;
-                for (Colour colour : model.getPlayers()) {
-                    int location = model.getPlayerLocation(colour);
+                for (Colour colour : mControllerInterface.getPlayerList()) {
+                    int location = mControllerInterface.getPlayerFacadePosition(colour);
                     if(colour == Constants.MR_X_COLOUR && mControllerInterface.getCurrentPlayer() == Constants.MR_X_COLOUR){
                         location = currentPlayerLocation;
                     }
@@ -519,7 +522,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
                         }
                     });
                 }
-                final Colour currentPlayer = model.getCurrentPlayer();
+                final Colour currentPlayer = mControllerInterface.getCurrentPlayer();
 
                 showValidMoves(mControllerInterface.getValidSingleMovesAtLocation(currentPlayer, currentPlayerLocation), currentPlayerLocation);
             }

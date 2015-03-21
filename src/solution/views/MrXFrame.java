@@ -1,19 +1,12 @@
 package solution.views;
 
-import scotlandyard.MoveTicket;
-import solution.Models.ScotlandYardModel;
-import solution.helpers.TicketHelper;
 import solution.interfaces.GameControllerInterface;
 import solution.interfaces.adapters.GameUIAdapter;
 
 import javax.swing.*;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.io.File;
 import java.net.URL;
-import java.util.List;
 
 /**
  * Created by benallen on 12/03/15.
@@ -22,8 +15,11 @@ public class MrXFrame extends JPanel {
     GameControllerInterface mControllerInterface;
     public MrXFrame(GameControllerInterface controllerInterface) {
         mControllerInterface = controllerInterface;
-        controllerInterface.addUpdateListener(new GameAdapter());
+        GameAdapter gameAdapter = new GameAdapter();
+        controllerInterface.addUpdateListener(gameAdapter);
         createFrame();
+        gameAdapter.onGameModelUpdated(controllerInterface);
+
     }
 
     private void createFrame() {
@@ -57,34 +53,15 @@ public class MrXFrame extends JPanel {
         add(roundContainer, gbc);
 
 
-//        Box vertBox = Box.createVerticalBox();
-//
-//
-//        List<MoveTicket> moveHistory = controllerInterface.getMrXHistory();
-//        for(int i = 0; i < moveHistory.size(); i++){
-//            MoveTicket currentMove = moveHistory.get(i);
-//            JPanel panelDisplay = new JPanel();
-//            panelDisplay.setOpaque(false);
-//
-//            JLabel moveDetails = new JLabel();
-//
-//            // Find the number in
-//            moveDetails.setIcon(TicketHelper.ticketToImg(currentMove.ticket));
-//
-//            moveDetails.setForeground(Color.WHITE);
-//            panelDisplay.add(moveDetails);
-//            gbc.gridx = i + 1;
-//            vertBox.add(panelDisplay, gbc);
-//        }
-//        add(vertBox, gbc);
         setBackground(Color.BLACK);
         setOpaque(false);
         setVisible(true);
+
     }
 
     class GameAdapter extends GameUIAdapter {
         @Override
-        public void onGameModelUpdated(ScotlandYardModel model) {
+        public void onGameModelUpdated(GameControllerInterface controllerInterface) {
             removeAll();
             createFrame();
         }

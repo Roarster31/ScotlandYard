@@ -2,7 +2,6 @@ package solution.views;
 
 import scotlandyard.Colour;
 import solution.Constants;
-import solution.Models.ScotlandYardModel;
 import solution.helpers.ColourHelper;
 import solution.helpers.SoundHelper;
 import solution.interfaces.GameControllerInterface;
@@ -10,13 +9,9 @@ import solution.interfaces.adapters.GameUIAdapter;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -42,7 +37,8 @@ public class PlayerInfoBar extends JPanel {
         setPreferredSize(new Dimension(800, 170));
         setOpaque(false);
         mGameControllerInterface = controllerInterface;
-        controllerInterface.addUpdateListener(new GameAdapter());
+        GameAdapter gameAdapter = new GameAdapter();
+        controllerInterface.addUpdateListener(gameAdapter);
 
         URL resource = getClass().getClassLoader().getResource("ui" + File.separator + "options.png");
         try {
@@ -57,6 +53,8 @@ public class PlayerInfoBar extends JPanel {
         updatePlayerInfoImgs();
         addMouseListener(new LocalMouseAdapter());
         addMouseMotionListener(new LocalMouseAdapter());
+
+        gameAdapter.onGameModelUpdated(controllerInterface);
 
 
     }
@@ -117,7 +115,7 @@ public class PlayerInfoBar extends JPanel {
 
     class GameAdapter extends GameUIAdapter {
         @Override
-        public void onGameModelUpdated(ScotlandYardModel model) {
+        public void onGameModelUpdated(GameControllerInterface controllerInterface) {
             removeAll();
             updatePlayerInfoImgs();
             repaint();

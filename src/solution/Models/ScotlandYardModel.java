@@ -28,7 +28,7 @@ public class ScotlandYardModel extends ScotlandYard {
         mGraphName = graphFileName;
         mRounds = rounds;
         final URL resource = getClass().getClassLoader().getResource(graphFileName);
-        final String filename = URLDecoder.decode(resource.getFile());
+        final String filename = URLDecoder.decode(resource.getFile(), "UTF-8");
         mGraph = new ScotlandYardGraphReader().readGraph(filename);
         mNumberOfDetectives = numberOfDetectives;
         mPlayerMap = new HashMap<Colour, PlayerHolder>();

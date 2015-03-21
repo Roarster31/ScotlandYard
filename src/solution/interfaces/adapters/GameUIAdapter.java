@@ -1,6 +1,6 @@
 package solution.interfaces.adapters;
 
-import solution.Models.ScotlandYardModel;
+import solution.interfaces.GameControllerInterface;
 import solution.interfaces.GameUIInterface;
 
 /**
@@ -13,7 +13,7 @@ public class GameUIAdapter implements GameUIInterface {
     }
 
     @Override
-    public void onGameModelUpdated(ScotlandYardModel model) {
+    public void onGameModelUpdated(GameControllerInterface controllerInterface) {
 
     }
 }
