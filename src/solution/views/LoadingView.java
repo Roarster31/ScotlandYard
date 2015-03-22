@@ -17,6 +17,10 @@ public class LoadingView extends JPanel {
 
     public LoadingView(){
         setOpaque(false);
+        loadInAssets();
+    }
+
+    private void loadInAssets() {
         URL resource1 = getClass().getClassLoader().getResource("ui" + File.separator + "loadingimg.png");
         try {
             mLoadingImg = ImageIO.read(new File(resource1.toURI()));
@@ -26,6 +30,7 @@ public class LoadingView extends JPanel {
             e.printStackTrace();
         }
     }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);

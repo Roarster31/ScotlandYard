@@ -21,41 +21,40 @@ public class GameLayout extends JPanel {
     private MapView mapView;
     private SideBarView sbView;
     private GameControllerInterface mControllerInterface;
-    GridBagConstraints gbc = new GridBagConstraints();
+    GridBagConstraints mGridLayout;
+
     public GameLayout(GameControllerInterface controllerInterface, PlayerInfoBar.PlayerInfoBarListener listener) {
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        mControllerInterface = controllerInterface;
-
+        // Set Opaque
         setOpaque(false);
-        GameAdapter gameAdapter = new GameAdapter();
-        controllerInterface.addUpdateListener(gameAdapter);
 
-        PlayerInfoBar playerInfoBar = new PlayerInfoBar(controllerInterface);
-        playerInfoBar.setListener(listener);
         // Set to a percentage layout
         setLayout(new GridBagLayout());
 
-        GridBagConstraints gbcInside = new GridBagConstraints();
+        // Set the listeners
+        GameAdapter gameAdapter = new GameAdapter();
+        controllerInterface.addUpdateListener(gameAdapter);
+        mControllerInterface = controllerInterface;
 
-        // Setup the grid
-        gbc.gridy = 0;
-        gbc.gridx = 0;
-        gbc.gridwidth = gbc.gridheight = 1;
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.anchor = GridBagConstraints.NORTHWEST;
+        // Create a new bar
+        PlayerInfoBar playerInfoBar = new PlayerInfoBar(controllerInterface);
+        playerInfoBar.setListener(listener);
+
+        // Setup the global grid
+        setupGridLayout();
 
         // Set up map Panel
         JPanel mapViewContainer = new JPanel();
         mapViewContainer.setLayout(new BorderLayout());
         mapViewContainer.setOpaque(false);
         mapViewContainer.setBorder(new EmptyBorder(20,20,20,20));
+
         // Load in the map view
         mapView = new MapView(controllerInterface, "pirate_map.png", new MapData("custom_data", MapData.DataFormat.CUSTOM));
         mapView.setBorder(new EmptyBorder(20,20,20,20));
 
         // Set Dimensions
         mapView.setPreferredSize(new Dimension(800, 600));
-        mapView.setMinimumSize(new Dimension(800,600));
+        mapView.setMinimumSize(new Dimension(800, 600));
 
 
         // Load in the map
@@ -66,43 +65,69 @@ public class GameLayout extends JPanel {
         subLayout.setLayout(new GridBagLayout());
         subLayout.setOpaque(false);
 
+        // Set up the sidebar
         sbView = new SideBarView(controllerInterface);
 
+        // Setup Layout
+        GridBagConstraints gbcInside = setupInsideGrid(mapViewContainer, subLayout);
+
+        // Add in the map
+        subLayout.add(mapViewContainer, gbcInside);
+
+        // change current grid position
+        gbcInside.gridx = 1;
+        gbcInside.weightx = 30;
+
+
+        // Add in the sidebar
+        subLayout.add(sbView, gbcInside);
+
+        // Add in the sublayout
+        add(subLayout, mGridLayout);
+
+        // Add in the player bar
+        mGridLayout.gridy = 1;
+        mGridLayout.weighty = 10;
+        add(playerInfoBar, mGridLayout);
+
+        gameAdapter.onGameModelUpdated(controllerInterface);
+    }
+
+    private GridBagConstraints setupInsideGrid(JPanel mapViewContainer, JPanel subLayout) {
+        GridBagConstraints gbcInside = new GridBagConstraints();
         gbcInside.gridy = gbcInside.gridx = 0;
         gbcInside.weightx = 70;
         gbcInside.weighty = 100;
-        subLayout.add(mapViewContainer, gbcInside);
 
-        gbcInside.gridx = 1;
-        gbcInside.weightx = 30;
-        subLayout.add(sbView, gbcInside);
+        return gbcInside;
+    }
 
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.weightx = 100;
-        gbc.weighty = 90;
-
-        add(subLayout, gbc);
-        gbc.gridy = 1;
-        gbc.weighty = 10;
-        add(playerInfoBar, gbc);
-
-        gameAdapter.onGameModelUpdated(controllerInterface);
-
+    private void setupGridLayout() {
+        mGridLayout = new GridBagConstraints();
+        mGridLayout.gridy = mGridLayout.gridx = 0;
+        mGridLayout.gridwidth = mGridLayout.gridheight = 1;
+        mGridLayout.fill = GridBagConstraints.BOTH;
+        mGridLayout.anchor = GridBagConstraints.NORTHWEST;
+        mGridLayout.weightx = 100;
+        mGridLayout.weighty = 90;
     }
 
     class GameAdapter extends GameUIAdapter {
         @Override
         public void onGameModelUpdated(GameControllerInterface controllerInterface) {
-            System.out.println("Change has been made\n\n\n");
+
+            // If the game is over then show the gameover menu
             if(!controllerInterface.isGameOver()) {
                 System.out.println("It is " + ColourHelper.toString(controllerInterface.getCurrentPlayer()) + "'s turn");
             }else{
+                // Print out the winning players in the log
                 List<String> winningPlayers = new ArrayList<String>();
                 for(Colour winningColour : controllerInterface.getWinningPlayers()){
                     winningPlayers.add(ColourHelper.toString(winningColour));
                 }
                 System.out.println("Gameover! " + StringUtils.join(winningPlayers, ", ") + " won!");
+
+                // Show the game over view
                 mapView.showGameOverView();
 
             }

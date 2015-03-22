@@ -17,7 +17,6 @@ public class ScreenView extends JPanel {
     private IntroView introView;
     private PlayerAddView playerAddView;
     private LoadingView loadingView;
-
     enum Screen {INTRO, ADD_PLAYER, GAME_PLAY, LOADING}
     private final GameControllerInterface mControllerInterface;
 
@@ -31,12 +30,17 @@ public class ScreenView extends JPanel {
     }
     public ScreenView(final GameControllerInterface controllerInterface) {
         setOpaque(false);
+
+        // Set listeners
         mControllerInterface = controllerInterface;
         controllerInterface.addUpdateListener(new GameAdapter());
+
+        // When game starts call the Intro Screen
         callScreen(Screen.INTRO);
 
     }
     public void callScreen(final Screen screenToDisplay){
+        // First call the loading screen and then when the new screen is ready call that
         manageScreens(Screen.LOADING);
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -71,10 +75,14 @@ public class ScreenView extends JPanel {
 
     private void showGameView() {
         System.out.println("Showing Game View");
+
+        // Reset the game layout
         if(gameLayout != null){
             remove(gameLayout);
             gameLayout = null;
         }
+
+        // Create a new layout and pass the listener in through the constructor
         gameLayout = new GameLayout(mControllerInterface, new PlayerInfoBar.PlayerInfoBarListener(){
             @Override
             public void onMenuBtnPress() {
@@ -85,6 +93,8 @@ public class ScreenView extends JPanel {
                 showSaveOptions();
             }
         });
+
+        // Add it the screen
         add(gameLayout, mGridLayout);
     }
 
@@ -94,10 +104,13 @@ public class ScreenView extends JPanel {
     }
     public void showIntroView(){
         System.out.println("Showing Intro Screen");
+
+        // Reset the intro view
         if(introView != null){
             remove(introView);
             introView = null;
         }
+        // Create a new intro view and set its listener
         introView = new IntroView();
         introView.setListener(new IntroView.IntroViewListener(){
             @Override
@@ -107,33 +120,47 @@ public class ScreenView extends JPanel {
             @Override
             public void onLoadBtnPress() { showLoadOptions(); }
         });
+
+        // Add it to the screen
         add(introView, mGridLayout);
 
     }
     public void showLoadingView(){
         System.out.println("Showing Loading View");
+
+        // Reset the loading view
         if(loadingView != null){
             remove(loadingView);
             loadingView = null;
         }
+
+        // Create a new loading view
         loadingView = new LoadingView();
+
+        // Add it to the screen
         add(loadingView, mGridLayout);
     }
     public void showPlayerAddView(){
         System.out.println("Showing Add Player View");
-        // Set up player add view
+
+        // Set up player add view but reset it
         if(playerAddView != null){
             remove(playerAddView);
             playerAddView = null;
         }
+
+        // Create the new Player view
         playerAddView = new PlayerAddView(Constants.MIN_PLAYERS, Constants.MAX_PLAYERS);
 
+        // Set in the listener
         playerAddView.setListener(new PlayerAddView.PlayerCountListener() {
             @Override
             public void onPlayerCountDecided(int count) {
                 mControllerInterface.notifyAllPlayersAdded(count);
             }
         });
+
+        // Add it to the screen
         add(playerAddView, mGridLayout);
     }
     private void setupScreen(){
@@ -144,6 +171,7 @@ public class ScreenView extends JPanel {
         int width = gd.getDisplayMode().getWidth();
         int height = gd.getDisplayMode().getHeight();
 
+        // Set the preferred Size
         setPreferredSize(new Dimension(width, height));
 
         // Form the layout
@@ -171,6 +199,7 @@ public class ScreenView extends JPanel {
         fc.setCurrentDirectory(workingDirectory);
         int returnVal = fc.showSaveDialog(getParent());
 
+        // If approval then get the file selected
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             //This is where a real application would open the file.
@@ -181,6 +210,8 @@ public class ScreenView extends JPanel {
         }
     }
     private void showLoadOptions(){
+
+        // Create the file chooser
         final JFileChooser fc = new JFileChooser();
         File workingDirectory = new File(System.getProperty("user.dir"));
         fc.setCurrentDirectory(workingDirectory);

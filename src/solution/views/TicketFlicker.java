@@ -132,6 +132,8 @@ public class TicketFlicker {
         workingTicket.draw(g2d);
     }
     public List<MoveTicket> createExampleTickets(){
+
+        // Temporary tickets for testing
         List<MoveTicket> mrXHistory = new ArrayList<MoveTicket>();
 
         MoveTicket m = new MoveTicket(Colour.Black, 10, Ticket.DoubleMove);
