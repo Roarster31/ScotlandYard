@@ -21,7 +21,7 @@ public class PlayerAddView extends JPanel {
 
     private final int mMinPlayers;
     private final int mMaxPlayers;
-    private final Font mFont;
+    private Font mFont;
     private BufferedImage mDoneImg;
     private BufferedImage mLogoImg = null;
     private BufferedImage mPlayerAddImg = null;
@@ -38,6 +38,8 @@ public class PlayerAddView extends JPanel {
         @Override
         public void mouseClicked(MouseEvent e) {
             super.mouseClicked(e);
+
+            // If click and the max players hasnt been reached then increment the counter
             if (mPlusBtn.contains(e.getX(), e.getY()) ) {
                 if(numberOfPlayers < mMaxPlayers){
                     SoundHelper.itemClick();
@@ -47,6 +49,7 @@ public class PlayerAddView extends JPanel {
                 }
                 repaint();
             }
+            // If click and the min number of players hasnt been reached then decrement the counter
             if (mMinusBtn.contains(e.getX(), e.getY()) ) {
                 if(numberOfPlayers > mMinPlayers){
                     SoundHelper.itemClick();
@@ -56,6 +59,7 @@ public class PlayerAddView extends JPanel {
                 }
                 repaint();
             }
+            // If confirm button click then change slides
             if (mConfirmBtn.contains(e.getX(), e.getY()) ) {
                 SoundHelper.itemClick();
                 mListener.onPlayerCountDecided(numberOfPlayers);
@@ -65,28 +69,46 @@ public class PlayerAddView extends JPanel {
         @Override
         public void mouseMoved(MouseEvent e) {
             super.mouseMoved(e);
+
+            // If overlay on buttons the produce rectangle
             if (mPlusBtn.contains(e.getX(), e.getY()) ) {
+
+                // Set variables
                 mShowPlusOverlay = true;
                 mShowMinusOverlay = false;
                 mShowConfirmOverlay = false;
+
+                // Call sound
                 SoundHelper.itemHover();
                 repaint();
             }else if (mMinusBtn.contains(e.getX(), e.getY()) ) {
+
+                // Set variables
                 mShowMinusOverlay = true;
                 mShowPlusOverlay = false;
                 mShowConfirmOverlay = false;
+
+                // Call sound
                 SoundHelper.itemHover();
                 repaint();
             }else if (mConfirmBtn.contains(e.getX(), e.getY()) ) {
+
+                // Set variables
                 mShowMinusOverlay = false;
                 mShowPlusOverlay = false;
                 mShowConfirmOverlay = true;
+
+                // Call sound
                 SoundHelper.itemHover();
                 repaint();
             } else {
+
+                // Set variables
                 mShowPlusOverlay = false;
                 mShowMinusOverlay = false;
                 mShowConfirmOverlay = false;
+
+                // Call sound
                 SoundHelper.itemDeHover();
                 repaint();
             }
@@ -97,22 +119,24 @@ public class PlayerAddView extends JPanel {
     }
     public PlayerAddView(final int minPlayers, final int maxPlayers) {
         setOpaque(false);
+
+        /// Set number of players
         mMinPlayers = minPlayers;
         mMaxPlayers = maxPlayers;
         numberOfPlayers = minPlayers;
-        URL resource1 = getClass().getClassLoader().getResource("ui" + File.separator + "logo.png");
-        URL resource2 = getClass().getClassLoader().getResource("ui" + File.separator + "nop.png");
-        URL resource3 = getClass().getClassLoader().getResource("ui" + File.separator + "donebtn.png");
-        try {
-            mLogoImg = ImageIO.read(new File(resource1.toURI()));
-            mPlayerAddImg = ImageIO.read(new File(resource2.toURI()));
-            mDoneImg = ImageIO.read(new File(resource3.toURI()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
 
+        // Load in assets
+        loadInImages();
+
+        // Load in the font
+        loadInFont();
+
+        // Add listeners
+        addMouseListener(new LocalMouseAdapter());
+        addMouseMotionListener(new LocalMouseAdapter());
+    }
+
+    private void loadInFont() {
         InputStream is = getClass().getClassLoader().getResourceAsStream("ui" + File.separator + "snellroundhand.ttf");
         Font font = null;
         try {
@@ -123,10 +147,21 @@ public class PlayerAddView extends JPanel {
             e.printStackTrace();
         }
         mFont = font;
+    }
 
-
-        addMouseListener(new LocalMouseAdapter());
-        addMouseMotionListener(new LocalMouseAdapter());
+    private void loadInImages() {
+        URL resourceLogo = getClass().getClassLoader().getResource("ui" + File.separator + "logo.png");
+        URL resourceNoP = getClass().getClassLoader().getResource("ui" + File.separator + "nop.png");
+        URL resourceDoneBtn = getClass().getClassLoader().getResource("ui" + File.separator + "donebtn.png");
+        try {
+            mLogoImg = ImageIO.read(new File(resourceLogo.toURI()));
+            mPlayerAddImg = ImageIO.read(new File(resourceNoP.toURI()));
+            mDoneImg = ImageIO.read(new File(resourceDoneBtn.toURI()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -136,11 +171,17 @@ public class PlayerAddView extends JPanel {
         g2d.setRenderingHint(
                 RenderingHints.KEY_TEXT_ANTIALIASING,
                 RenderingHints.VALUE_TEXT_ANTIALIAS_GASP);
+
+        // Get width and height
         int w = getWidth();
         int h = getHeight();
+
+        // Draw assets
         g2d.drawImage(mLogoImg, null, (w / 2) - (mLogoImg.getWidth() / 2), (h / 4) - (mLogoImg.getHeight() / 2));
         g2d.drawImage(mPlayerAddImg, null, (w / 2) - (mPlayerAddImg.getWidth() / 2), ((2*h) / 4));
         g2d.drawImage(mDoneImg, null, (w / 2) - (mDoneImg.getWidth() / 2), ((3*h) / 4));
+
+        // Set up rectangle overlays
         mPlusBtn = new Ellipse2D.Double(
                 (w / 2) + 123,
                 ((2*h) / 4) + 119,
@@ -160,7 +201,7 @@ public class PlayerAddView extends JPanel {
                 mDoneImg.getHeight()
         );
 
-        // Current number of players
+        // Draw player counter
         String numberOfPlayersStr = String.valueOf(numberOfPlayers);
         g2d.setFont(mFont.deriveFont(80f));
         FontMetrics fm = g.getFontMetrics();
@@ -168,7 +209,7 @@ public class PlayerAddView extends JPanel {
         g2d.drawString(numberOfPlayersStr, (w / 2) - (wText / 2), ((2*h) / 4) + 160);
 
 
-        // Button Hover
+        // Draw rectangle overlays
         Color color = new Color(0, 0, 0, 0.1f);
         g2d.setPaint(color);
         if(mShowMinusOverlay){

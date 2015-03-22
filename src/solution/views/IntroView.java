@@ -31,25 +31,32 @@ public class IntroView extends JPanel {
 
     public IntroView(){
         setOpaque(false);
-        URL resource1 = getClass().getClassLoader().getResource("ui" + File.separator + "logo.png");
-        URL resource2 = getClass().getClassLoader().getResource("ui" + File.separator + "playbtn.png");
-        URL resource3 = getClass().getClassLoader().getResource("ui" + File.separator + "loadbtn.png");
+
+        // Load in the resources
+        loadInResources();
+
+        // Make the rectangles so they cannot be null
+        mPlayBtn = new Rectangle(0,0,0,0);
+        mLoadBtn = new Rectangle(0,0,0,0);
+
+        // Add in some listeners
+        addMouseMotionListener(new LocalMouseAdapter());
+        addMouseListener(new LocalMouseAdapter());
+    }
+
+    private void loadInResources() {
+        URL resourceLogo = getClass().getClassLoader().getResource("ui" + File.separator + "logo.png");
+        URL resourcePlayBtn = getClass().getClassLoader().getResource("ui" + File.separator + "playbtn.png");
+        URL resourceLoadBtn = getClass().getClassLoader().getResource("ui" + File.separator + "loadbtn.png");
         try {
-            mLogoImg = ImageIO.read(new File(resource1.toURI()));
-            mPlayImg = ImageIO.read(new File(resource2.toURI()));
-            mLoadImg = ImageIO.read(new File(resource3.toURI()));
+            mLogoImg = ImageIO.read(new File(resourceLogo.toURI()));
+            mPlayImg = ImageIO.read(new File(resourcePlayBtn.toURI()));
+            mLoadImg = ImageIO.read(new File(resourceLoadBtn.toURI()));
         } catch (IOException e) {
             e.printStackTrace();
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
-        int w = getWidth();
-        int h = getHeight();
-        mPlayBtn = new Rectangle(0,0,0,0);
-        mLoadBtn = new Rectangle(0,0,0,0);
-
-        addMouseMotionListener(new LocalMouseAdapter());
-        addMouseListener(new LocalMouseAdapter());
     }
 
     @Override
@@ -59,12 +66,17 @@ public class IntroView extends JPanel {
         g2d.setRenderingHint(
                 RenderingHints.KEY_TEXT_ANTIALIASING,
                 RenderingHints.VALUE_TEXT_ANTIALIAS_GASP);
+
+        // Get frame details
         int w = getWidth();
         int h = getHeight();
+
+        // Draw the resources
         g2d.drawImage(mLogoImg, null, (w / 2) - (mLogoImg.getWidth() / 2), (h / 4) - (mLogoImg.getHeight() / 2));
         g2d.drawImage(mPlayImg, null, (w / 2) - (mPlayImg.getWidth() / 2), ((2*h) / 4) - (mPlayImg.getHeight() / 2));
         g2d.drawImage(mLoadImg, null, (w / 2) - (mLoadImg.getWidth() / 2), ((3*h) / 4) - (mLoadImg.getHeight() / 2));
 
+        // Create the overlays
         mPlayBtn = new Rectangle(
                 (w / 2) - (mPlayImg.getWidth() / 2),
                 ((2*h) / 4) - (mPlayImg.getHeight() / 2),
@@ -78,7 +90,7 @@ public class IntroView extends JPanel {
                 mLoadImg.getHeight()
         );
 
-        // Button Hover
+        // Fill in rectangles if button hover
         Color color = new Color(0, 0, 0, 0.1f);
         g2d.setPaint(color);
         if(mShowPlayOverlay){
@@ -100,6 +112,8 @@ public class IntroView extends JPanel {
         @Override
         public void mouseClicked(MouseEvent e) {
             super.mouseClicked(e);
+
+            // If click call interface functions
             if (mPlayBtn.contains(e.getX(), e.getY()) ) {
                 SoundHelper.itemClick();
                 mListener.onPlayBtnPress();
@@ -115,6 +129,8 @@ public class IntroView extends JPanel {
         @Override
         public void mouseMoved(MouseEvent e) {
             super.mouseMoved(e);
+
+            // If overlay then show the rectangles and repaint
             if (mPlayBtn.contains(e.getX(), e.getY()) ) {
                 mShowPlayOverlay = true;
                 mShowLoadOverlay = false;

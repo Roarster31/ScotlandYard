@@ -25,6 +25,7 @@ public class MainFrame extends JFrame implements ActionListener {
     public MainFrame(final GameControllerInterface controllerInterface) {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
+        // Set controllers and interfaces
         mControllerInterface = controllerInterface;
         mainScreen = new ScreenView(controllerInterface);
 
@@ -67,36 +68,6 @@ public class MainFrame extends JFrame implements ActionListener {
         repaint();
         setVisible(true);
 
-    }
-    private void createMenu() {
-        //Where the GUI is created:
-        JMenuBar menuBar;
-        JMenu menu;
-        JMenuItem menuItem;
-
-        menuBar = new JMenuBar();
-
-        menu = new JMenu("File");
-        menu.setMnemonic(KeyEvent.VK_F);
-        menuBar.add(menu);
-
-        menuItem = new JMenuItem("Load game",
-                KeyEvent.VK_L);
-        menuItem.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_L, InputEvent.ALT_MASK));
-        menuItem.setActionCommand(COMMAND_LOAD);
-        menuItem.addActionListener(this);
-        menu.add(menuItem);
-
-        menuItem = new JMenuItem("Save game",
-                KeyEvent.VK_S);
-        menuItem.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_S, InputEvent.ALT_MASK));
-        menuItem.setActionCommand(COMMAND_SAVE);
-        menuItem.addActionListener(this);
-        menu.add(menuItem);
-
-        setJMenuBar(menuBar);
     }
 
     @Override

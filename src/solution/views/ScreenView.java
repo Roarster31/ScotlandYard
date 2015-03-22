@@ -16,7 +16,6 @@ public class ScreenView extends JPanel {
     private GameLayout gameLayout;
     private IntroView introView;
     private PlayerAddView playerAddView;
-    private GameOverView endOfGame;
     private LoadingView loadingView;
 
     enum Screen {INTRO, ADD_PLAYER, GAME_PLAY, LOADING}
@@ -46,8 +45,11 @@ public class ScreenView extends JPanel {
         });
     }
     private void manageScreens(Screen screenToDisplay){
+        // Clear and setup screens
         clearScreen();
         setupScreen();
+
+        // Call the screen depending on preference
         switch (screenToDisplay){
             case INTRO:
                 showIntroView();
@@ -62,6 +64,8 @@ public class ScreenView extends JPanel {
                 showLoadingView();
                 break;
         }
+
+        // End setup
         endSetupScreen();
     }
 

@@ -11,6 +11,7 @@ import java.net.URL;
 /**
  * Created by benallen on 12/03/15.
  */
+@Deprecated
 public class MrXFrame extends JPanel {
     GameControllerInterface mControllerInterface;
     public MrXFrame(GameControllerInterface controllerInterface) {
@@ -24,11 +25,6 @@ public class MrXFrame extends JPanel {
 
     private void createFrame() {
         setVisible(false);
-
-//        setMinimumSize(new Dimension(200,100));
-//        setPreferredSize(new Dimension(200,100));
-//        setMaximumSize(new Dimension(200,100));
-//        setSize(new Dimension(200,100));
 
         GameControllerInterface controllerInterface = mControllerInterface;
         setLayout(new GridBagLayout());

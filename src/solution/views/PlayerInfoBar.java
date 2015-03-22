@@ -31,24 +31,21 @@ public class PlayerInfoBar extends JPanel {
     private boolean mMenuBtnOverlay = false;
     private PlayerInfoBarListener mListener;
     private PlayerInfoImg[] playerColumns = new PlayerInfoImg[Constants.MAX_PLAYERS];
+    private final float mXScaler = 1.2f;
+    private final float mYScaler = 1.2f;
 
     public PlayerInfoBar(GameControllerInterface controllerInterface) {
-        setMinimumSize(new Dimension(800, 170));
-        setPreferredSize(new Dimension(800, 170));
-        setOpaque(false);
+
+        // Style form
+        styleForm();
+
+        // Set adapters and listeners
         mGameControllerInterface = controllerInterface;
         GameAdapter gameAdapter = new GameAdapter();
         controllerInterface.addUpdateListener(gameAdapter);
 
-        URL resource = getClass().getClassLoader().getResource("ui" + File.separator + "options.png");
-        try {
-            menuOptionsImg = ImageIO.read(new File(resource.toURI()));
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
+        // Load in assets
+        loadAssets();
 
         updatePlayerInfoImgs();
         addMouseListener(new LocalMouseAdapter());
@@ -58,6 +55,24 @@ public class PlayerInfoBar extends JPanel {
 
 
     }
+
+    private void styleForm() {
+        setMinimumSize(new Dimension(800, 170));
+        setPreferredSize(new Dimension(800, 170));
+        setOpaque(false);
+    }
+
+    private void loadAssets() {
+        URL resource = getClass().getClassLoader().getResource("ui" + File.separator + "options.png");
+        try {
+            menuOptionsImg = ImageIO.read(new File(resource.toURI()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void updatePlayerInfoImgs(){
         // get players info
         List<Colour> allPlayers = mGameControllerInterface.getPlayerList();
@@ -78,6 +93,8 @@ public class PlayerInfoBar extends JPanel {
         @Override
         public void mouseClicked(MouseEvent e) {
             super.mouseClicked(e);
+
+            // Call functions and call sounds
             if (mMenuBtn.contains(e.getX(), e.getY()) ) {
                 SoundHelper.itemClick();
                 mListener.onMenuBtnPress();
@@ -94,6 +111,8 @@ public class PlayerInfoBar extends JPanel {
         @Override
         public void mouseMoved(MouseEvent e) {
             super.mouseMoved(e);
+
+            // Draw overlays and call sound
             if (mSaveBtn.contains(e.getX(), e.getY()) ) {
                 mSaveBtnOverlay = true;
                 mMenuBtnOverlay = false;
@@ -129,6 +148,8 @@ public class PlayerInfoBar extends JPanel {
         g2d.setRenderingHint(
                 RenderingHints.KEY_TEXT_ANTIALIASING,
                 RenderingHints.VALUE_TEXT_ANTIALIAS_GASP);
+
+        // Draw Menu Option Container
         g2d.drawImage(
                 menuOptionsImg,
                 0,
@@ -136,6 +157,8 @@ public class PlayerInfoBar extends JPanel {
                 menuOptionsImg.getWidth(),
                 menuOptionsImg.getHeight(),
                 this);
+
+        // Draw Buttons
         mMenuBtn = new Rectangle(
                 0,
                 0,
@@ -160,11 +183,17 @@ public class PlayerInfoBar extends JPanel {
             g2d.fill(mMenuBtn);
         }
 
+        // Scale the columns
+        g2d.scale(mXScaler,mYScaler);
 
-        g2d.scale(1.2f,1.2f);
+        // Draw the columns
         for(int i = 0; i < mGameControllerInterface.getPlayerList().size(); i++) {
+
+            // Draw columns offseted from the menu
             playerColumns[i].draw(g2d, i * 160 + 130);
         }
+
+        // Scale back down
         g2d.scale(0.8f,0.8f);
     }
 }
