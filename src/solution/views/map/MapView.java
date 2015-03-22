@@ -132,20 +132,29 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         double leftMarginRatio = ((double)BorderMargins.leftMargin) / 1158.0f;
         double rightMarginRatio = ((double)(BorderMargins.rightMargin + BorderMargins.leftMargin)) / 1158.0f;
 
+        int scaledLeftPos = (int)(leftMarginRatio * getWidth());
+        int scaledTopPos =  (int)(topMarginRatio * getHeight());
+        int scaledWidth = (int)(getWidth() - (getWidth() * rightMarginRatio));
+        int scaledHeight = (int)(getHeight() - (getHeight() * bottomMarginRatio));
+
         g2d.drawImage(mMapImage, 0,0, getWidth(), getHeight(), this);
-        g2d.drawImage(mGraphImage, (int)(leftMarginRatio * getWidth()), (int)(topMarginRatio * getHeight()), (int)(getWidth() - (getWidth() * rightMarginRatio)), (int)(getHeight() - (getHeight() * bottomMarginRatio)), this);
+
+        // Translate everything
+
+        g2d.drawImage(mGraphImage, scaledLeftPos, scaledTopPos, scaledWidth, scaledHeight, this);
+
         try {
             g2d.setTransform(transform.createInverse());
         } catch (NoninvertibleTransformException e) {
             e.printStackTrace();
         }
-
+        g2d.translate(100+scaledLeftPos, 100+ scaledTopPos);
         //
 
         //g2d.fillRect(0,0,mImageSize.width,mImageSize.height);
 
 
-        g2d.drawImage(mBgPathImage, (int)(leftMarginRatio * getWidth()), (int)(topMarginRatio * getHeight()), (int)(getWidth() - (getWidth() * rightMarginRatio)), (int)(getHeight() - (getHeight() * bottomMarginRatio)), this);
+        g2d.drawImage(mBgPathImage, 0, 0, scaledWidth, scaledHeight, this);
 
         for (MapPath mapPath : mMapData.getPathList()) {
             if(mapPath.isAvailable()) {
@@ -160,7 +169,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         }
 
 
-        g2d.drawImage(mBgPositionImage, (int)(leftMarginRatio * getWidth()), (int)(topMarginRatio * getHeight()), (int)(getWidth() - (getWidth() * rightMarginRatio)), (int)(getHeight() - (getHeight() * bottomMarginRatio)), this);
+        g2d.drawImage(mBgPositionImage, 0, 0, scaledWidth, scaledHeight, this);
 
         for (MapPosition position : mMapData.getPositionList()) {
             if(position.isHovered() || position.isAvailable() || position.isHighlighted() || position.hasPlayerColor()) {
