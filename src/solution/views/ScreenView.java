@@ -164,6 +164,8 @@ public class ScreenView extends JPanel {
 
     }
     private void showSaveOptions(){
+
+        // Create the chooser
         final JFileChooser fc = new JFileChooser();
         File workingDirectory = new File(System.getProperty("user.dir"));
         fc.setCurrentDirectory(workingDirectory);

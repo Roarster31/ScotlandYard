@@ -66,12 +66,7 @@ public class GameLayout extends JPanel {
         subLayout.setLayout(new GridBagLayout());
         subLayout.setOpaque(false);
 
-        // Set up mr xs history panel
-        MrXFrame mrXHistoryPanel = new MrXFrame(controllerInterface);
-        mrXHistoryPanel.setLayout(new BoxLayout(mrXHistoryPanel, BoxLayout.Y_AXIS));
-
         sbView = new SideBarView(controllerInterface);
-
 
         gbcInside.gridy = gbcInside.gridx = 0;
         gbcInside.weightx = 70;
