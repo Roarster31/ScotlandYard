@@ -24,6 +24,8 @@ public class SoundHelper {
         URL url2 = SoundHelper.class.getClassLoader().getResource("sound" + File.separator + "click.wav");
         URL url3 = SoundHelper.class.getClassLoader().getResource("sound" + File.separator + "noclick.wav");
         try {
+
+            // Save the input streams into the clips
             AudioInputStream audioInput = AudioSystem.getAudioInputStream(url);
             mSelectClip = AudioSystem.getClip();
             mSelectClip.open(audioInput);

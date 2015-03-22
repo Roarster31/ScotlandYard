@@ -15,6 +15,9 @@ import java.util.HashMap;
  * Created by benallen on 12/03/15.
  */
 public class TicketHelper {
+    /*
+    *    Converts a ticket into a imageIcon
+    */
     public static ImageIcon ticketImgs(Ticket ticketName){
         HashMap<Ticket, String> ticketTypeTo = new HashMap<Ticket, String>(6);
         ticketTypeTo.put(Ticket.Bus, "bus.png");
@@ -31,6 +34,9 @@ public class TicketHelper {
         return ticketIcon;
 
     }
+    /*
+    *    Converts a ticket into a buffered image
+    */
     public static BufferedImage ticketBuffImg(Ticket ticketName){
         HashMap<Ticket, String> ticketTypeTo = new HashMap<Ticket, String>(6);
         ticketTypeTo.put(Ticket.Bus, "busticket.png");

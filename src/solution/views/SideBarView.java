@@ -34,7 +34,6 @@ public class SideBarView extends JPanel {
     private GameControllerInterface mControllerInterface;
     private BufferedImage mRoundHolderImg;
     private BufferedImage mCurrentPlayerImg;
-    private AffineTransform transform;
     private Font mFont;
     private final int SIDEBAR_WIDTH = 216;
     private final int SIDEBAR_HEIGHT = 800;
@@ -46,21 +45,59 @@ public class SideBarView extends JPanel {
     private final int mTicketStackIncrLimit = 150;
 
     SideBarView(GameControllerInterface controllerInterface){
-        transform = new AffineTransform();
         mControllerInterface = controllerInterface;
 
         controllerInterface.addUpdateListener(new GameAdapter());
 
         // Set up sizing
-        setPreferredSize(new Dimension(SIDEBAR_WIDTH, SIDEBAR_HEIGHT));
-        setMaximumSize(new Dimension(SIDEBAR_WIDTH,SIDEBAR_HEIGHT));
-        setMinimumSize(new Dimension(SIDEBAR_WIDTH,SIDEBAR_HEIGHT));
-        setSize(new Dimension(SIDEBAR_WIDTH,SIDEBAR_HEIGHT));
+        setSizing();
 
         // All tickets
         ticketToImg = new HashMap<Ticket, BufferedImage>(5);
 
         // Load in the images
+        loadInImages();
+            
+        // Load up an image for each ticket
+        Ticket[] ticketTypes = {Ticket.Bus, Ticket.Underground, Ticket.Taxi, Ticket.DoubleMove, Ticket.SecretMove};
+        for (int i = 0; i < 5; i++){
+            ticketToImg.put(ticketTypes[i], TicketHelper.ticketBuffImg(ticketTypes[i]));
+        }
+
+        // Grab the font in
+        loadInFont();
+
+        // Styling
+        setOpaque(false);
+
+        // Add the listeners
+        addMouseListener(new LocalMouseAdapter());
+        addMouseMotionListener(new LocalMouseAdapter());
+        addMouseWheelListener(new LocalScrollAdapter());
+
+    }
+
+    private void setSizing() {
+        setPreferredSize(new Dimension(SIDEBAR_WIDTH, SIDEBAR_HEIGHT));
+        setMaximumSize(new Dimension(SIDEBAR_WIDTH,SIDEBAR_HEIGHT));
+        setMinimumSize(new Dimension(SIDEBAR_WIDTH,SIDEBAR_HEIGHT));
+        setSize(new Dimension(SIDEBAR_WIDTH,SIDEBAR_HEIGHT));
+    }
+
+    private void loadInFont() {
+        InputStream is = getClass().getClassLoader().getResourceAsStream("ui" + File.separator + "snellroundhand.ttf");
+        Font font = null;
+        try {
+            font = Font.createFont(Font.TRUETYPE_FONT, is);
+        } catch (FontFormatException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        mFont = font;
+    }
+
+    private void loadInImages() {
         URL resource1 = getClass().getClassLoader().getResource("ui" + File.separator + "roundholder.png");
         URL resource2 = getClass().getClassLoader().getResource("ui" + File.separator + "currentPlayer.png");
         URL resource3 = getClass().getClassLoader().getResource("ui" + File.separator + "paper.png");
@@ -73,34 +110,8 @@ public class SideBarView extends JPanel {
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
-            
-        // Load up an image for each ticket
-        Ticket[] ticketTypes = {Ticket.Bus, Ticket.Underground, Ticket.Taxi, Ticket.DoubleMove, Ticket.SecretMove};
-        for (int i = 0; i < 5; i++){
-            ticketToImg.put(ticketTypes[i], TicketHelper.ticketBuffImg(ticketTypes[i]));
-        }
-
-        // Grab the font in
-        InputStream is = getClass().getClassLoader().getResourceAsStream("ui" + File.separator + "snellroundhand.ttf");
-        Font font = null;
-        try {
-            font = Font.createFont(Font.TRUETYPE_FONT, is);
-        } catch (FontFormatException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        mFont = font;
-
-        // Styling
-        setOpaque(false);
-
-        // Add the listeners
-        addMouseListener(new LocalMouseAdapter());
-        addMouseMotionListener(new LocalMouseAdapter());
-        addMouseWheelListener(new LocalScrollAdapter());
-
     }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
