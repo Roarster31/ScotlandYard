@@ -122,6 +122,11 @@ public interface GameControllerInterface {
      */
     public void loadGame(File fileLocation, boolean replay);
 
+    /**
+     *
+     * @return true if Mr X is currently visible
+     */
+    public boolean isMrXVisible();
 
 
     /**

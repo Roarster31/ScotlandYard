@@ -78,6 +78,11 @@ public class GameController implements GameControllerInterface {
         }
     }
 
+    @Override
+    public boolean isMrXVisible() {
+        return model.getRealPlayerLocation(Constants.MR_X_COLOUR) == model.getPlayerLocation(Colour.Black);
+    }
+
     private void resetGameData() {
         mrXHistoryTracker = new MrXHistoryTracker();
         gameRecordTracker = new GameRecordTracker();

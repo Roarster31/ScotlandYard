@@ -575,17 +575,19 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
                 for (MapPosition mapPosition : mMapData.getPositionList()) {
                     mapPosition.setPlayerColor(null);
                 }
-                int currentPlayerLocation = mControllerInterface.getCurrentPlayerRealPosition();
+                int realPlayerLocation = mControllerInterface.getCurrentPlayerRealPosition();
                 MapPosition currentPlayerPosition = null;
                 for (Colour colour : mControllerInterface.getPlayerList()) {
+
                     int location = mControllerInterface.getPlayerVisiblePosition(colour);
-                    if (colour == Constants.MR_X_COLOUR && mControllerInterface.getCurrentPlayer() == Constants.MR_X_COLOUR) {
-                        location = currentPlayerLocation;
+
+                    if (mControllerInterface.getCurrentPlayer() == Constants.MR_X_COLOUR || mControllerInterface.isMrXVisible()) {
+                        location = realPlayerLocation;
                     }
                     System.out.println(ColourHelper.toString(colour) + " @ " + location);
                     for (MapPosition mapPosition : mMapData.getPositionList()) {
 
-                        if (mapPosition.getId() == currentPlayerLocation) {
+                        if (mapPosition.getId() == realPlayerLocation) {
                             currentPlayerPosition = mapPosition;
                         }
 
@@ -630,10 +632,10 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
                 }
                 final Colour currentPlayer = mControllerInterface.getCurrentPlayer();
 
-                List<MoveTicket> validMoves = mControllerInterface.getValidSingleMovesAtLocation(currentPlayer, currentPlayerLocation);
+                List<MoveTicket> validMoves = mControllerInterface.getValidSingleMovesAtLocation(currentPlayer, realPlayerLocation);
 
                 if(validMoves.size() > 0) {
-                    showValidMoves(validMoves, currentPlayerLocation);
+                    showValidMoves(validMoves, realPlayerLocation);
                 }else{
                     showMovePass();
                 }
