@@ -11,6 +11,7 @@ import java.util.LinkedHashSet;
  * This is the view representation of a route along 1 or more DataPaths
  * both ids represent associated DataPosition ids, unordered
  * path describes the entire collection of coordinates from id1 to id2 (or vice versa)
+ * positionList is the list of DataPositions the DataRoute passes through
  **/
 public class ViewRoute {
     public int id1;

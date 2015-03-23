@@ -6,7 +6,7 @@ import scotlandyard.Ticket;
 import java.awt.*;
 
 /**
- * Created by rory on 10/03/15.
+ * This utility class contains a few methods used commonly throughout
  */
 public class ColourHelper {
 

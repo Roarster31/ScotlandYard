@@ -3,7 +3,7 @@ package solution.development.models;
 import java.util.ArrayList;
 
 /**
- * Created by rory on 18/03/15.
+ * A POJO for saving graph data with GSON
  */
 public class DataSave {
     public ArrayList<DataPosition> positionList;

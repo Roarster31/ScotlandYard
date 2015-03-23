@@ -2,6 +2,10 @@ package solution.development;
 
 import java.io.File;
 
+/**
+ * Highway Control is a development tool used to create
+ * new maps and the routes between nodes on the map
+ */
 public class HighwayControl {
 
     public static void main(String[] args) {

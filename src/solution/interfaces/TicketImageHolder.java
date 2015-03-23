@@ -3,9 +3,7 @@ package solution.interfaces;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-/**
- * Created by benallen on 20/03/15.
- */
+
 public class TicketImageHolder {
     private BufferedImage img;
     private int yPos;

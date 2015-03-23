@@ -5,7 +5,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
 /**
- * Created by benallen on 19/03/15.
+ * An implementation of {@link java.awt.event.MouseListener} and {@link java.awt.event.MouseMotionListener} which can be extended to override
+ * desired methods
  */
 public class MouseAdapter implements MouseListener, MouseMotionListener {
     @Override

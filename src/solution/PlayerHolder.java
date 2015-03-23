@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by rory on 03/03/15.
+ * This holds data for a player in one place. Use it instead of separate lists of
+ * attributes for all players
  */
 public class PlayerHolder {
 	private String name;

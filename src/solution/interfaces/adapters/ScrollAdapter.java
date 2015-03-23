@@ -4,7 +4,8 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
 /**
- * Created by benallen on 19/03/15.
+ * An implementation of {@link java.awt.event.MouseWheelListener} which can be extended to override
+ * desired methods
  */
 public class ScrollAdapter implements MouseWheelListener {
     @Override

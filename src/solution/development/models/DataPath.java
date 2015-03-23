@@ -31,8 +31,19 @@ public class DataPath {
         }
         return path;
     }
-    
+
+    /**
+     * This is called when the DataPath is selected by a user, it will
+     * add a point along the path which can be moved later by the user
+     * as a waypoint
+     *
+     * @param x the x position of the click
+     * @param y the y position of the click
+     */
     public void onSelected(int x, int y) {
+
+        //first we check to see whether or not the user is clicking an existing waypoint on our path
+        //if they are, we set that waypoint's index as the currently moving index, movingCoordIndex
         for (int i = 0; i < pathXCoords.length; i++) {
             Rectangle2D.Double rect = new Rectangle2D.Double(pathXCoords[i] - MapCanvas.EDIT_POINT_CIRC_SIZE / 2, pathYCoords[i] - MapCanvas.EDIT_POINT_CIRC_SIZE / 2, MapCanvas.EDIT_POINT_CIRC_SIZE, MapCanvas.EDIT_POINT_CIRC_SIZE);
             if(rect.contains(x,y)){
@@ -41,12 +52,16 @@ public class DataPath {
             }
         }
 
+        //if we're here then we will be adding a new position
         PathIterator iterator = getPath().getPathIterator(null);
 
         float[] prevCoords = null;
 
         movingCoordIndex = 0;
 
+        //we iterate through the path's segments until we find the segment that has been clicked
+        //on each iteration we keep track of the index we're at as we need to know how far along
+        //the path we are in order to insert the new point in the correct position
         while(!iterator.isDone()){
 
             float[] curCoords = new float[2];
@@ -68,6 +83,8 @@ public class DataPath {
             iterator.next();
         }
 
+        //now that we know where to insert the new point we will create a new list
+        //of x and y coordinates and insert the new point in it
         int[] newXCoords = new int[pathXCoords.length+1];
         int[] newYCoords = new int[pathYCoords.length+1];
 
@@ -89,11 +106,21 @@ public class DataPath {
 
     }
 
+    /**
+     *
+     * This updates the x and y coordinates of the selected coordinate
+     *
+     * @param x the x position of the click
+     * @param y the y position of the click
+     */
     public void onPointDrag(int x, int y) {
         pathXCoords[movingCoordIndex] = x;
         pathYCoords[movingCoordIndex] = y;
     }
 
+    /**
+     * Clears the {@link solution.development.models.DataPath#movingCoordIndex}
+     */
     public void onDragStop() {
         movingCoordIndex = -1;
     }

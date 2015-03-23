@@ -6,7 +6,7 @@ import scotlandyard.Player;
 import java.util.List;
 
 /**
- * Created by rory on 11/03/15.
+ * This implementation of Player allows us to feed the model moves
  */
 public class UIPlayer implements Player {
     private Move mPendingMove;
@@ -24,7 +24,6 @@ public class UIPlayer implements Player {
                     return move;
                 }
             }
-            System.err.println("Something's gone wrong (with null move)");
             return null;
     }
 }

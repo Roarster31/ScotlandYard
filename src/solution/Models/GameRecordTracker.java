@@ -12,7 +12,8 @@ import java.nio.file.Files;
 import java.util.*;
 
 /**
- * Created by rory on 12/03/15.
+ * This class tracks the state of the {@link solution.ScotlandYardModel} and keeps track of all moves made.
+ * It can also save this list to file and load it later to be replayed.
  */
 public class GameRecordTracker implements Spectator {
 
@@ -69,7 +70,16 @@ public class GameRecordTracker implements Spectator {
 
     }
 
-    public ScotlandYardModel load(File fileLocation, Player uiPlayer) throws IOException {
+    /**
+     * Loads the specified game file. Once loaded {@link #getCurrentMove()} may be called to get the current move in the queue
+     * and {@link #nextMove()} to increment the queue position by one
+     *
+     * @param fileLocation the game file to load
+     * @param player a {@link scotlandyard.Player} implementation to use when constructing the {@link solution.ScotlandYardModel}
+     * @return this {@link solution.Models.GameRecordTracker}
+     * @throws IOException
+     */
+    public ScotlandYardModel load(File fileLocation, Player player) throws IOException {
 
         String input = StringUtils.join(Files.readAllLines(fileLocation.toPath()), "");
 
@@ -98,7 +108,7 @@ public class GameRecordTracker implements Spectator {
 
 
         for(Colour colour : loadData.getColourList()){
-            model.join(uiPlayer, colour, loadData.getStartPositions().get(colour), startingTickets.get(colour));
+            model.join(player, colour, loadData.getStartPositions().get(colour), startingTickets.get(colour));
         }
 
         track(model);
@@ -174,6 +184,11 @@ public class GameRecordTracker implements Spectator {
     }
 
 
+    /**
+     * Gets the current move in the move queue after loading in a game
+     *
+     * @return the current {@link scotlandyard.Move} in the internal move queue
+     */
     public Move getCurrentMove(){
 
         if(mQueuedMoves != null && mCurrentPosInQueue < mQueuedMoves.length){
@@ -183,6 +198,9 @@ public class GameRecordTracker implements Spectator {
         return null;
     }
 
+    /**
+     * Call this to increment the move queue by one
+     */
     public void nextMove(){
         mCurrentPosInQueue++;
     }
@@ -207,6 +225,10 @@ public class GameRecordTracker implements Spectator {
         }
     }
 
+    /**
+     * This custom serializer allows us to save the {@link scotlandyard.Move}s to file without modifying the {@link scotlandyard.Move}
+     * java files as per spec
+     */
     public class MoveClassAdapter  implements JsonSerializer<Move>, JsonDeserializer<Move> {
         @Override
         public JsonElement serialize(Move src, Type typeOfSrc, JsonSerializationContext context) {

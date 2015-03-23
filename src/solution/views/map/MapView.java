@@ -578,7 +578,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
                 int currentPlayerLocation = mControllerInterface.getCurrentPlayerRealPosition();
                 MapPosition currentPlayerPosition = null;
                 for (Colour colour : mControllerInterface.getPlayerList()) {
-                    int location = mControllerInterface.getPlayerFacadePosition(colour);
+                    int location = mControllerInterface.getPlayerVisiblePosition(colour);
                     if (colour == Constants.MR_X_COLOUR && mControllerInterface.getCurrentPlayer() == Constants.MR_X_COLOUR) {
                         location = currentPlayerLocation;
                     }

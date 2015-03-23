@@ -5,9 +5,10 @@ import solution.interfaces.GameControllerInterface;
 import solution.interfaces.GameUIInterface;
 
 /**
- * Created by rory on 11/03/15.
+ * An implementation of {@link solution.interfaces.GameUIInterface} which can be extended to override
+ * desired methods
  */
-public class GameUIAdapter implements GameUIInterface {
+public abstract class GameUIAdapter implements GameUIInterface {
     @Override
     public void showGameInterface() {
 

@@ -1,16 +1,14 @@
 package solution.helpers;
 
 import com.jhlabs.image.GrayscaleFilter;
-import com.jhlabs.image.HSBAdjustFilter;
 import com.jhlabs.image.RGBAdjustFilter;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
 /**
- * Created by benallen on 19/03/15.
- * Functions used in here were written by a third party and not myself.
- * It uses the filters lib
+ * This utility class uses the com.jhlabs.* package to help tint images
+ * http://www.jhlabs.com/ip/filters/
  */
 public class ColourTintHelper {
 

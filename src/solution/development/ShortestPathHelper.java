@@ -5,11 +5,18 @@ import solution.development.models.DataPosition;
 
 import java.util.ArrayList;
 
-/**
- * Created by rory on 19/03/15.
- */
 public class ShortestPathHelper {
 
+    /**
+     *
+     * This implementation of shortest path algorithm uses a breadth first search to find shortest paths
+     *
+     * @param sourceId the id of the source {@link solution.development.models.DataPosition}
+     * @param targetId the id of the target {@link solution.development.models.DataPosition}
+     * @param dataPositions a list of all {@link solution.development.models.DataPosition}s available to pass through
+     * @param dataPaths a list of all {@link solution.development.models.DataPath}s available to pass along
+     * @return A list of {@link solution.development.models.DataPosition}s through which the shortest path traverses
+     */
     public static ArrayList<DataPosition> shortestPath(final int sourceId, final int targetId, final ArrayList<DataPosition> dataPositions, final ArrayList<DataPath> dataPaths){
 
         ArrayList<SearchHolder> fullList = new ArrayList<SearchHolder>();
@@ -101,6 +108,11 @@ public class ShortestPathHelper {
 
     }
 
+    /**
+     * This small class allows us to hold DataPositions and keep track of the last
+     * {@link solution.development.models.DataPosition} through which we have travelled
+     * á la Dijkstra
+     */
     static class SearchHolder {
 
         public final DataPosition dataPosition;

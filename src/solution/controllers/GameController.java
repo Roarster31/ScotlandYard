@@ -3,6 +3,7 @@ package solution.controllers;
 import scotlandyard.*;
 import solution.Constants;
 import solution.Models.GameRecordTracker;
+import solution.MrXHistoryTracker;
 import solution.ScotlandYardModel;
 import solution.helpers.ColourHelper;
 import solution.helpers.SetupHelper;
@@ -16,7 +17,10 @@ import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
- * Created by rory on 10/03/15.
+ * This represents the controller in our MVC paradigm. It allows the view to retrieve relevant information about the game state
+ * while providing a decoupled environment between the view and controller. To do this we use {@link solution.interfaces.GameControllerInterface}
+ * to communicate to the controller from the view and {@link solution.interfaces.GameUIInterface} to communicate updates to
+ * the views.
  */
 public class GameController implements GameControllerInterface {
 
@@ -36,9 +40,7 @@ public class GameController implements GameControllerInterface {
         uiPlayer = new UIPlayer();
     }
 
-    public List<MoveTicket> getMrXHistory() {
-        return mrXHistoryTracker.getMoveHistory();
-    }
+
     @Override
     public void saveGame(File fileLocation) {
         try {
@@ -49,15 +51,7 @@ public class GameController implements GameControllerInterface {
             e.printStackTrace();
         }
     }
-    @Override
-    public boolean isGameOver(){
-        return model.isGameOver();
-    }
 
-    @Override
-    public Set<Colour> getWinningPlayers() {
-        return model.getWinningPlayers();
-    }
 
     @Override
     public void loadGame(File fileLocation, boolean replay) {
@@ -69,7 +63,7 @@ public class GameController implements GameControllerInterface {
 
             loadState = replay ? LoadState.LOAD_REPLAY : LoadState.LOAD_NO_REPLAY;
 
-            notifyModelUpdated();
+            notifyListenersModelUpdated();
 
             if(!replay) {
                 tryNextTrackerMove();
@@ -92,7 +86,7 @@ public class GameController implements GameControllerInterface {
     }
 
     @Override
-    public int getPlayerFacadePosition(Colour colour) {
+    public int getPlayerVisiblePosition(Colour colour) {
         return model.getPlayerLocation(colour);
     }
 
@@ -104,20 +98,26 @@ public class GameController implements GameControllerInterface {
         listeners.remove(listener);
     }
 
+    /**
+     * Creates and starts a new {@link solution.ScotlandYardModel}
+     *
+     * @param playerCount the number of players to create the {@link solution.ScotlandYardModel} with
+     */
     private void startNewGame(final int playerCount) {
         try {
             resetGameData();
             model = new ScotlandYardModel(playerCount-1, getRounds(), "graph.txt");
 
-            model.spectate(mrXHistoryTracker);
+
 
             ArrayList<Integer> playerLocations = new ArrayList<Integer>();
             int maxNodeNum = model.getGraph().getNodes().size();
-            System.out.println("maxNodeNum = " + maxNodeNum);
             Random random = new Random();
+
+            //adds each player while making sure no two players start on the same location
             for (int i = 0; i < playerCount; i++) {
-                //todo do proper location
                 final Colour colour = ColourHelper.getColour(i);
+
                 int location = random.nextInt(maxNodeNum);
                 while(playerLocations.contains(location)){
                     location = random.nextInt(maxNodeNum);
@@ -127,23 +127,44 @@ public class GameController implements GameControllerInterface {
                 model.join(uiPlayer, colour, location, SetupHelper.getTickets(colour.equals(Constants.MR_X_COLOUR)));
             }
 
+
+            //begin tracking the game
+            model.spectate(mrXHistoryTracker);
             gameRecordTracker.track(model);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
-        notifyModelUpdated();
+        notifyListenersModelUpdated();
     }
 
-    private void notifyModelUpdated() {
+    private void notifyListenersModelUpdated() {
         for(GameUIInterface gameInterface : listeners) {
             gameInterface.onGameModelUpdated(this);
         }
     }
 
+    @Override
+    public boolean isGameOver(){
+        return model.isGameOver();
+    }
+
+    @Override
+    public Set<Colour> getWinningPlayers() {
+        return model.getWinningPlayers();
+    }
+
+    @Override
+    public List<MoveTicket> getMrXHistory() {
+        return mrXHistoryTracker.getMoveHistory();
+    }
+
+    @Override
     public Colour getCurrentPlayer(){
         return model.getCurrentPlayer();
     }
 
+    @Override
     public Map<Ticket, Integer> getPlayerTickets(Colour currentPlayer){
         if(currentPlayer == Constants.MR_X_COLOUR){
             System.out.println();
@@ -158,15 +179,15 @@ public class GameController implements GameControllerInterface {
     }
 
     @Override
-    public List<MoveTicket> getValidSingleMovesAtLocation(Colour currentPlayer, int location) {
-        return model.getAvailableSingleMoves(model.getGraph(), currentPlayer, location, model.getAllPlayerTickets(currentPlayer));
+    public List<MoveTicket> getValidSingleMovesAtLocation(Colour player, int location) {
+        return model.getAvailableSingleMoves(model.getGraph(), player, location, model.getAllPlayerTickets(player));
     }
 
     @Override
-    public List<MoveTicket> getValidSecondMovesAtLocation(Colour currentPlayer, int location, Ticket firstTicket) {
-        Map<Ticket, Integer> playerTickets = new HashMap<Ticket, Integer>(model.getAllPlayerTickets(currentPlayer));
+    public List<MoveTicket> getValidSecondMovesAtLocation(Colour player, int location, Ticket firstTicket) {
+        Map<Ticket, Integer> playerTickets = new HashMap<Ticket, Integer>(model.getAllPlayerTickets(player));
         playerTickets.put(firstTicket, playerTickets.get(firstTicket)-1);
-        return model.getAvailableSingleMoves(model.getGraph(), currentPlayer, location, playerTickets);
+        return model.getAvailableSingleMoves(model.getGraph(), player, location, playerTickets);
     }
 
     @Override
@@ -214,12 +235,12 @@ public class GameController implements GameControllerInterface {
         if(move instanceof MovePass){
             notifyMoveAnimationFinished();
         }else {
-            notifyAnimateMove(move);
+            notifyListenersAnimateMove(move);
         }
 
     }
 
-    private void notifyAnimateMove(Move move) {
+    private void notifyListenersAnimateMove(Move move) {
         MoveTicket firstMove = null;
         MoveTicket secondMove = null;
 
@@ -241,7 +262,7 @@ public class GameController implements GameControllerInterface {
         model.turn();
 
 
-            notifyModelUpdated();
+            notifyListenersModelUpdated();
 
             // Is the game over?
             if(isGameOver()){
@@ -286,27 +307,6 @@ public class GameController implements GameControllerInterface {
 
 
 
-    class MrXHistoryTracker implements Spectator {
 
-        List<MoveTicket> moveHistory;
-
-        public MrXHistoryTracker () {
-            moveHistory = new ArrayList<MoveTicket>();
-        }
-
-        @Override
-        public void notify(Move move) {
-            if(move.colour == Constants.MR_X_COLOUR){
-                if(move instanceof MoveTicket){
-                    moveHistory.add((MoveTicket) move);
-                }
-            }
-        }
-
-        public List<MoveTicket> getMoveHistory() {
-            return moveHistory;
-        }
-
-    }
 
 }

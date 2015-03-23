@@ -3,7 +3,7 @@ package solution;
 import scotlandyard.Colour;
 
 /**
- * Created by rory on 10/03/15!
+ * This file defines some common constants used throughout
  */
 public class Constants {
     public static final Colour MR_X_COLOUR = Colour.Black;

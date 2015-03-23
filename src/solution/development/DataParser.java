@@ -8,7 +8,7 @@ import java.io.*;
 import java.nio.file.Files;
 
 /**
- * Created by rory on 05/03/15.
+ * This class handles loading and saving data for Highway Control
  */
 public class DataParser {
 

@@ -19,12 +19,14 @@ import java.util.ArrayList;
 import java.util.Random;
 
 /**
- * Created by rory on 04/03/15.
+ * This differs from {@link solution.views.map.MapView} in that it is capable of showing
+ * different view types (inclusive of what {@link solution.views.map.MapView} can show)
+ * and is consequently messier
  */
 public class MapCanvas extends JPanel implements MouseListener, MouseMotionListener {
 
-    private static final int POS_CIRC_SIZE = 20;
     public static final int EDIT_POINT_CIRC_SIZE = 8;
+    private static final int POS_CIRC_SIZE = 20;
     private int mouseX;
     private int mouseY;
     private ArrayList<ViewPosition> mViewPositionList;
@@ -66,6 +68,7 @@ public class MapCanvas extends JPanel implements MouseListener, MouseMotionListe
 
         g2d.setColor(Color.DARK_GRAY);
 
+        //if the view is PREVIEW then we show what the map will look like in reality
         if (currentView == ViewType.PREVIEW) {
 
             for (ViewPath viewPath : mViewPathList) {
@@ -78,13 +81,13 @@ public class MapCanvas extends JPanel implements MouseListener, MouseMotionListe
 
                 g2d.setColor(Color.DARK_GRAY);
 
-                int outerRadius = (int) (POS_CIRC_SIZE*1.3f);
+                int outerRadius = (int) (POS_CIRC_SIZE * 1.3f);
                 g2d.fillOval(viewPosition.x - outerRadius / 2, viewPosition.y - outerRadius / 2, outerRadius, outerRadius);
 
                 int segmentAngleSize = (int) (360 / (float) (viewPosition.types.size()));
                 for (int i = 0; i < viewPosition.types.size(); i++) {
                     g2d.setColor(ColourHelper.ticketColour(viewPosition.types.get(i)));
-                    g2d.fillArc(viewPosition.x - POS_CIRC_SIZE / 2, viewPosition.y - POS_CIRC_SIZE / 2, POS_CIRC_SIZE, POS_CIRC_SIZE, i* segmentAngleSize, segmentAngleSize);
+                    g2d.fillArc(viewPosition.x - POS_CIRC_SIZE / 2, viewPosition.y - POS_CIRC_SIZE / 2, POS_CIRC_SIZE, POS_CIRC_SIZE, i * segmentAngleSize, segmentAngleSize);
                 }
 
             }
@@ -98,6 +101,8 @@ public class MapCanvas extends JPanel implements MouseListener, MouseMotionListe
                 g.drawString(nodeName, x, y);
             }
 
+            //if the view is ROUTES then we show all the routes of length longer than two nodes
+            //so that the user can look for issues and fix them appropriately
         } else if (currentView == ViewType.ROUTES) {
 
             g2d.setStroke(new BasicStroke(3f));
@@ -107,9 +112,9 @@ public class MapCanvas extends JPanel implements MouseListener, MouseMotionListe
             for (ViewRoute viewRoute : mViewRouteList) {
                 //we don't care about single path routes
 //                if (viewRoute.positionList.size() > 2) {
-                    g2d.setColor(new Color(randomColour.nextFloat(), randomColour.nextFloat(), randomColour.nextFloat()));
+                g2d.setColor(new Color(randomColour.nextFloat(), randomColour.nextFloat(), randomColour.nextFloat()));
 
-                    g2d.draw(viewRoute.path);
+                g2d.draw(viewRoute.path);
 //                }
             }
 
@@ -155,6 +160,8 @@ public class MapCanvas extends JPanel implements MouseListener, MouseMotionListe
                 g.drawString(nodeName, x, y);
             }
 
+            //the last view type, NODES is shown when the user wants to view and possibly edit
+            //the position of nodes and the paths between them
         } else if (currentView == ViewType.NODES) {
 
             g2d.setStroke(new BasicStroke(3f));
@@ -168,10 +175,10 @@ public class MapCanvas extends JPanel implements MouseListener, MouseMotionListe
 
             for (DataPath dataPath : mPathList) {
 
-                if(hoveringpath != null && hoveringpath.id1 == dataPath.id1 && hoveringpath.id2 == dataPath.id2) {
+                if (hoveringpath != null && hoveringpath.id1 == dataPath.id1 && hoveringpath.id2 == dataPath.id2) {
                     g2d.setStroke(new BasicStroke(4f));
                     g2d.setColor(Color.CYAN);
-                }else if (selectedPath != null && selectedPath.id1 == dataPath.id1 && selectedPath.id2 == dataPath.id2) {
+                } else if (selectedPath != null && selectedPath.id1 == dataPath.id1 && selectedPath.id2 == dataPath.id2) {
                     g2d.setStroke(new BasicStroke(4f));
                     g2d.setColor(Color.CYAN);
                 } else {
@@ -180,7 +187,7 @@ public class MapCanvas extends JPanel implements MouseListener, MouseMotionListe
                 }
 
                 for (int i = 0; i < dataPath.pathXCoords.length; i++) {
-                    g2d.fillOval(dataPath.pathXCoords[i] - EDIT_POINT_CIRC_SIZE/2, dataPath.pathYCoords[i] - EDIT_POINT_CIRC_SIZE/2, EDIT_POINT_CIRC_SIZE, EDIT_POINT_CIRC_SIZE);
+                    g2d.fillOval(dataPath.pathXCoords[i] - EDIT_POINT_CIRC_SIZE / 2, dataPath.pathYCoords[i] - EDIT_POINT_CIRC_SIZE / 2, EDIT_POINT_CIRC_SIZE, EDIT_POINT_CIRC_SIZE);
                 }
 
 
@@ -291,7 +298,7 @@ public class MapCanvas extends JPanel implements MouseListener, MouseMotionListe
                     break;
                 case EDIT:
                     selectedPath = selectPath(e);
-                    if(selectedPath != null) {
+                    if (selectedPath != null) {
                         selectedPath.onSelected(e.getX(), e.getY());
                     }
                     repaint();
@@ -338,9 +345,9 @@ public class MapCanvas extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if(currentView == ViewType.NODES){
-            if(currentTool == ToolType.EDIT){
-                if(selectedPath != null) {
+        if (currentView == ViewType.NODES) {
+            if (currentTool == ToolType.EDIT) {
+                if (selectedPath != null) {
                     selectedPath.onDragStop();
                     selectedPath = null;
                 }
@@ -384,7 +391,7 @@ public class MapCanvas extends JPanel implements MouseListener, MouseMotionListe
                     }
                     break;
                 case EDIT:
-                    if(selectedPath != null) {
+                    if (selectedPath != null) {
                         selectedPath.onPointDrag(e.getX(), e.getY());
                     }
                     repaint();
@@ -469,6 +476,11 @@ public class MapCanvas extends JPanel implements MouseListener, MouseMotionListe
         repaint();
     }
 
+
+    /**
+     * this uses the data model objects to construct view objects to represent the map
+     * more realistically
+     */
     private void calculateViewObjects() {
 
         mViewPositionList = new ArrayList<ViewPosition>();
