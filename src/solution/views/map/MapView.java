@@ -49,8 +49,8 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     static class BorderMargins {
         public static int topMargin = 63;
         public static int leftMargin = 75;
-        public static int bottomMargin = 71;
-        public static int rightMargin = 72;
+        public static int bottomMargin = 71; // 71
+        public static int rightMargin = 72; // 72
     }
 
     public MapView(final GameControllerInterface gameController, final String graphImageMapPath, final MapData mapData) {
@@ -150,8 +150,8 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         double leftMarginRatio = ((double)BorderMargins.leftMargin) / 1158.0f;
         double rightMarginRatio = ((double)(BorderMargins.rightMargin + BorderMargins.leftMargin)) / 1158.0f;
 
-        double bottomMarginRatioBE = ((double)(BorderMargins.bottomMargin)) / 819.0f;
-        double rightMarginRatioBE = ((double)(BorderMargins.rightMargin)) / 1158.0f;
+        double bottomMarginRatioBE = ((double)(38)) / 819.0f;
+        double rightMarginRatioBE = ((double)( 65)) / 1158.0f;
 
         int scaledLeftPos = (int)(leftMarginRatio * getWidth());
         int scaledTopPos =  (int)(topMarginRatio * getHeight());
@@ -160,7 +160,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         int scaledWidth = (int)(getWidth() - (getWidth() * rightMarginRatio));
         int scaledHeight = (int)(getHeight() - (getHeight() * bottomMarginRatio));
 
-        g2d.drawImage(mMapImage, 0,0,scaledWidth + scaledLeftPos + scaledRightPos, scaledHeight + scaledBottomPos + scaledTopPos, this);
+        g2d.drawImage(mMapImage, 0,0,scaledWidth + scaledLeftPos + scaledRightPos, scaledHeight + scaledTopPos + scaledBottomPos, this);
 
         // Translate everything
 
