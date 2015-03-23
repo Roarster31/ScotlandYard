@@ -107,11 +107,11 @@ public class ScotlandYardModel extends ScotlandYard {
             }
 
             Ticket requiredTicket = Ticket.fromRoute(edge.data());
-            if (!detectiveOnNode(firstNodePos) && tickets.get(requiredTicket) > 0) {
+            if (!detectiveOnNode(firstNodePos) && tickets.containsKey(requiredTicket) && tickets.get(requiredTicket) > 0) {
                 moves.add(new MoveTicket(playerColour, firstNodePos, requiredTicket));
             }
 
-            if (!detectiveOnNode(firstNodePos) && tickets.get(Ticket.SecretMove) > 0) {
+            if (!detectiveOnNode(firstNodePos) && tickets.containsKey(Ticket.SecretMove) && tickets.get(Ticket.SecretMove) > 0) {
                 moves.add(new MoveTicket(playerColour, firstNodePos, Ticket.SecretMove));
             }
 
@@ -174,10 +174,14 @@ public class ScotlandYardModel extends ScotlandYard {
 
     @Override
     public boolean join(Player player, Colour colour, int location, Map<Ticket, Integer> tickets) {
-        mPlayerMap.put(colour, new PlayerHolder(player, colour, location, tickets));
-        // Add the current player to the colour list
-        colourList.add(colour);
-        return false;
+        if(!mPlayerMap.containsKey(colour)) {
+            mPlayerMap.put(colour, new PlayerHolder(player, colour, location, tickets));
+            // Add the current player to the colour list
+            colourList.add(colour);
+            return true;
+        }else{
+            return false;
+        }
     }
 
     @Override

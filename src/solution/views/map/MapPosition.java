@@ -83,9 +83,10 @@ public class MapPosition {
         for (int i = 0; i < tickets.size(); i++) {
             Color color = ColourHelper.ticketColour(tickets.get(i));
 
+
             float[] hsb = Color.RGBtoHSB(color.getRed(),color.getGreen(),color.getBlue(),null);
 
-            g2d.setColor(Color.getHSBColor(hsb[0],hsb[1], brightness));
+            g2d.setColor(Color.getHSBColor(hsb[0], hsb[1], hsb[2]*brightness));
             g2d.fillArc(x - radius / 2, y - radius / 2, radius, radius, segmentStartAngles[i], segmentAngleSize);
         }
 

@@ -1,9 +1,6 @@
 package solution.views.map;
 
-import scotlandyard.Colour;
-import scotlandyard.MoveDouble;
-import scotlandyard.MoveTicket;
-import scotlandyard.Ticket;
+import scotlandyard.*;
 import solution.Constants;
 import solution.Models.MapData;
 import solution.development.models.ViewRoute;
@@ -12,7 +9,7 @@ import solution.helpers.PathInterpolator;
 import solution.helpers.RouteHelper;
 import solution.interfaces.GameControllerInterface;
 import solution.interfaces.adapters.GameUIAdapter;
-import solution.views.GameOverView;
+import solution.views.FloatingDialog;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -45,8 +42,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     private TransportSprite transportSprite;
     private AnimationWorker animationWorker;
     private List<MoveTicket> mCurrentMoveList;
-    private boolean mShowGameover = false;
-    private GameOverView mEndOfGame;
+    private FloatingDialog mFloatingDialog;
     private boolean hasPainted;
     private GameAdapter mListener;
 
@@ -165,8 +161,8 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             mMapPopup.draw(g2d);
         }
 
-        if (mShowGameover) {
-            mEndOfGame.draw(g2d);
+        if (mFloatingDialog != null) {
+            mFloatingDialog.draw(g2d);
         }
 
         onPaintComplete();
@@ -185,9 +181,28 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         // Set up game over view
         int width = mGraphImage.getWidth();
         int height = mGraphImage.getHeight();
-        mEndOfGame = new GameOverView(mControllerInterface, width, height);
-        System.out.println(width + " " + height);
-        mShowGameover = true;
+        mFloatingDialog = FloatingDialog.getGameoverInstance(mControllerInterface, width, height);
+        repaint();
+    }
+
+    private void showMovePass() {
+        int width = mGraphImage.getWidth();
+        int height = mGraphImage.getHeight();
+        final Colour currentPlayer = mControllerInterface.getCurrentPlayer();
+        mFloatingDialog = FloatingDialog.getMovePassInstance(currentPlayer, width, height);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                mFloatingDialog = null;
+                mControllerInterface.notifyMoveSelected(new MovePass(currentPlayer));
+            }
+        }).start();
         repaint();
     }
 
@@ -222,10 +237,6 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         Graphics2D g2d = mBgPositionImage.createGraphics();
 
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-//        hints.put(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE);
-//        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
-//        hints.put(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
-//        hints.put(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
 
         for (MapPosition position : mMapData.getPositionList()) {
             position.draw(g2d);
@@ -422,8 +433,8 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
 
         repaint();
     }
-
     class GraphMouseListener extends MouseAdapter implements MouseMotionListener {
+
         @Override
         public void mouseClicked(MouseEvent e) {
             Point2D transformedPoint = inverseTransform.transform(new Point2D.Double(e.getX(), e.getY()), null);
@@ -496,15 +507,15 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             repaint();
 
         }
-
         @Override
         public void mouseEntered(MouseEvent e) {
             Cursor cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
             setCursor(cursor);
         }
-    }
 
+    }
     class GameAdapter extends GameUIAdapter {
+
         @Override
         public void onGameModelUpdated(GameControllerInterface controllerInterface) {
 
@@ -569,16 +580,22 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
                 }
                 final Colour currentPlayer = mControllerInterface.getCurrentPlayer();
 
-                showValidMoves(mControllerInterface.getValidSingleMovesAtLocation(currentPlayer, currentPlayerLocation), currentPlayerLocation);
+                List<MoveTicket> validMoves = mControllerInterface.getValidSingleMovesAtLocation(currentPlayer, currentPlayerLocation);
+
+                if(validMoves.size() > 0) {
+                    showValidMoves(validMoves, currentPlayerLocation);
+                }else{
+                    showMovePass();
+                }
             }
 
             repaint();
         }
-
         @Override
         public void animateMove(MoveTicket firstMove, MoveTicket secondMove) {
             MapView.this.animateMove(firstMove, secondMove);
         }
+
     }
 
 

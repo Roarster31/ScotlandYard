@@ -119,7 +119,12 @@ public class GameController implements GameControllerInterface {
             for (int i = 0; i < playerCount; i++) {
                 //todo do proper location
                 final Colour colour = ColourHelper.getColour(i);
-                model.join(uiPlayer, colour, new Random().nextInt(190), SetupHelper.getTickets(colour.equals(Constants.MR_X_COLOUR)));
+                if(i == 2) {
+                    HashMap<Ticket, Integer> map = new HashMap<Ticket, Integer>();
+                    model.join(uiPlayer, colour, new Random().nextInt(190), map);
+                }else{
+                    model.join(uiPlayer, colour, new Random().nextInt(190), SetupHelper.getTickets(colour.equals(Constants.MR_X_COLOUR)));
+                }
             }
 
             gameRecordTracker.track(model);
@@ -208,8 +213,11 @@ public class GameController implements GameControllerInterface {
     public void notifyMoveSelected(Move move) {
         uiPlayer.setPendingMove(move);
 
-        notifyAnimateMove(move);
-
+        if(move instanceof MovePass){
+            notifyMoveAnimationFinished();
+        }else {
+            notifyAnimateMove(move);
+        }
 
     }
 
