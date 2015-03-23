@@ -45,10 +45,19 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     private FloatingDialog mFloatingDialog;
     private boolean hasPainted;
     private GameAdapter mListener;
+    private int mBackgroundWidth;
+    private int mBackgroundHeight;
 
+    static class BorderMargins {
+        public static int topMargin = 63;
+        public static int leftMargin = 75;
+        public static int bottomMargin = 71; // 71
+        public static int rightMargin = 72; // 72
+    }
     public MapView(final GameControllerInterface controllerInterface, final String graphImageMapPath, final MapData mapData) {
         mControllerInterface = controllerInterface;
         mMapData = mapData;
+        setOpaque(false);
 
         transform = new AffineTransform();
         inverseTransform = new AffineTransform();
@@ -67,12 +76,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             public void componentResized(ComponentEvent e) {
                 Dimension size = getSize();
 
-                transform.setToScale(size.getWidth() / mImageSize.getWidth(), size.getHeight() / mImageSize.getHeight());
-                try {
-                    inverseTransform = transform.createInverse();
-                } catch (NoninvertibleTransformException e1) {
-                    e1.printStackTrace();
-                }
+                setTransform(size);
                 repaint();
             }
 
@@ -80,7 +84,29 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
 
 
     }
+    float mIntA = 819f;
+    float mIntB = 1058f;
+    private void setTransform(Dimension windowSize) {
 
+        double topMarginRatio = ((double)BorderMargins.topMargin) / mIntA;
+        double leftMarginRatio = ((double)BorderMargins.leftMargin) / mIntB;
+
+        int scaledLeftPos = (int)(leftMarginRatio * getWidth());
+        int scaledTopPos =  (int)(topMarginRatio * getHeight());
+
+        float scaleX = (float)getWidth() / mImageSize.width;
+        float scaleY = (float)getHeight() / mImageSize.height;
+
+        transform = new AffineTransform();
+        transform.translate(scaledLeftPos, scaledTopPos);
+        transform.scale(scaleX * 0.858, scaleY * 0.8);
+
+        try {
+            inverseTransform = transform.createInverse();
+        } catch (NoninvertibleTransformException e1) {
+            e1.printStackTrace();
+        }
+    }
     @Override
     public void removeNotify() {
         super.removeNotify();
@@ -124,6 +150,12 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
 //        hints.put(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
 //        hints.put(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
         g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
+
+        setupDimensions();
+
+        g2d.drawImage(mMapImage, 0,0,mBackgroundWidth, mBackgroundHeight, this);
+
 
         g2d.setTransform(transform);
         g2d.drawImage(mGraphImage, null, 0, 0);
@@ -169,7 +201,25 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
 
 
     }
+    private void setupDimensions() {
+        double topMarginRatio = ((double) BorderMargins.topMargin) / mIntA;
+        double bottomMarginRatio = ((double)(BorderMargins.bottomMargin + BorderMargins.topMargin)) / mIntA;
+        double leftMarginRatio = ((double) BorderMargins.leftMargin) / mIntB;
+        double rightMarginRatio = ((double)(BorderMargins.rightMargin + BorderMargins.leftMargin)) / mIntB;
 
+        double bottomMarginRatioBE = ((double)(38)) / mIntA;
+        double rightMarginRatioBE = ((double)( 65)) / mIntB;
+
+        int scaledLeftPos = (int)(leftMarginRatio * getWidth());
+        int scaledTopPos =  (int)(topMarginRatio * getHeight());
+        int scaledRightPos = (int)(rightMarginRatioBE * getWidth());
+        int scaledBottomPos =  (int)(bottomMarginRatioBE * getHeight());
+        int scaledWidth = (int)(getWidth() - (getWidth() * rightMarginRatio));
+        int scaledHeight = (int)(getHeight() - (getHeight() * bottomMarginRatio));
+
+        mBackgroundWidth = scaledWidth + scaledLeftPos + scaledRightPos;
+        mBackgroundHeight = scaledHeight + scaledTopPos + scaledBottomPos;
+    }
     private void onPaintComplete() {
         if (!hasPainted) {
             hasPainted = true;
