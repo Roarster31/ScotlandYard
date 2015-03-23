@@ -47,7 +47,9 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     private GameAdapter mListener;
     private int mBackgroundWidth;
     private int mBackgroundHeight;
+    private boolean mShouldCheckDimensions;
 
+    //we store some hardcoded data for the image
     static class MapImageInfo {
         public static int topMargin = 63;
         public static int leftMargin = 75;
@@ -73,13 +75,16 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         createBgPathImage();
         createBgPositionImage();
 
+        invalidateMapDimensions();
+
         addComponentListener(new ComponentAdapter() {
 
             @Override
             public void componentResized(ComponentEvent e) {
-                Dimension size = getSize();
 
-                setTransform(size);
+                invalidateMapDimensions();
+
+                setTransform();
                 repaint();
             }
 
@@ -87,7 +92,11 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
 
 
     }
-    private void setTransform(Dimension windowSize) {
+
+    /**
+     * sets up the transformation for use later
+     */
+    private void setTransform() {
 
         double topMarginRatio = ((double)MapImageInfo.topMargin) / MapImageInfo.imageWidth;
         double leftMarginRatio = ((double)MapImageInfo.leftMargin) / MapImageInfo.imageHeight;
@@ -108,6 +117,10 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             e1.printStackTrace();
         }
     }
+
+    /**
+     * we remove the {@link solution.interfaces.GameControllerInterface} here
+     */
     @Override
     public void removeNotify() {
         super.removeNotify();
@@ -115,6 +128,9 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         mControllerInterface.removeUpdateListener(mListener);
     }
 
+    /**
+     * we add the {@link solution.interfaces.GameControllerInterface} here
+     */
     @Override
     public void addNotify() {
         super.addNotify();
@@ -122,7 +138,6 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         mListener = new GameAdapter();
         mControllerInterface.addUpdateListener(mListener);
         mListener.onGameModelUpdated(mControllerInterface);
-
 
     }
 
@@ -133,9 +148,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             resource = getClass().getClassLoader().getResource("ui" + File.separator + "mapbg.png");
             mMapImage = ImageIO.read(new File(resource.toURI()));
             mImageSize = new Dimension(mGraphImage.getWidth(), mGraphImage.getHeight());
-        } catch (IOException ex) {
-            //todo handle exception...
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | IOException e) {
             e.printStackTrace();
         }
     }
@@ -145,24 +158,27 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
+        //antialiasing makes everything look nicer
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-//        hints.put(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE);
-//        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
-//        hints.put(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
-//        hints.put(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
         g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
+        //check to make sure the map border is correct
+        ensureMapDimensions();
 
-        setupDimensions();
-
+        //draw the map border
         g2d.drawImage(mMapImage, 0,0,mBackgroundWidth, mBackgroundHeight, this);
 
 
+        //apply the image transformation to scale all of the following
         g2d.setTransform(transform);
+
+        //draw the map image
         g2d.drawImage(mGraphImage, null, 0, 0);
 
+        //draw the cached path image
         g2d.drawImage(mBgPathImage, null, 0, 0);
 
+        //draw live path data
         for (MapPath mapPath : mMapData.getPathList()) {
             if (mapPath.isAvailable()) {
                 mapPath.drawBackground(g2d);
@@ -175,9 +191,10 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
             }
         }
 
-
+        //draw the cached position image
         g2d.drawImage(mBgPositionImage, null, 0, 0);
 
+        //draw the live position data
         for (MapPosition position : mMapData.getPositionList()) {
             if (position.isAvailable() || position.isHighlighted() || position.hasPlayerColor()) {
                 position.draw(g2d);
@@ -186,41 +203,61 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
 
         g2d.setColor(Color.GREEN);
 
+        //draw any currently active sprites
         if (transportSprite != null) {
             transportSprite.draw(g2d);
         }
 
+        //draw any popups currently active
         if (mMapPopup != null) {
             mMapPopup.draw(g2d);
         }
 
+        //draw the floating text dialog if it exists
         if (mFloatingDialog != null) {
             mFloatingDialog.draw(g2d);
         }
 
         onPaintComplete();
 
-
     }
-    private void setupDimensions() {
-        double topMarginRatio = ((double) MapImageInfo.topMargin) / MapImageInfo.imageWidth;
-        double bottomMarginRatio = ((double)(MapImageInfo.bottomMargin + MapImageInfo.topMargin)) / MapImageInfo.imageWidth;
-        double leftMarginRatio = ((double) MapImageInfo.leftMargin) / MapImageInfo.imageHeight;
-        double rightMarginRatio = ((double)(MapImageInfo.rightMargin + MapImageInfo.leftMargin)) / MapImageInfo.imageHeight;
 
-        double bottomMarginRatioBE = ((double)(38)) / MapImageInfo.imageWidth;
-        double rightMarginRatioBE = ((double)( 65)) / MapImageInfo.imageHeight;
-
-        int scaledLeftPos = (int)(leftMarginRatio * getWidth());
-        int scaledTopPos =  (int)(topMarginRatio * getHeight());
-        int scaledRightPos = (int)(rightMarginRatioBE * getWidth());
-        int scaledBottomPos =  (int)(bottomMarginRatioBE * getHeight());
-        int scaledWidth = (int)(getWidth() - (getWidth() * rightMarginRatio));
-        int scaledHeight = (int)(getHeight() - (getHeight() * bottomMarginRatio));
-
-        mBackgroundWidth = scaledWidth + scaledLeftPos + scaledRightPos;
-        mBackgroundHeight = scaledHeight + scaledTopPos + scaledBottomPos;
+    /**
+     * lets the map know it should recalculate the map dimensions
+     */
+    private void invalidateMapDimensions(){
+        mShouldCheckDimensions = true;
     }
+    /**
+     * calculates dimensions for border image
+     */
+    private void ensureMapDimensions() {
+        if(mShouldCheckDimensions) {
+            mShouldCheckDimensions = false;
+            double topMarginRatio = ((double) MapImageInfo.topMargin) / MapImageInfo.imageWidth;
+            double bottomMarginRatio = ((double) (MapImageInfo.bottomMargin + MapImageInfo.topMargin)) / MapImageInfo.imageWidth;
+            double leftMarginRatio = ((double) MapImageInfo.leftMargin) / MapImageInfo.imageHeight;
+            double rightMarginRatio = ((double) (MapImageInfo.rightMargin + MapImageInfo.leftMargin)) / MapImageInfo.imageHeight;
+
+            double bottomMarginRatioBE = ((double) (38)) / MapImageInfo.imageWidth;
+            double rightMarginRatioBE = ((double) (65)) / MapImageInfo.imageHeight;
+
+            int scaledLeftPos = (int) (leftMarginRatio * getWidth());
+            int scaledTopPos = (int) (topMarginRatio * getHeight());
+            int scaledRightPos = (int) (rightMarginRatioBE * getWidth());
+            int scaledBottomPos = (int) (bottomMarginRatioBE * getHeight());
+            int scaledWidth = (int) (getWidth() - (getWidth() * rightMarginRatio));
+            int scaledHeight = (int) (getHeight() - (getHeight() * bottomMarginRatio));
+
+            mBackgroundWidth = scaledWidth + scaledLeftPos + scaledRightPos;
+            mBackgroundHeight = scaledHeight + scaledTopPos + scaledBottomPos;
+        }
+    }
+
+    /**
+     * This is run after the first paint to let the interface know
+     * that we've loaded the map and all associated images
+     */
     private void onPaintComplete() {
         if (!hasPainted) {
             hasPainted = true;
@@ -228,14 +265,19 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         }
     }
 
+    /**
+     * shows a dialog for the gameover state
+     */
     public void showGameOverView() {
-        // Set up game over view
         int width = mGraphImage.getWidth();
         int height = mGraphImage.getHeight();
         mFloatingDialog = FloatingDialog.getGameoverInstance(mControllerInterface, width, height);
         repaint();
     }
 
+    /**
+     * shows a dialog for the case where a player cannot move
+     */
     private void showMovePass() {
         int width = mGraphImage.getWidth();
         int height = mGraphImage.getHeight();
@@ -245,6 +287,8 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         new Thread(new Runnable() {
             @Override
             public void run() {
+
+                //we wait 3 seconds before continuing
                 try {
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
@@ -257,6 +301,9 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         repaint();
     }
 
+    /**
+     * creates a cached image of all paths so that we don't need to redraw all paths on {@link #paintComponent(java.awt.Graphics)}
+     */
     private void createBgPathImage() {
 
         mBgPathImage = new BufferedImage(mImageSize.width, mImageSize.height, BufferedImage.TYPE_INT_ARGB);
@@ -280,6 +327,10 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         g2d.dispose();
     }
 
+    /**
+     * creates a cached image of all positions so that we don't need to redraw all positions
+     * on {@link #paintComponent(java.awt.Graphics)}
+     */
     private void createBgPositionImage() {
 
 
@@ -299,9 +350,9 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     }
 
     @Override
-    public void onTicketSelected(final Ticket ticket, final int nodeId) {
+    public void onTicketSelected(final Ticket ticket, final int posId) {
         final Colour currentPlayer = mControllerInterface.getCurrentPlayer();
-        final MoveTicket singleMove = new MoveTicket(currentPlayer, nodeId, ticket);
+        final MoveTicket singleMove = new MoveTicket(currentPlayer, posId, ticket);
 
         if (secondMoves != null && firstMove != null) {
             mControllerInterface.notifyMoveSelected(new MoveDouble(mControllerInterface.getCurrentPlayer(), firstMove, singleMove));
@@ -315,6 +366,12 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         repaint();
     }
 
+    /**
+     * Animates the the current player through the two moves
+     *
+     * @param firstMove the first move to animate
+     * @param secondMove the second move to animate, may be null
+     */
     private void animateMove(final MoveTicket firstMove, final MoveTicket secondMove) {
 
         PathInterpolator firstMoveInterpolator = null;
@@ -412,14 +469,14 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     }
 
     @Override
-    public void onDoubleMoveSelected(Ticket ticket, int nodeId) {
+    public void onDoubleMoveSelected(Ticket ticket, int posId) {
         final Colour currentPlayer = mControllerInterface.getCurrentPlayer();
-        final MoveTicket moveTicket = new MoveTicket(currentPlayer, nodeId, ticket);
+        final MoveTicket moveTicket = new MoveTicket(currentPlayer, posId, ticket);
 
-        secondMoves = mControllerInterface.getValidSecondMovesAtLocation(currentPlayer, nodeId, ticket);
+        secondMoves = mControllerInterface.getValidSecondMovesAtLocation(currentPlayer, posId, ticket);
         firstMove = moveTicket;
 
-        showValidMoves(secondMoves, nodeId);
+        showValidMoves(secondMoves, posId);
         mMapPopup.reset();
 
         repaint();
@@ -427,7 +484,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     }
 
     @Override
-    public void onDoubleMoveCancelled(Ticket mSelectedTicket, int id) {
+    public void onDoubleMoveCancelled(Ticket mSelectedTicket, int posId) {
 
         secondMoves = null;
         firstMove = null;

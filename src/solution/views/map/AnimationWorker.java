@@ -5,7 +5,9 @@ import java.awt.*;
 import java.util.ArrayList;
 
 /**
- * Created by rory on 15/03/15.
+ * This class handles animation and threading. Implementations of {@link solution.views.map.AnimationWorker.AnimationInterface} can add themselves
+ * to this through {@link solution.views.map.AnimationWorker#addWork(solution.views.map.AnimationWorker.AnimationInterface)} and receive appropriate
+ * callbacks on ticks.
  */
 public class AnimationWorker implements Runnable{
 
@@ -17,10 +19,16 @@ public class AnimationWorker implements Runnable{
     public interface AnimationInterface {
 
         /**
+         * Called on every tick
          *
          * @return true if the animation is finished and should be cleared up
          */
         public boolean onTick();
+
+        /**
+         * Called after {@link solution.views.map.AnimationWorker.AnimationInterface#onTick()} returns true. Implementations may run
+         * tidy up code here.
+         */
         public void onFinished();
     }
     public AnimationWorker (Component component) {
@@ -51,6 +59,7 @@ public class AnimationWorker implements Runnable{
 
             dirtyList.clear();
 
+            //find all callbacks that are done and add to a dirty list
             for(AnimationInterface callback : callbacks){
                 if(callback.onTick()){
                     dirtyList.add(callback);
@@ -59,6 +68,7 @@ public class AnimationWorker implements Runnable{
 
             repaintableComponent.repaint();
 
+            //remove dirty callbacks - rinse & repeat
             for(AnimationInterface dirtyCallback : dirtyList){
                 dirtyCallback.onFinished();
                 callbacks.remove(dirtyCallback);

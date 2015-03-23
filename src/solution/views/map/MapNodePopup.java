@@ -369,11 +369,27 @@ public class MapNodePopup {
 
 
     public interface PopupInterface {
-        public void onTicketSelected(final Ticket ticket, final int nodeId);
 
-        public void onDoubleMoveSelected(final Ticket ticket, final int nodeId);
+        /**
+         * Called when a ticket has been selected
+         * @param ticket the chosen ticket
+         * @param posId the target position's id
+         */
+        public void onTicketSelected(final Ticket ticket, final int posId);
 
-        public void onDoubleMoveCancelled(Ticket mSelectedTicket, int id);
+        /**
+         * Called when the option to Double Move has been selected
+         * @param ticket the chosen ticket
+         * @param posId the target position's id
+         */
+        public void onDoubleMoveSelected(final Ticket ticket, final int posId);
+
+        /**
+         * Called when the option to Double Move has been cancelled
+         * @param mSelectedTicket the first ticket chosen
+         * @param posId the target position's id
+         */
+        public void onDoubleMoveCancelled(Ticket mSelectedTicket, int posId);
     }
 
 }
