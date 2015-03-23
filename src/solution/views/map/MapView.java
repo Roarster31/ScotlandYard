@@ -1,5 +1,6 @@
 package solution.views.map;
 
+import javafx.scene.transform.Affine;
 import scotlandyard.Colour;
 import scotlandyard.MoveDouble;
 import scotlandyard.MoveTicket;
@@ -86,10 +87,26 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         });
     }
 
+
     private void setTransform(Dimension windowSize) {
+
+        double topMarginRatio = ((double)BorderMargins.topMargin) / 819.0f;
+        double bottomMarginRatio = ((double)(BorderMargins.bottomMargin + BorderMargins.topMargin)) / 819.0f;
+        double leftMarginRatio = ((double)BorderMargins.leftMargin) / 1158.0f;
+        double rightMarginRatio = ((double)(BorderMargins.rightMargin + BorderMargins.leftMargin)) / 1158.0f;
+
+        int scaledLeftPos = (int)(leftMarginRatio * getWidth());
+        int scaledTopPos =  (int)(topMarginRatio * getHeight());
+        int scaledWidth = (int)(getWidth() - (getWidth() * rightMarginRatio));
+        int scaledHeight = (int)(getHeight() - (getHeight() * bottomMarginRatio));
+
+        float scaleX = (float)getWidth() / mImageSize.width;
+        float scaleY = (float)getHeight() / mImageSize.height;
+
         transform = new AffineTransform();
-        transform.translate((mImageSize.getWidth() - mInnerImageSize.getWidth()) / 2f, (mImageSize.getHeight() - mInnerImageSize.getHeight()) / 2f);
-        transform.scale(mInnerImageSize.getWidth() / windowSize.getWidth(), mInnerImageSize.getHeight() / windowSize.getHeight());
+        transform.translate(scaledLeftPos, scaledTopPos);
+        transform.scale(scaleX, scaleY);
+
         try {
             inverseTransform = transform.createInverse();
         } catch (NoninvertibleTransformException e1) {
@@ -118,43 +135,53 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        //g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 //        hints.put(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE);
 //        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
 //        hints.put(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
 //        hints.put(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        //g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
         long startTime = System.currentTimeMillis();
+
 
         double topMarginRatio = ((double)BorderMargins.topMargin) / 819.0f;
         double bottomMarginRatio = ((double)(BorderMargins.bottomMargin + BorderMargins.topMargin)) / 819.0f;
         double leftMarginRatio = ((double)BorderMargins.leftMargin) / 1158.0f;
         double rightMarginRatio = ((double)(BorderMargins.rightMargin + BorderMargins.leftMargin)) / 1158.0f;
 
+        double bottomMarginRatioBE = ((double)(BorderMargins.bottomMargin)) / 819.0f;
+        double rightMarginRatioBE = ((double)(BorderMargins.rightMargin)) / 1158.0f;
+
         int scaledLeftPos = (int)(leftMarginRatio * getWidth());
         int scaledTopPos =  (int)(topMarginRatio * getHeight());
+        int scaledRightPos = (int)(rightMarginRatioBE * getWidth());
+        int scaledBottomPos =  (int)(bottomMarginRatioBE * getHeight());
         int scaledWidth = (int)(getWidth() - (getWidth() * rightMarginRatio));
         int scaledHeight = (int)(getHeight() - (getHeight() * bottomMarginRatio));
 
-        g2d.drawImage(mMapImage, 0,0, getWidth(), getHeight(), this);
+        g2d.drawImage(mMapImage, 0,0,scaledWidth + scaledLeftPos + scaledRightPos, scaledHeight + scaledBottomPos + scaledTopPos, this);
 
         // Translate everything
 
-        g2d.drawImage(mGraphImage, scaledLeftPos, scaledTopPos, scaledWidth, scaledHeight, this);
-
-        try {
-            g2d.setTransform(transform.createInverse());
-        } catch (NoninvertibleTransformException e) {
-            e.printStackTrace();
-        }
-        g2d.translate(100+scaledLeftPos, 100+ scaledTopPos);
-        //
-
-        //g2d.fillRect(0,0,mImageSize.width,mImageSize.height);
 
 
-        g2d.drawImage(mBgPathImage, 0, 0, scaledWidth, scaledHeight, this);
+
+//        float ratioHeight = 1.25f; // 1.217   -- 1.225
+//        float ratioWidth = 1.155f; //1.131   -- 1.148
+//        AffineTransform nodesTransform = new AffineTransform();
+//        nodesTransform.scale(ratioWidth, ratioHeight);
+//        g2d.setTransform(nodesTransform);
+//        g2d.translate(scaledLeftPos - 8, scaledTopPos - 8);
+
+
+        g2d.setTransform(transform);
+
+        g2d.drawImage(mGraphImage, null, 0, 0);
+
+        int widthOfNodes = getWidth();
+        int heightOfNodes = getHeight();
+        g2d.drawImage(mBgPathImage, null, 0,0);
 
         for (MapPath mapPath : mMapData.getPathList()) {
             if(mapPath.isAvailable()) {
@@ -169,7 +196,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         }
 
 
-        g2d.drawImage(mBgPositionImage, 0, 0, scaledWidth, scaledHeight, this);
+        g2d.drawImage(mBgPositionImage,null, 0, 0);
 
         for (MapPosition position : mMapData.getPositionList()) {
             if(position.isHovered() || position.isAvailable() || position.isHighlighted() || position.hasPlayerColor()) {
@@ -188,6 +215,8 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         }
 
 
+        g2d.fillRect(0,0,20,20);
+//        g2d.fillRect(scaledWidth -20,scaledHeight -20,20,20);
 
     }
 
