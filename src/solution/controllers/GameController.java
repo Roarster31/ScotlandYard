@@ -20,17 +20,25 @@ import java.util.*;
  */
 public class GameController implements GameControllerInterface {
 
+    private enum LoadState {LOAD_REPLAY,LOAD_NO_REPLAY,NOT_LOADING}
+
     private ScotlandYardModel model;
     private Set<GameUIInterface> listeners;
     private MrXHistoryTracker mrXHistoryTracker;
     private UIPlayer uiPlayer;
     private GameRecordTracker gameRecordTracker;
-    private boolean replayingGame;
+    private LoadState loadState = LoadState.NOT_LOADING;
+
+    public GameController(){
+        listeners = new HashSet<GameUIInterface>();
+        mrXHistoryTracker = new MrXHistoryTracker();
+        gameRecordTracker = new GameRecordTracker();
+        uiPlayer = new UIPlayer();
+    }
 
     public List<MoveTicket> getMrXHistory() {
         return mrXHistoryTracker.getMoveHistory();
     }
-
     @Override
     public void saveGame(File fileLocation) {
         try {
@@ -45,6 +53,7 @@ public class GameController implements GameControllerInterface {
     public boolean isGameOver(){
         return model.isGameOver();
     }
+
     @Override
     public Set<Colour> getWinningPlayers() {
         return model.getWinningPlayers();
@@ -58,7 +67,7 @@ public class GameController implements GameControllerInterface {
 
             model.spectate(mrXHistoryTracker);
 
-            replayingGame = replay;
+            loadState = replay ? LoadState.LOAD_REPLAY : LoadState.LOAD_NO_REPLAY;
 
             notifyModelUpdated();
 
@@ -79,11 +88,7 @@ public class GameController implements GameControllerInterface {
         mrXHistoryTracker = new MrXHistoryTracker();
         gameRecordTracker = new GameRecordTracker();
         uiPlayer = new UIPlayer();
-    }
-
-    @Override
-    public List<Edge<Integer, Route>> getGraphRoutes() {
-        return model.getGraph().getEdges();
+        loadState = LoadState.NOT_LOADING;
     }
 
     @Override
@@ -91,12 +96,6 @@ public class GameController implements GameControllerInterface {
         return model.getPlayerLocation(colour);
     }
 
-    public GameController(){
-        listeners = new HashSet<GameUIInterface>();
-        mrXHistoryTracker = new MrXHistoryTracker();
-        gameRecordTracker = new GameRecordTracker();
-        uiPlayer = new UIPlayer();
-    }
     public void addUpdateListener(GameUIInterface listener){
         listeners.add(listener);
     }
@@ -105,11 +104,7 @@ public class GameController implements GameControllerInterface {
         listeners.remove(listener);
     }
 
-
-
-
-
-    private void setupModel(final int playerCount) {
+    private void startNewGame(final int playerCount) {
         try {
             resetGameData();
             model = new ScotlandYardModel(playerCount-1, getRounds(), "graph.txt");
@@ -148,6 +143,7 @@ public class GameController implements GameControllerInterface {
     public Colour getCurrentPlayer(){
         return model.getCurrentPlayer();
     }
+
     public Map<Ticket, Integer> getPlayerTickets(Colour currentPlayer){
         if(currentPlayer == Constants.MR_X_COLOUR){
             System.out.println();
@@ -180,10 +176,7 @@ public class GameController implements GameControllerInterface {
 
     @Override
     public void notifyAllPlayersAdded(int count) {
-        setupModel(count);
-
-        //parts of the ui rely on the model being created so this has to
-        //come after setupModel
+        startNewGame(count);
 
         for(GameUIInterface uiInterface : listeners){
             uiInterface.showGameInterface();
@@ -193,7 +186,7 @@ public class GameController implements GameControllerInterface {
 
     @Override
     public void notifyMapLoaded() {
-        if(gameRecordTracker.getCurrentMove() != null && replayingGame) {
+        if(loadState == LoadState.LOAD_REPLAY) {
             tryNextTrackerMove();
         }
     }
@@ -201,7 +194,7 @@ public class GameController implements GameControllerInterface {
     private void tryNextTrackerMove() {
         Move currentMove = gameRecordTracker.getCurrentMove();
         if(currentMove != null){
-                if(replayingGame){
+                if(loadState == LoadState.LOAD_REPLAY){
                     notifyMoveSelected(currentMove);
                 }else{
                     uiPlayer.setPendingMove(currentMove);
@@ -210,7 +203,7 @@ public class GameController implements GameControllerInterface {
                     tryNextTrackerMove();
                 }
         }else{
-            replayingGame = false;
+            loadState = LoadState.NOT_LOADING;
         }
     }
 
@@ -255,7 +248,7 @@ public class GameController implements GameControllerInterface {
                 System.out.printf("The game is over ):");
             }
 
-        if(gameRecordTracker.getCurrentMove() != null && replayingGame){
+        if(gameRecordTracker.getCurrentMove() != null && loadState == LoadState.LOAD_REPLAY){
             gameRecordTracker.nextMove();
             tryNextTrackerMove();
         }
@@ -272,11 +265,21 @@ public class GameController implements GameControllerInterface {
         rounds.add(false);
         rounds.add(false);
         rounds.add(false);
+        rounds.add(false);
+        rounds.add(true);
+        rounds.add(false);
+        rounds.add(false);
+        rounds.add(false);
+        rounds.add(false);
         rounds.add(true);
         rounds.add(false);
         rounds.add(false);
         rounds.add(false);
+        rounds.add(false);
         rounds.add(true);
+        rounds.add(false);
+        rounds.add(false);
+        rounds.add(false);
         rounds.add(false);
         return rounds;
     }

@@ -32,8 +32,6 @@ public interface GameControllerInterface {
     public void loadGame(File fileLocation, boolean replay);
     public boolean isGameOver();
 
-    List<Edge<Integer, Route>> getGraphRoutes();
-
     public int getPlayerFacadePosition(Colour colour);
 
 }
