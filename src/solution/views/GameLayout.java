@@ -53,8 +53,9 @@ public class GameLayout extends JPanel {
         mapView.setBorder(new EmptyBorder(20,20,20,20));
 
         // Set Dimensions
-        mapView.setPreferredSize(new Dimension(800, 600));
-        mapView.setMinimumSize(new Dimension(800, 600));
+        final Dimension dimension = new Dimension(1000, 800);
+        mapView.setPreferredSize(dimension);
+        mapView.setMinimumSize(dimension);
 
 
         // Load in the map

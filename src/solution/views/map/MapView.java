@@ -48,12 +48,15 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     private int mBackgroundWidth;
     private int mBackgroundHeight;
 
-    static class BorderMargins {
+    static class MapImageInfo {
         public static int topMargin = 63;
         public static int leftMargin = 75;
-        public static int bottomMargin = 71; // 71
-        public static int rightMargin = 72; // 72
+        public static int bottomMargin = 71;
+        public static int rightMargin = 72;
+        public static float imageWidth = 819f;
+        public static float imageHeight = 1058f;
     }
+    
     public MapView(final GameControllerInterface controllerInterface, final String graphImageMapPath, final MapData mapData) {
         mControllerInterface = controllerInterface;
         mMapData = mapData;
@@ -84,12 +87,10 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
 
 
     }
-    float mIntA = 819f;
-    float mIntB = 1058f;
     private void setTransform(Dimension windowSize) {
 
-        double topMarginRatio = ((double)BorderMargins.topMargin) / mIntA;
-        double leftMarginRatio = ((double)BorderMargins.leftMargin) / mIntB;
+        double topMarginRatio = ((double)MapImageInfo.topMargin) / MapImageInfo.imageWidth;
+        double leftMarginRatio = ((double)MapImageInfo.leftMargin) / MapImageInfo.imageHeight;
 
         int scaledLeftPos = (int)(leftMarginRatio * getWidth());
         int scaledTopPos =  (int)(topMarginRatio * getHeight());
@@ -202,13 +203,13 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
 
     }
     private void setupDimensions() {
-        double topMarginRatio = ((double) BorderMargins.topMargin) / mIntA;
-        double bottomMarginRatio = ((double)(BorderMargins.bottomMargin + BorderMargins.topMargin)) / mIntA;
-        double leftMarginRatio = ((double) BorderMargins.leftMargin) / mIntB;
-        double rightMarginRatio = ((double)(BorderMargins.rightMargin + BorderMargins.leftMargin)) / mIntB;
+        double topMarginRatio = ((double) MapImageInfo.topMargin) / MapImageInfo.imageWidth;
+        double bottomMarginRatio = ((double)(MapImageInfo.bottomMargin + MapImageInfo.topMargin)) / MapImageInfo.imageWidth;
+        double leftMarginRatio = ((double) MapImageInfo.leftMargin) / MapImageInfo.imageHeight;
+        double rightMarginRatio = ((double)(MapImageInfo.rightMargin + MapImageInfo.leftMargin)) / MapImageInfo.imageHeight;
 
-        double bottomMarginRatioBE = ((double)(38)) / mIntA;
-        double rightMarginRatioBE = ((double)( 65)) / mIntB;
+        double bottomMarginRatioBE = ((double)(38)) / MapImageInfo.imageWidth;
+        double rightMarginRatioBE = ((double)( 65)) / MapImageInfo.imageHeight;
 
         int scaledLeftPos = (int)(leftMarginRatio * getWidth());
         int scaledTopPos =  (int)(topMarginRatio * getHeight());
