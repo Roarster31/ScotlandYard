@@ -14,7 +14,7 @@ public class SetupHelper {
             Ticket.Underground, Ticket.DoubleMove,
             Ticket.SecretMove };
 
-    public final static int[] mrXTicketNumbers = { 4, 3, 3, 2, 5 };
+    public final static int[] mrXTicketNumbers = { 0, 0, 0, 2, 5 };
     public final static int[] detectiveTicketNumbers = { 11, 8, 4, 0, 0 };
 
     public static Map<Ticket, Integer> getTickets(boolean mrX)

@@ -1,4 +1,4 @@
-package solution.Models;
+package solution;
 
 import scotlandyard.Colour;
 import scotlandyard.Move;

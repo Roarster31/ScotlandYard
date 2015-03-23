@@ -1,4 +1,4 @@
-package solution.helpers;
+package solution;
 
 import scotlandyard.*;
 

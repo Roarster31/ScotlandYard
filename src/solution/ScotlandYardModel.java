@@ -1,8 +1,6 @@
 package solution;
 
 import scotlandyard.*;
-import solution.Models.PlayerHolder;
-import solution.helpers.GraphHelper;
 
 import java.io.IOException;
 import java.net.URL;
