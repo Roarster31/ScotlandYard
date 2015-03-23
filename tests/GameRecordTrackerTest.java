@@ -3,7 +3,7 @@ import scotlandyard.Colour;
 import scotlandyard.Move;
 import scotlandyard.Player;
 import solution.Models.GameRecordTracker;
-import solution.Models.ScotlandYardModel;
+import solution.ScotlandYardModel;
 import solution.helpers.ColourHelper;
 
 import java.io.File;

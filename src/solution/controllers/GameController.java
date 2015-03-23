@@ -3,7 +3,7 @@ package solution.controllers;
 import scotlandyard.*;
 import solution.Constants;
 import solution.Models.GameRecordTracker;
-import solution.Models.ScotlandYardModel;
+import solution.ScotlandYardModel;
 import solution.helpers.ColourHelper;
 import solution.helpers.SetupHelper;
 import solution.interfaces.GameControllerInterface;

@@ -4,6 +4,7 @@ import com.google.gson.*;
 import com.sun.deploy.util.StringUtils;
 import scotlandyard.*;
 import solution.Constants;
+import solution.ScotlandYardModel;
 
 import java.io.*;
 import java.lang.reflect.Type;
