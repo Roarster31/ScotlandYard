@@ -46,6 +46,9 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     private Dimension mImageSize;
     private TransportSprite transportSprite;
     private AnimationWorker animationWorker;
+    private int mBackgroundWidth;
+    private int mBackgroundHeight;
+
     static class BorderMargins {
         public static int topMargin = 63;
         public static int leftMargin = 75;
@@ -91,14 +94,10 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
     private void setTransform(Dimension windowSize) {
 
         double topMarginRatio = ((double)BorderMargins.topMargin) / 819.0f;
-        double bottomMarginRatio = ((double)(BorderMargins.bottomMargin + BorderMargins.topMargin)) / 819.0f;
         double leftMarginRatio = ((double)BorderMargins.leftMargin) / 1158.0f;
-        double rightMarginRatio = ((double)(BorderMargins.rightMargin + BorderMargins.leftMargin)) / 1158.0f;
 
         int scaledLeftPos = (int)(leftMarginRatio * getWidth());
         int scaledTopPos =  (int)(topMarginRatio * getHeight());
-        int scaledWidth = (int)(getWidth() - (getWidth() * rightMarginRatio));
-        int scaledHeight = (int)(getHeight() - (getHeight() * bottomMarginRatio));
 
         float scaleX = (float)getWidth() / mImageSize.width;
         float scaleY = (float)getHeight() / mImageSize.height;
@@ -142,25 +141,9 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
 //        hints.put(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
         //g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
-        long startTime = System.currentTimeMillis();
+        setupDimensions();
 
-
-        double topMarginRatio = ((double)BorderMargins.topMargin) / 819.0f;
-        double bottomMarginRatio = ((double)(BorderMargins.bottomMargin + BorderMargins.topMargin)) / 819.0f;
-        double leftMarginRatio = ((double)BorderMargins.leftMargin) / 1158.0f;
-        double rightMarginRatio = ((double)(BorderMargins.rightMargin + BorderMargins.leftMargin)) / 1158.0f;
-
-        double bottomMarginRatioBE = ((double)(38)) / 819.0f;
-        double rightMarginRatioBE = ((double)( 65)) / 1158.0f;
-
-        int scaledLeftPos = (int)(leftMarginRatio * getWidth());
-        int scaledTopPos =  (int)(topMarginRatio * getHeight());
-        int scaledRightPos = (int)(rightMarginRatioBE * getWidth());
-        int scaledBottomPos =  (int)(bottomMarginRatioBE * getHeight());
-        int scaledWidth = (int)(getWidth() - (getWidth() * rightMarginRatio));
-        int scaledHeight = (int)(getHeight() - (getHeight() * bottomMarginRatio));
-
-        g2d.drawImage(mMapImage, 0,0,scaledWidth + scaledLeftPos + scaledRightPos, scaledHeight + scaledTopPos + scaledBottomPos, this);
+        g2d.drawImage(mMapImage, 0,0,mBackgroundWidth, mBackgroundHeight, this);
 
         // Translate everything
 
@@ -218,6 +201,26 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
         g2d.fillRect(0,0,20,20);
 //        g2d.fillRect(scaledWidth -20,scaledHeight -20,20,20);
 
+    }
+
+    private void setupDimensions() {
+        double topMarginRatio = ((double) BorderMargins.topMargin) / 819.0f;
+        double bottomMarginRatio = ((double)(BorderMargins.bottomMargin + BorderMargins.topMargin)) / 819.0f;
+        double leftMarginRatio = ((double) BorderMargins.leftMargin) / 1158.0f;
+        double rightMarginRatio = ((double)(BorderMargins.rightMargin + BorderMargins.leftMargin)) / 1158.0f;
+
+        double bottomMarginRatioBE = ((double)(38)) / 819.0f;
+        double rightMarginRatioBE = ((double)( 65)) / 1158.0f;
+
+        int scaledLeftPos = (int)(leftMarginRatio * getWidth());
+        int scaledTopPos =  (int)(topMarginRatio * getHeight());
+        int scaledRightPos = (int)(rightMarginRatioBE * getWidth());
+        int scaledBottomPos =  (int)(bottomMarginRatioBE * getHeight());
+        int scaledWidth = (int)(getWidth() - (getWidth() * rightMarginRatio));
+        int scaledHeight = (int)(getHeight() - (getHeight() * bottomMarginRatio));
+
+        mBackgroundWidth = scaledWidth + scaledLeftPos + scaledRightPos;
+        mBackgroundHeight = scaledHeight + scaledTopPos + scaledBottomPos;
     }
 
     private void createBgPathImage(){
