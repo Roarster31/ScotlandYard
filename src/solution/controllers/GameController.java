@@ -116,15 +116,20 @@ public class GameController implements GameControllerInterface {
 
             model.spectate(mrXHistoryTracker);
 
+            ArrayList<Integer> playerLocations = new ArrayList<Integer>();
+            int maxNodeNum = model.getGraph().getNodes().size();
+            System.out.println("maxNodeNum = " + maxNodeNum);
+            Random random = new Random();
             for (int i = 0; i < playerCount; i++) {
                 //todo do proper location
                 final Colour colour = ColourHelper.getColour(i);
-                if(i == 2) {
-                    HashMap<Ticket, Integer> map = new HashMap<Ticket, Integer>();
-                    model.join(uiPlayer, colour, new Random().nextInt(190), map);
-                }else{
-                    model.join(uiPlayer, colour, new Random().nextInt(190), SetupHelper.getTickets(colour.equals(Constants.MR_X_COLOUR)));
+                int location = random.nextInt(maxNodeNum);
+                while(playerLocations.contains(location)){
+                    location = random.nextInt(maxNodeNum);
                 }
+                playerLocations.add(location);
+
+                model.join(uiPlayer, colour, location, SetupHelper.getTickets(colour.equals(Constants.MR_X_COLOUR)));
             }
 
             gameRecordTracker.track(model);
