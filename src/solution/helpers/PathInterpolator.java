@@ -144,6 +144,7 @@ public class PathInterpolator {
 
         }
 
+        System.out.println("segments count: "+segments.size());
 
         return this;
 
