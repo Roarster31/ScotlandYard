@@ -54,6 +54,9 @@ public class ScotlandYardModel extends ScotlandYard {
         playerTickets.put(move.ticket, playerTickets.get(move.ticket) - 1);
 
         if (move.colour == Constants.MR_X_COLOUR) {
+            if(mRounds.get(mCurrentRound)) {
+                mPlayerMap.get(move.colour).updateVisiblePosition();
+            }
             mCurrentRound++;
         } else {
             // Add the ticket to MrX's stash if it wasn't Mr X who played

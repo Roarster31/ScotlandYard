@@ -635,15 +635,20 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
                 }
                 int realPlayerLocation = mControllerInterface.getCurrentPlayerRealPosition();
                 MapPosition currentPlayerPosition = null;
+                MapPosition mrXPosition = null;
                 for (Colour colour : mControllerInterface.getPlayerList()) {
 
                     int location = mControllerInterface.getPlayerVisiblePosition(colour);
 
-                    if (mControllerInterface.getCurrentPlayer() == Constants.MR_X_COLOUR || mControllerInterface.isMrXVisible()) {
+                    if (mControllerInterface.getCurrentPlayer() == Constants.MR_X_COLOUR && colour == Constants.MR_X_COLOUR && (colour == mControllerInterface.getCurrentPlayer() || mControllerInterface.isMrXVisible())) {
                         location = realPlayerLocation;
                     }
                     System.out.println(ColourHelper.toString(colour) + " @ " + location);
                     for (MapPosition mapPosition : mMapData.getPositionList()) {
+
+                        if(mapPosition.getId() == mControllerInterface.getPlayerVisiblePosition(Constants.MR_X_COLOUR)){
+                            mrXPosition = mapPosition;
+                        }
 
                         if (mapPosition.getId() == realPlayerLocation) {
                             currentPlayerPosition = mapPosition;
@@ -659,6 +664,7 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
                 }
                 if (currentPlayerPosition != null) {
                     final MapPosition finalCurrentPlayerPosition = currentPlayerPosition;
+                    final MapPosition finalMrXPosition = mrXPosition;
                     animationWorker.addWork(new AnimationWorker.AnimationInterface() {
 
                         private float TICK_LIMIT = 50;
@@ -667,6 +673,10 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
                         @Override
                         public boolean onTick() {
 
+                            if(finalMrXPosition != null) {
+                                finalMrXPosition.setPlayerRingAlpha(1f - tick / TICK_LIMIT);
+                                finalMrXPosition.setPlayerRingRadius((int) (MapPosition.CIRC_RADIUS * (tick * 4 / TICK_LIMIT)));
+                            }
 
                             finalCurrentPlayerPosition.setPlayerRingAlpha(1f - tick / TICK_LIMIT);
                             finalCurrentPlayerPosition.setPlayerRingRadius((int) (MapPosition.CIRC_RADIUS * (tick * 4 / TICK_LIMIT)));
@@ -676,13 +686,17 @@ public class MapView extends JPanel implements MapNodePopup.PopupInterface {
                                 tick = 0;
                             }
 
-                            repaint();
-
                             return !ColourHelper.toColor(mControllerInterface.getCurrentPlayer()).equals(finalCurrentPlayerPosition.getPlayerColor());
                         }
 
                         @Override
                         public void onFinished() {
+
+                            if(finalMrXPosition != null) {
+                                finalMrXPosition.setPlayerRingAlpha(1f - tick / TICK_LIMIT);
+                                finalMrXPosition.setPlayerRingRadius((int) (MapPosition.CIRC_RADIUS * (tick * 4 / TICK_LIMIT)));
+                            }
+
                             finalCurrentPlayerPosition.setPlayerRingAlpha(1f);
                             finalCurrentPlayerPosition.setPlayerRingRadius(MapPosition.CIRC_RADIUS);
                         }
